@@ -39,23 +39,15 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				if (values.get(X_FIELD).size() >= HISTORY_SIZE) {
-					for (String valuePath : VALUE_PATHS) {
-						values.get(valuePath).remove(0);
-					}
-				}
+				long expire = now + 100;
+				trimValues(HISTORY_SIZE);
 				for (int i = 0; i < 3; i++) {
-					values.get(VALUE_PATHS[i]).add(
-							new TimestampedValue(event.values[i], now,
-									now + 100));
-					notifyDataChanged(VALUE_PATHS[i]);
+					putValue(VALUE_PATHS[i], now, expire, event.values[i]);
 				}
 				float len2 = (float) Math.sqrt(event.values[0]
 						* event.values[0] + event.values[1] * event.values[1]
 						+ event.values[2] * event.values[2]);
-				values.get(TOTAL_FIELD).add(
-						new TimestampedValue(len2, now, now + 100));
-				notifyDataChanged(TOTAL_FIELD);
+				putValue(TOTAL_FIELD, now, expire, len2);
 
 			}
 		}
@@ -142,16 +134,4 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 	protected void unregister(String id) {
 		updateAccuracy();
 	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		String valuePath = registeredValuePaths.get(id);
-		List<TimestampedValue> list = values.get(valuePath);
-		List<TimestampedValue> reducedList = getValuesForTimeSpan(list, now,
-				timespan);
-		return reducedList;
-
-	}
-
 }

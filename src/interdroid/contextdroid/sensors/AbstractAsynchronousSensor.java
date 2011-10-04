@@ -30,7 +30,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	protected Bundle currentConfiguration = new Bundle();
 
-	protected Map<String, List<TimestampedValue>> values = new HashMap<String, List<TimestampedValue>>();
+	private Map<String, List<TimestampedValue>> values = new HashMap<String, List<TimestampedValue>>();
 
 	protected Map<String, Bundle> registeredConfigurations = new HashMap<String, Bundle>();
 
@@ -45,9 +45,9 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onBind(android.content.Intent)
-	 * 
+	 *
 	 * returns the sensor interface
 	 */
 	@Override
@@ -57,9 +57,9 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onCreate()
-	 * 
+	 *
 	 * Creates the ContextManager and connects to the ContextDroid service.
 	 */
 	@Override
@@ -92,9 +92,9 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onDestroy()
-	 * 
+	 *
 	 * Stops the connection to ContextDroid
 	 */
 	@Override
@@ -144,9 +144,6 @@ public abstract class AbstractAsynchronousSensor extends Service {
 			Bundle configuration);
 
 	protected abstract void unregister(String id);
-
-	protected abstract List<TimestampedValue> getValues(String id, long now,
-			long timespan);
 
 	protected String getScheme() {
 		return SCHEMA;
@@ -225,7 +222,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 	 * Gets all readings from timespan seconds ago until now. Readings are in
 	 * reverse order (latest first). This is important for the expression
 	 * engine.
-	 * 
+	 *
 	 * @param start
 	 *            the start
 	 * @param end
@@ -256,6 +253,36 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		}
 		return result.subList(startPos, endPos);
 
+	}
+
+	protected void trimValues(int history) {
+		for (String path : VALUE_PATHS) {
+			if (values.get(path).size() >= history) {
+				values.get(path).remove(0);
+			}
+		}
+	}
+
+
+	protected void trimValueByTime(long expire) {
+		for (String valuePath : VALUE_PATHS) {
+			while ((values.get(valuePath).size() > 0
+					&& values.get(valuePath).get(0).timestamp < expire)) {
+				values.get(valuePath).remove(0);
+			}
+		}
+	}
+
+	protected void putValue(String valuePath, long now, long expire,
+			Object value) {
+		values.get(valuePath).add(
+				new TimestampedValue(value, now, expire));
+		notifyDataChanged(valuePath);
+	}
+
+	protected List<TimestampedValue> getValues(String id, long now, long timespan) {
+		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
+				now, timespan);
 	}
 
 }

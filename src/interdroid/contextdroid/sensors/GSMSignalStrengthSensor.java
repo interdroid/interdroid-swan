@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
@@ -26,13 +22,11 @@ public class GSMSignalStrengthSensor extends AbstractAsynchronousSensor {
 		@Override
 		public void onSignalStrengthsChanged(SignalStrength signalStrength) {
 			long now = System.currentTimeMillis();
-			if (values.get(SIGNAL_STRENGTH_FIELD).size() >= HISTORY_SIZE) {
-				values.get(SIGNAL_STRENGTH_FIELD).remove(0);
-			}
-			values.get(SIGNAL_STRENGTH_FIELD).add(
-					new TimestampedValue(signalStrength.getGsmSignalStrength(),
-							now, now));
-			notifyDataChanged(SIGNAL_STRENGTH_FIELD);
+
+			trimValues(HISTORY_SIZE);
+			putValue(SIGNAL_STRENGTH_FIELD, now, now,
+					signalStrength.getGsmSignalStrength());
+
 			System.out.println("new signal strength: "
 					+ signalStrength.getGsmSignalStrength());
 		}
@@ -76,13 +70,6 @@ public class GSMSignalStrengthSensor extends AbstractAsynchronousSensor {
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_NONE);
 		}
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }

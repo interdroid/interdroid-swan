@@ -39,7 +39,7 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 
 	/**
 	 * Sample rms.
-	 * 
+	 *
 	 * @return the RMS of the sample in dB
 	 */
 	private double sampleRms(AudioRecord audioRecord, int sampleLength) {

@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -25,19 +21,13 @@ public class CallSensor extends AbstractAsynchronousSensor {
 		@Override
 		public void onCallStateChanged(int state, String incomingNumber) {
 			long now = System.currentTimeMillis();
-			if (values.get(STATE_FIELD).size() >= HISTORY_SIZE) {
-				values.get(STATE_FIELD).remove(0);
-			}
-			values.get(STATE_FIELD).add(new TimestampedValue(state, now, now));
-			notifyDataChanged(STATE_FIELD);
+			long expire = now + EXPIRE_TIME;
+			trimValues(HISTORY_SIZE);
 
-			if (values.get(PHONE_NUMBER_FIELD).size() >= HISTORY_SIZE) {
-				values.get(PHONE_NUMBER_FIELD).remove(0);
-			}
+			putValue(STATE_FIELD, now, expire, state);
+
 			if (incomingNumber != null && incomingNumber.length() > 0) {
-				values.get(PHONE_NUMBER_FIELD).add(
-						new TimestampedValue(incomingNumber, now, now));
-				notifyDataChanged(PHONE_NUMBER_FIELD);
+				putValue(PHONE_NUMBER_FIELD, now, now, incomingNumber);
 			}
 		}
 	};
@@ -86,13 +76,6 @@ public class CallSensor extends AbstractAsynchronousSensor {
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_NONE);
 		}
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }

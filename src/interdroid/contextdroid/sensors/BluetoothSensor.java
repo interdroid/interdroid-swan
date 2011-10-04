@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -35,28 +31,16 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			long now = System.currentTimeMillis();
-			if (values.get(DEVICE_NAME_FIELD).size() >= HISTORY_SIZE) {
-				for (String valuePath : VALUE_PATHS) {
-					values.get(valuePath).remove(0);
-				}
-			}
+			long expire = now + EXPIRE_TIME;
+			trimValues(HISTORY_SIZE);
 			BluetoothDevice device = intent
 					.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-			values.get(DEVICE_NAME_FIELD).add(
-					new TimestampedValue(device.getName(), now, now
-							+ EXPIRE_TIME));
-			values.get(DEVICE_ADDRESS_FIELD).add(
-					new TimestampedValue(device.getAddress(), now, now
-							+ EXPIRE_TIME));
+			putValue(DEVICE_NAME_FIELD, now, expire, device.getName());
+			putValue(DEVICE_ADDRESS_FIELD, now, expire, device.getAddress());
 			Bundle bothBundle = new Bundle();
 			bothBundle.putString("name", device.getName());
 			bothBundle.putString("address", device.getAddress());
-			values.get(DEVICE_BUNDLED_FIELD).add(
-					new TimestampedValue(bothBundle, now, now + EXPIRE_TIME));
-			// notify all that we have new data
-			for (String valuePath : VALUE_PATHS) {
-				notifyDataChanged(valuePath);
-			}
+			putValue(DEVICE_BUNDLED_FIELD, now, expire, bothBundle);
 
 			System.out.println("bt found: " + device.getName());
 		}
@@ -119,7 +103,7 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 				+ "', 'type': 'string'},"
 				+ "            {'name': '"
 				+ DEVICE_BUNDLED_FIELD
-				+ "', 'type': 'bundle'}"
+				+ "', 'type': 'bytes'}"
 				+ "           ]"
 				+ "}".replace('\'', '"');
 	}
@@ -166,13 +150,6 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 			unregisterReceiver(bluetoothReceiver);
 		}
 		updatePollRate();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }
