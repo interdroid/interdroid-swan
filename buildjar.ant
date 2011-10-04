@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<project name="ContextDroid" default="jar">
+	<target name="jar">
+		<jar destfile="contextdroid.jar" includes="**/*.class" basedir="bin"/>
+	</target>
+</project>

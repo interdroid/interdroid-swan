@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start">start</string>
+    
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">Context Framework</string>
+<string name="contextservice">contextservice</string>
+
+</resources>

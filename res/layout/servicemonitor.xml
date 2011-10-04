@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   android:orientation="vertical"
+   android:layout_width="fill_parent"
+   android:layout_height="fill_parent"
+   >
+
+<TextView android:text="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/NumContextExpressions">
+</TextView>
+
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Show Context Expressions" android:id="@+id/ShowContextExpressionsButton">
+</Button>
+
+<TextView android:text="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/NumContextEntities">
+</TextView>
+
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/ShowContextEntitiesButton" android:text="Show Context Entities">
+</Button>
+
+<TextView android:text="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/NumSLRs">
+</TextView>
+
+<Button android:layout_width="wrap_content" 
+  android:layout_height="wrap_content" 
+  android:id="@+id/ShowServiceLevelRequestsButton" android:text="Show Service Level Requests">
+</Button>
+
+<TextView android:text="ServiceLevel" 
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content" 
+  android:id="@+id/ServiceLevel" />
+
+</LinearLayout>
