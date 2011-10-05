@@ -1,6 +1,7 @@
 package interdroid.contextdroid.sensors;
 
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
+import interdroid.vdb.content.EntityUriBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,8 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -22,7 +31,21 @@ import android.os.RemoteException;
  */
 public abstract class AbstractAsynchronousSensor extends Service {
 
-	protected String SCHEMA;
+	private static final Logger LOG =
+			LoggerFactory.getLogger(AbstractAsynchronousSensor.class);
+
+	private static final String	TIMESTAMP_FIELD	= "_timestamp";
+
+	private static final String	EXPIRE_FIELD	= "_expiration";
+
+	protected static final String	SCHEMA_TIMESTAMP_FIELDS	=
+			"\n{'name':'" + TIMESTAMP_FIELD + "', 'type':'long'}," +
+			"\n{'name':'" + EXPIRE_FIELD + "', 'type':'long'},"
+			.replace('\'', '"');
+
+	private Uri uri;
+
+	private Schema schema;
 
 	protected String[] VALUE_PATHS;
 
@@ -67,13 +90,16 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		contextServiceConnector = new SensorContextServiceConnector(this);
 		contextServiceConnector.start();
 
-		SCHEMA = getScheme();
 		VALUE_PATHS = getValuePaths();
 		for (String valuePath : VALUE_PATHS) {
 			expressionIdsPerValuePath.put(valuePath, new ArrayList<String>());
 			values.put(valuePath, Collections
 					.synchronizedList(new ArrayList<TimestampedValue>()));
 		}
+
+		schema = Schema.parse(getScheme());
+		uri = EntityUriBuilder.nativeUri(schema.getNamespace(), schema.getName());
+		LOG.debug("Sensor storing to URI: {}", uri);
 
 		initDefaultConfiguration(DEFAULT_CONFIGURATION);
 		onConnected();
@@ -145,9 +171,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	protected abstract void unregister(String id);
 
-	protected String getScheme() {
-		return SCHEMA;
-	}
+	protected abstract String getScheme();
 
 	private void printState() {
 		for (String key : notified.keySet()) {
@@ -263,6 +287,19 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		}
 	}
 
+	protected void putValue(String valuePath, long now, long expire,
+			Object value) {
+		values.get(valuePath).add(
+				new TimestampedValue(value, now, expire));
+		notifyDataChanged(valuePath);
+	}
+
+	protected void putValues(final ContentValues values,
+			long now, long expire) {
+		values.put(TIMESTAMP_FIELD, now);
+		values.put(EXPIRE_FIELD, expire);
+		getContentResolver().insert(uri, values);
+	}
 
 	protected void trimValueByTime(long expire) {
 		for (String valuePath : VALUE_PATHS) {
@@ -273,14 +310,68 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		}
 	}
 
-	protected void putValue(String valuePath, long now, long expire,
-			Object value) {
-		values.get(valuePath).add(
-				new TimestampedValue(value, now, expire));
-		notifyDataChanged(valuePath);
+	protected List<TimestampedValue> getValues(String id, long now, long timespan) {
+		String fieldName = registeredValuePaths.get(id);
+		Type fieldType = getType(fieldName);
+		Cursor values = getContentResolver().query(uri,
+				new String[] {TIMESTAMP_FIELD, EXPIRE_FIELD,
+					fieldName},
+				TIMESTAMP_FIELD + " > ? AND " + EXPIRE_FIELD + " < ?",
+				new String[] {String.valueOf(now - timespan),
+					String.valueOf(now)},
+				// If timespan is zero we just pull the last one in time
+				TIMESTAMP_FIELD + (timespan > 0 ? " ASC" : " DESC"));
+		List<TimestampedValue> ret = null;
+		if (values != null && values.moveToFirst()) {
+			ret = new ArrayList<TimestampedValue>(values.getCount());
+			do {
+				switch (fieldType) {
+				case INT:
+					ret.add(new TimestampedValue(values.getInt(2), values.getLong(0), values.getLong(1)));
+					break;
+				case LONG:
+					ret.add(new TimestampedValue(values.getLong(2), values.getLong(0), values.getLong(1)));
+					break;
+				case ENUM:
+				case STRING:
+					ret.add(new TimestampedValue(values.getString(2), values.getLong(0), values.getLong(1)));
+					break;
+				case FLOAT:
+					ret.add(new TimestampedValue(values.getFloat(2), values.getLong(0), values.getLong(1)));
+					break;
+				case DOUBLE:
+					ret.add(new TimestampedValue(values.getDouble(2), values.getLong(0), values.getLong(1)));
+					break;
+				case FIXED:
+				case BYTES:
+					ret.add(new TimestampedValue(values.getBlob(2), values.getLong(0), values.getLong(1)));
+				default:
+					throw new RuntimeException("Unsupported type.");
+				}
+				// Limit to one result if timespan is zero
+				if (timespan == 0) {
+					break;
+				}
+			} while (values.moveToNext());
+		}
+		try {
+			if (values != null) {
+				values.close();
+			}
+		} catch (Exception e) {
+			LOG.warn("Error closing cursor ignored.", e);
+		}
+		if (ret == null) {
+			ret = new ArrayList<TimestampedValue>(0);
+		}
+		return ret;
 	}
 
-	protected List<TimestampedValue> getValues(String id, long now, long timespan) {
+	private Type getType(String fieldName) {
+		return schema.getField(fieldName).schema().getType();
+	}
+
+	protected List<TimestampedValue> getMemoryValues(String id, long now, long timespan) {
 		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
 				now, timespan);
 	}

@@ -42,7 +42,7 @@ public class TestActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
 
-		final ContextTypedValue left = new ContextTypedValue("wifi/ssid",
+		final ContextTypedValue left = new ContextTypedValue("battery/level",
 				HistoryReductionMode.NONE, 500);
 		final String valueName = "myFirstValue";
 		contextManager = new ContextManager(TestActivity.this);

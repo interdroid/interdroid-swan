@@ -46,4 +46,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.stateofflow.eclipse.metrics.MetricsNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>slf4android_src</name>
+			<type>2</type>
+			<locationURI>_android_slf4android_eb6193e8/src</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

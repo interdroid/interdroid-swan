@@ -1,6 +1,12 @@
 package interdroid.contextdroid.sensors;
 
+import interdroid.vdb.content.avro.AvroContentProviderProxy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -9,7 +15,7 @@ import android.os.Bundle;
 
 public class BatterySensor extends AbstractAsynchronousSensor {
 
-	public static final String TAG = "BatterySensor";
+	public static final Logger LOG = LoggerFactory.getLogger(BatterySensor.class);
 
 	public static final String LEVEL_FIELD = "level";
 	public static final String VOLTAGE_FIELD = "voltage";
@@ -18,6 +24,37 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 	protected static final int HISTORY_SIZE = 10;
 	public static final long EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes?
 
+	public static final String SCHEME;
+
+	public static class Provider extends AvroContentProviderProxy {
+
+		public Provider() {
+			super(SCHEME);
+		}
+
+	}
+
+	static {
+		String scheme =
+				"{'type': 'record', 'name': 'battery', "
+						+ "'namespace': 'interdroid.context.sensor.battery',"
+						+ "\n'fields': ["
+						+ SCHEMA_TIMESTAMP_FIELDS
+						+ "\n{'name': '"
+						+ LEVEL_FIELD
+						+ "', 'type': 'int'},"
+						+ "\n{'name': '"
+						+ VOLTAGE_FIELD
+						+ "', 'type': 'int'},"
+						+ "\n{'name': '"
+						+ TEMPERATURE_FIELD
+						+ "', 'type': 'int'}"
+						+ "\n]"
+						+ "}";
+		SCHEME = scheme.replace('\'', '"');
+		LOG.debug("Schema: {}", SCHEME);
+	}
+
 	private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -25,16 +62,15 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 			if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
 				long now = System.currentTimeMillis();
 				long expire = now + EXPIRE_TIME;
-				trimValues(HISTORY_SIZE);
-				putValue(LEVEL_FIELD, now, expire,
-						intent.getIntExtra(
-								BatteryManager.EXTRA_LEVEL, 0));
-				putValue(TEMPERATURE_FIELD, now, expire,
-						intent.getIntExtra(
-								BatteryManager.EXTRA_TEMPERATURE, 0));
-				putValue(VOLTAGE_FIELD, now, expire,
-						intent.getIntExtra(
-								BatteryManager.EXTRA_VOLTAGE, 0));
+
+				ContentValues values = new ContentValues();
+				values.put(LEVEL_FIELD, intent.getIntExtra(
+					BatteryManager.EXTRA_LEVEL, 0));
+				values.put(TEMPERATURE_FIELD,intent.getIntExtra(
+					BatteryManager.EXTRA_TEMPERATURE, 0));
+				values.put(VOLTAGE_FIELD, intent.getIntExtra(
+					BatteryManager.EXTRA_VOLTAGE, 0));
+				putValues(values, now, expire);
 			}
 		}
 
@@ -56,19 +92,7 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 
 	@Override
 	public String getScheme() {
-		return "{'type': 'record', 'name': 'battery', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ LEVEL_FIELD
-				+ "', 'type': 'integer'},"
-				+ "            {'name': '"
-				+ VOLTAGE_FIELD
-				+ "', 'type': 'integer'},"
-				+ "            {'name': '"
-				+ TEMPERATURE_FIELD
-				+ "', 'type': 'integer'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
+		return SCHEME;
 	}
 
 	@Override
