@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
@@ -12,7 +12,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 
-public class SignalStrengthSensor extends AbstractAsynchronousSensor {
+public class SignalStrengthSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -180,7 +180,7 @@ public class SignalStrengthSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id, final String valuePath,
+	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			telephonyManager =
@@ -191,11 +191,16 @@ public class SignalStrengthSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_NONE);
 		}
+	}
+
+	@Override
+	public final void onDestroySensor() {
+		// Nothing to do
 	}
 
 }

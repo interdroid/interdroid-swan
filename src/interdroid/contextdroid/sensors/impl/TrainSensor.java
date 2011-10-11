@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
 import android.os.Bundle;
 import android.util.Log;
 
-public class TrainSensor extends AbstractAsynchronousSensor {
+public class TrainSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Train";
 
@@ -131,13 +131,6 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 		return null;
 	}
 
-	public void onDestroy() {
-		for (TrainPoller trainPoller : activeThreads.values()) {
-			trainPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { DEPARTURE_TIME_FIELD, ARRIVAL_TIME_FIELD };
@@ -167,22 +160,15 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		TrainPoller trainPoller = new TrainPoller(id, valuePath, configuration);
 		activeThreads.put(id, trainPoller);
 		trainPoller.start();
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class TrainPoller extends Thread {
@@ -223,7 +209,7 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 				}
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
-							DEFAULT_CONFIGURATION.getLong(SAMPLE_INTERVAL))
+							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
 							+ start - System.currentTimeMillis());
 				} catch (InterruptedException e) {
 				}
@@ -232,6 +218,13 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (TrainPoller trainPoller : activeThreads.values()) {
+			trainPoller.interrupt();
 		}
 	};
 

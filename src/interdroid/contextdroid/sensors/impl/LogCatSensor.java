@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 import android.os.Bundle;
 
-public class LogCatSensor extends AbstractAsynchronousSensor {
+public class LogCatSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "LogCat";
 
@@ -27,13 +27,6 @@ public class LogCatSensor extends AbstractAsynchronousSensor {
 	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	private Map<String, LogcatPoller> activeThreads = new HashMap<String, LogcatPoller>();
-
-	public void onDestroy() {
-		for (LogcatPoller logcatPoller : activeThreads.values()) {
-			logcatPoller.interrupt();
-		}
-		super.onDestroy();
-	}
 
 	@Override
 	public String[] getValuePaths() {
@@ -62,7 +55,8 @@ public class LogCatSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath,
+			Bundle configuration) {
 		System.out.println("Logcat got registration for: " + id);
 		LogcatPoller logcatPoller = new LogcatPoller(id, configuration);
 		activeThreads.put(id, logcatPoller);
@@ -70,15 +64,8 @@ public class LogCatSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).terminate();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class LogcatPoller extends Thread {
@@ -103,7 +90,7 @@ public class LogCatSensor extends AbstractAsynchronousSensor {
 					String parameters = configuration
 							.getString(LOGCAT_PARAMETERS);
 					if (parameters == null) {
-						parameters = DEFAULT_CONFIGURATION
+						parameters = mDefaultConfiguration
 								.getString(LOGCAT_PARAMETERS);
 					}
 					try {
@@ -132,6 +119,13 @@ public class LogCatSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (LogcatPoller logcatPoller : activeThreads.values()) {
+			logcatPoller.interrupt();
 		}
 	};
 

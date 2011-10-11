@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ import android.telephony.TelephonyManager;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class CallSensor extends AbstractAsynchronousSensor {
+public class CallSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -115,7 +115,7 @@ public class CallSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	public final void initDefaultConfiguration(Bundle defaults) {
+	public final void initDefaultConfiguration(final Bundle defaults) {
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class CallSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id,
+	public final void register(final String id,
 			final String valuePath, final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			telephonyManager =
@@ -141,11 +141,17 @@ public class CallSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_NONE);
 		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

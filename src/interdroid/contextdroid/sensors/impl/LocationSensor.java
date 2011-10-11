@@ -1,6 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import android.os.Looper;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class LocationSensor extends AbstractAsynchronousSensor {
+public class LocationSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -191,7 +192,7 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id, final String valuePath,
+	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() > 0) {
 			updateListener();
@@ -231,10 +232,10 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 			}
 		}
 		if (minTime == Long.MAX_VALUE) {
-			minTime = DEFAULT_CONFIGURATION.getLong(MIN_TIME);
+			minTime = mDefaultConfiguration.getLong(MIN_TIME);
 		}
 		if (minDistance == Long.MAX_VALUE) {
-			minDistance = DEFAULT_CONFIGURATION.getLong(MIN_DISTANCE);
+			minDistance = mDefaultConfiguration.getLong(MIN_DISTANCE);
 		}
 
 		locationManager.removeUpdates(locationListener);
@@ -243,12 +244,18 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			locationManager.removeUpdates(locationListener);
 		} else {
 			updateListener();
 		}
+
+	}
+
+	@Override
+	public void onDestroySensor() {
+		// TODO Auto-generated method stub
 
 	}
 

@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.BufferedReader;
@@ -20,7 +20,7 @@ import android.os.Bundle;
  *
  * @author rkemp
  */
-public class RainSensor extends AbstractAsynchronousSensor {
+public class RainSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Rain";
 
@@ -150,13 +150,6 @@ public class RainSensor extends AbstractAsynchronousSensor {
 		return null;
 	}
 
-	public void onDestroy() {
-		for (RainPoller rainPoller : activeThreads.values()) {
-			rainPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { START_TIME_FIELD, STOP_TIME_FIELD,
@@ -192,22 +185,15 @@ public class RainSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		RainPoller rainPoller = new RainPoller(id, valuePath, configuration);
 		activeThreads.put(id, rainPoller);
 		rainPoller.start();
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class RainPoller extends Thread {
@@ -227,9 +213,9 @@ public class RainSensor extends AbstractAsynchronousSensor {
 			String url = String.format(BASE_URL, configuration.get(LATITUDE),
 					configuration.get(LONGITUDE));
 			long window = configuration.getLong(WINDOW,
-					DEFAULT_CONFIGURATION.getLong(WINDOW));
+					mDefaultConfiguration.getLong(WINDOW));
 			int threshold = configuration.getInt(THRESHOLD,
-					DEFAULT_CONFIGURATION.getInt(THRESHOLD));
+					mDefaultConfiguration.getInt(THRESHOLD));
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
 				if (values.size() >= HISTORY_SIZE) {
@@ -260,7 +246,7 @@ public class RainSensor extends AbstractAsynchronousSensor {
 					Thread.sleep(Math.max(
 							0,
 							configuration.getLong(SAMPLE_INTERVAL,
-									DEFAULT_CONFIGURATION
+									mDefaultConfiguration
 											.getLong(SAMPLE_INTERVAL))
 									+ start - System.currentTimeMillis()));
 				} catch (InterruptedException e) {
@@ -270,6 +256,13 @@ public class RainSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (RainPoller rainPoller : activeThreads.values()) {
+			rainPoller.interrupt();
 		}
 	};
 

@@ -1,15 +1,14 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractSensorBase;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
 
-public class TimeSensor extends AbstractAsynchronousSensor {
+public class TimeSensor extends AbstractSensorBase {
 
 	public static final String CURRENT_MS_FIELD = "current";
 
@@ -21,7 +20,7 @@ public class TimeSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
+	public void initDefaultConfiguration(Bundle defaultConfig) {
 	}
 
 	@Override
@@ -33,19 +32,36 @@ public class TimeSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
+		// Nothing to do
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
+		// Nothing to do
 	}
 
 	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
+	public List<TimestampedValue> getValues(String id, long now,
 			long timespan) {
 		List<TimestampedValue> result = new ArrayList<TimestampedValue>();
 		result.add(new TimestampedValue(now, now, 0));
 		return result;
+	}
+
+	@Override
+	public final void onDestroySensor() {
+		// Nothing to do
+	}
+
+	@Override
+	public final void onConnected() {
+		// Nothing to do
+	}
+
+	@Override
+	protected void init() {
+		// Nothing to do
 	}
 
 }

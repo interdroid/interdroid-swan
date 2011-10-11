@@ -1,6 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;import interdroid.vdb.content.avro.AvroContentProviderProxy;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
+import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ import android.os.Bundle;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class BluetoothSensor extends AbstractAsynchronousSensor {
+public class BluetoothSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -69,32 +70,38 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 	/**
 	 * Does the device support limited discovery.
 	 */
-	private static final String	HAS_SERVICE_LIMITED_DISCOVERY	= "has_service_limited_discovery";
+	private static final String	HAS_SERVICE_LIMITED_DISCOVERY =
+			"has_service_limited_discovery";
 
 	/**
 	 * Does the device support networking.
 	 */
-	private static final String	HAS_SERVICE_NETWORING	= "has_service_networking";
+	private static final String	HAS_SERVICE_NETWORING	=
+			"has_service_networking";
 
 	/**
 	 * Does the device support object transfer.
 	 */
-	private static final String	HAS_SERVICE_OBJECT_TRANSFER	= "has_service_object_transfer";
+	private static final String	HAS_SERVICE_OBJECT_TRANSFER	=
+			"has_service_object_transfer";
 
 	/**
 	 * Does the device support positioning.
 	 */
-	private static final String	HAS_SERVICE_POSITIONING	= "has_service_positioning";
+	private static final String	HAS_SERVICE_POSITIONING	=
+			"has_service_positioning";
 
 	/**
 	 * Does the device support rendering.
 	 */
-	private static final String	HAS_SERVICE_RENDER	= "has_service_render";
+	private static final String	HAS_SERVICE_RENDER	=
+			"has_service_render";
 
 	/**
 	 * Does the device support telephony.
 	 */
-	private static final String	HAS_SERVICE_TELEPHONY	= "has_service_telephony";
+	private static final String	HAS_SERVICE_TELEPHONY	=
+			"has_service_telephony";
 
 	/**
 	 * The discovery interval.
@@ -240,20 +247,11 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 							+ start
 							- System.currentTimeMillis());
 				} catch (InterruptedException e) {
+					LOG.warn("Interrupted while sleeping.", e);
 				}
 			}
 		}
 	};
-
-	public final void onDestroy() {
-		unregisterReceiver(bluetoothReceiver);
-
-		mBluetoothAdapter.cancelDiscovery();
-		stopPolling = true;
-		bluetoothPoller.interrupt();
-
-		super.onDestroy();
-	}
 
 	@Override
 	public final String[] getValuePaths() {
@@ -284,7 +282,7 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id, final String valuePath,
+	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			registerReceiver(bluetoothReceiver, new IntentFilter(
@@ -318,11 +316,20 @@ public class BluetoothSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(bluetoothReceiver);
 		}
 		updatePollRate();
+	}
+
+	@Override
+	public final void onDestroySensor() {
+		unregisterReceiver(bluetoothReceiver);
+
+		mBluetoothAdapter.cancelDiscovery();
+		stopPolling = true;
+		bluetoothPoller.interrupt();
 	}
 
 }

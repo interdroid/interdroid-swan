@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractSensorBase;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 import android.os.Bundle;
 import android.util.Log;
 
-public class CalendarSensor extends AbstractAsynchronousSensor {
+public class CalendarSensor extends AbstractSensorBase {
 
 	public static final String TAG = "Calendar";
 
@@ -142,13 +142,6 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 		return null;
 	}
 
-	public void onDestroy() {
-		for (CalendarPoller calendarPoller : activeThreads.values()) {
-			calendarPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { START_TIME_NEXT_EVENT_FIELD };
@@ -178,19 +171,19 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		CalendarPoller calendarPoller = new CalendarPoller(id, configuration);
 		activeThreads.put(id, calendarPoller);
 		calendarPoller.start();
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
 	}
 
 	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
+	public List<TimestampedValue> getValues(String id, long now,
 			long timespan) {
 		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
 				timespan);
@@ -210,10 +203,10 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 		public void run() {
 			boolean ignoreFreeEvents = configuration.getBoolean(
 					IGNORE_FREE_EVENTS,
-					DEFAULT_CONFIGURATION.getBoolean(IGNORE_FREE_EVENTS));
+					mDefaultConfiguration.getBoolean(IGNORE_FREE_EVENTS));
 			boolean ignoreAlldayEvents = configuration.getBoolean(
 					IGNORE_ALLDAY_EVENTS,
-					DEFAULT_CONFIGURATION.getBoolean(IGNORE_ALLDAY_EVENTS));
+					mDefaultConfiguration.getBoolean(IGNORE_ALLDAY_EVENTS));
 			String privateCalendarURL = configuration
 					.getString(PRIVATE_CALENDAR_URL)
 					+ "/full/?max-results=5&singleevents=true&futureevents=true&orderby=starttime&sortorder=a";
@@ -232,7 +225,7 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 				}
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
-							DEFAULT_CONFIGURATION.getLong(SAMPLE_INTERVAL))
+							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
 							+ start - System.currentTimeMillis());
 				} catch (InterruptedException e) {
 				}
@@ -242,6 +235,19 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 		public List<TimestampedValue> getValues() {
 			return values;
 		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (CalendarPoller calendarPoller : activeThreads.values()) {
+			calendarPoller.interrupt();
+		}
+	}
+
+	@Override
+	protected void init() {
+		// TODO Auto-generated method stub
+
 	};
 
 }

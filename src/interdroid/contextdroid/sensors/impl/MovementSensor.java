@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 
-public class MovementSensor extends AbstractAsynchronousSensor {
+public class MovementSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "MovementSensor";
 
@@ -53,11 +53,6 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 			}
 		}
 	};
-
-	public void onDestroy() {
-		sensorManager.unregisterListener(sensorEventListener);
-		super.onDestroy();
-	}
 
 	@Override
 	public String[] getValuePaths() {
@@ -103,7 +98,7 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		updateAccuracy();
 	}
 
@@ -111,7 +106,7 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 		sensorManager.unregisterListener(sensorEventListener);
 		if (registeredConfigurations.size() > 0) {
 
-			int highestAccuracy = DEFAULT_CONFIGURATION.getInt(ACCURACY);
+			int highestAccuracy = mDefaultConfiguration.getInt(ACCURACY);
 			for (Bundle configuration : registeredConfigurations.values()) {
 				if (configuration == null) {
 					continue;
@@ -132,7 +127,12 @@ public class MovementSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		updateAccuracy();
+	}
+
+	@Override
+	public final void onDestroySensor() {
+		sensorManager.unregisterListener(sensorEventListener);
 	}
 }

@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import android.os.Bundle;
  *
  * @author rkemp
  */
-public class TwitterSensor extends AbstractAsynchronousSensor {
+public class TwitterSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Twitter";
 
@@ -71,13 +71,6 @@ public class TwitterSensor extends AbstractAsynchronousSensor {
 
 	}
 
-	public void onDestroy() {
-		for (TwitterPoller twitterPoller : activeThreads.values()) {
-			twitterPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { NR_MENTIONS_FIELD };
@@ -104,7 +97,7 @@ public class TwitterSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		TwitterPoller twitterPoller = new TwitterPoller(id, valuePath,
 				configuration);
 		activeThreads.put(id, twitterPoller);
@@ -112,15 +105,8 @@ public class TwitterSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class TwitterPoller extends Thread {
@@ -153,7 +139,7 @@ public class TwitterSensor extends AbstractAsynchronousSensor {
 					Thread.sleep(Math.max(
 							0,
 							configuration.getLong(SAMPLE_INTERVAL,
-									DEFAULT_CONFIGURATION
+									mDefaultConfiguration
 											.getLong(SAMPLE_INTERVAL))
 									+ start - System.currentTimeMillis()));
 				} catch (InterruptedException e) {
@@ -163,6 +149,13 @@ public class TwitterSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (TwitterPoller twitterPoller : activeThreads.values()) {
+			twitterPoller.interrupt();
 		}
 	};
 

@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import android.content.BroadcastReceiver;
@@ -17,7 +17,7 @@ import android.os.Bundle;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class BatterySensor extends AbstractAsynchronousSensor {
+public class BatterySensor extends AbstractVdbSensor {
 
 	/**
 	 * The level field.
@@ -106,17 +106,6 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 
 	};
 
-	/**
-	 * Called when the sensor is destroyed.
-	 */
-	@Override
-	public final void onDestroy() {
-		if (registeredConfigurations.size() > 0) {
-			unregisterReceiver(batteryReceiver);
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public final String[] getValuePaths() {
 		return new String[] { TEMPERATURE_FIELD, LEVEL_FIELD, VOLTAGE_FIELD };
@@ -136,7 +125,7 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id, final String valuePath,
+	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			registerReceiver(batteryReceiver, new IntentFilter(
@@ -145,8 +134,15 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
+			unregisterReceiver(batteryReceiver);
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		if (registeredConfigurations.size() > 0) {
 			unregisterReceiver(batteryReceiver);
 		}
 	}

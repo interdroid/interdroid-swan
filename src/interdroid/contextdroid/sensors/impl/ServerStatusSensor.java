@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import org.apache.http.params.HttpParams;
 
 import android.os.Bundle;
 
-public class ServerStatusSensor extends AbstractAsynchronousSensor {
+public class ServerStatusSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "ServerStatus";
 
@@ -52,13 +52,6 @@ public class ServerStatusSensor extends AbstractAsynchronousSensor {
 		}
 	}
 
-	public void onDestroy() {
-		for (ServerPoller serverPoller : activeThreads.values()) {
-			serverPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { STATUS_FIELD };
@@ -86,22 +79,15 @@ public class ServerStatusSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		ServerPoller serverPoller = new ServerPoller(id, configuration);
 		activeThreads.put(id, serverPoller);
 		serverPoller.start();
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class ServerPoller extends Thread {
@@ -117,7 +103,7 @@ public class ServerStatusSensor extends AbstractAsynchronousSensor {
 
 		public void run() {
 			int timeout = configuration.getInt(CONNECTION_TIMEOUT,
-					DEFAULT_CONFIGURATION.getInt(CONNECTION_TIMEOUT));
+					mDefaultConfiguration.getInt(CONNECTION_TIMEOUT));
 			String serverURL = configuration.getString(SERVER_URL);
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
@@ -130,7 +116,7 @@ public class ServerStatusSensor extends AbstractAsynchronousSensor {
 				notifyDataChangedForId(id);
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
-							DEFAULT_CONFIGURATION.getLong(SAMPLE_INTERVAL))
+							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
 							+ start - System.currentTimeMillis());
 				} catch (InterruptedException e) {
 				}
@@ -139,6 +125,13 @@ public class ServerStatusSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (ServerPoller serverPoller : activeThreads.values()) {
+			serverPoller.interrupt();
 		}
 	};
 

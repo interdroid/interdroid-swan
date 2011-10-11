@@ -1,6 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import android.os.Bundle;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class ScreenSensor extends AbstractAsynchronousSensor {
+public class ScreenSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -81,7 +82,7 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 	private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(final Context context, final Intent intent) {
 			long now = System.currentTimeMillis();
 			long expire = now + EXPIRE_TIME;
 			ContentValues values = new ContentValues();
@@ -96,22 +97,17 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 
 	};
 
-	public void onDestroy() {
-		unregisterReceiver(screenReceiver);
-		super.onDestroy();
-	}
-
 	@Override
-	public String[] getValuePaths() {
+	public final String[] getValuePaths() {
 		return new String[] { IS_SCREEN_ON_FIELD };
 	}
 
 	@Override
-	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
+	public void initDefaultConfiguration(final Bundle defaults) {
 	}
 
 	@Override
-	public String getScheme() {
+	public final String getScheme() {
 		return SCHEME;
 	}
 
@@ -121,7 +117,8 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(String id, String valuePath, Bundle configuration) {
+	public final void register(final String id, final String valuePath,
+			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 			filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -130,10 +127,15 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(screenReceiver);
 		}
+	}
+
+	@Override
+	public final void onDestroySensor() {
+		unregisterReceiver(screenReceiver);
 	}
 
 }

@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import java.util.List;
@@ -23,7 +23,7 @@ import android.os.Bundle;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class WifiSensor extends AbstractAsynchronousSensor {
+public class WifiSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
@@ -166,20 +166,6 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 	};
 
 	@Override
-	public final void onDestroy() {
-		try {
-			unregisterReceiver(wifiReceiver);
-		} catch (IllegalArgumentException e) {
-			LOG.error("Error unregistering", e);
-		}
-
-		stopPolling = true;
-		wifiPoller.interrupt();
-
-		super.onDestroy();
-	}
-
-	@Override
 	public final String[] getValuePaths() {
 		return new String[] { SSID_FIELD, BSSID_FIELD, LEVEL_FIELD};
 	}
@@ -200,7 +186,7 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void register(final String id, final String valuePath,
+	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			registerReceiver(wifiReceiver, new IntentFilter(
@@ -238,11 +224,23 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected final void unregister(final String id) {
+	public final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(wifiReceiver);
 		}
 		updatePollRate();
+	}
+
+	@Override
+	public void onDestroySensor() {
+		try {
+			unregisterReceiver(wifiReceiver);
+		} catch (IllegalArgumentException e) {
+			LOG.error("Error unregistering", e);
+		}
+
+		stopPolling = true;
+		wifiPoller.interrupt();
 	}
 
 }

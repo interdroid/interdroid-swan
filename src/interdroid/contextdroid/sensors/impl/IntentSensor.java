@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextTypedValueListener;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
@@ -10,7 +10,7 @@ import java.util.List;
 
 import android.os.Bundle;
 
-public class IntentSensor extends AbstractAsynchronousSensor {
+public class IntentSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Intent";
 
@@ -20,10 +20,6 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	private static final String MAGIC_RELAY = "MAGIC_RELAY";
-
-	public void onDestroy() {
-		super.onDestroy();
-	}
 
 	@Override
 	public String[] getValuePaths() {
@@ -50,8 +46,8 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(final String id, final String valuePath,
-			Bundle configuration) {
+	public void register(final String id, final String valuePath,
+			final Bundle configuration) {
 		try {
 			contextServiceConnector.registerContextTypedValue(id + "."
 					+ MAGIC_RELAY, new ContextTypedValue(
@@ -64,10 +60,10 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 							// values is always of length 1
 							if (newValues[0].value.toString().contains(
 									"Starting: Intent {")) {
-								if (values.size() >= HISTORY_SIZE) {
-									values.remove(0);
+								if (getValues().size() >= HISTORY_SIZE) {
+									getValues().remove(0);
 								}
-								values.get(valuePath)
+								getValues().get(valuePath)
 										.add(new TimestampedValue(
 												getIntentFrom(newValues[0].value),
 												newValues[0].timestamp,
@@ -83,7 +79,7 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 		}
 	}
 
-	private String getIntentFrom(Object value) {
+	private String getIntentFrom(final Object value) {
 		String string = value.toString();
 		string = string.substring(string.indexOf("cmp=") + 4);
 		string = string.substring(0, string.indexOf(" "));
@@ -91,7 +87,7 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public void unregister(final String id) {
 		try {
 			contextServiceConnector.unregisterContextTypedValue(id + "."
 					+ MAGIC_RELAY);
@@ -101,9 +97,7 @@ public class IntentSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
+	public void onDestroySensor() {
+		// Nothing to do
 	}
 }

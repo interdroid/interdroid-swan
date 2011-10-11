@@ -1,6 +1,6 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 
-public class SoundSensor extends AbstractAsynchronousSensor {
+public class SoundSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Sound";
 
@@ -68,13 +68,6 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 		return rmspow;
 	}
 
-	public void onDestroy() {
-		for (SoundPoller soundPoller : activeThreads.values()) {
-			soundPoller.interrupt();
-		}
-		super.onDestroy();
-	}
-
 	@Override
 	public String[] getValuePaths() {
 		return new String[] { DB_FIELD };
@@ -107,22 +100,15 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		SoundPoller soundPoller = new SoundPoller(id, configuration);
 		activeThreads.put(id, soundPoller);
 		soundPoller.start();
 	}
 
 	@Override
-	protected void unregister(String id) {
+	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class SoundPoller extends Thread {
@@ -138,22 +124,22 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 			this.id = id;
 			int buffersize = 8 * AudioRecord.getMinBufferSize(
 					configuration.getInt(SAMPLE_RATE,
-							DEFAULT_CONFIGURATION.getInt(SAMPLE_RATE)),
+							mDefaultConfiguration.getInt(SAMPLE_RATE)),
 					configuration.getInt(CHANNEL_CONFIG,
-							DEFAULT_CONFIGURATION.getInt(CHANNEL_CONFIG)),
+							mDefaultConfiguration.getInt(CHANNEL_CONFIG)),
 					configuration.getInt(AUDIO_FORMAT,
-							DEFAULT_CONFIGURATION.getInt(AUDIO_FORMAT)));
+							mDefaultConfiguration.getInt(AUDIO_FORMAT)));
 			audioRecord = new AudioRecord(configuration.getInt(AUDIO_SOURCE,
-					DEFAULT_CONFIGURATION.getInt(AUDIO_SOURCE)),
+					mDefaultConfiguration.getInt(AUDIO_SOURCE)),
 					configuration.getInt(SAMPLE_RATE,
-							DEFAULT_CONFIGURATION.getInt(SAMPLE_RATE)),
+							mDefaultConfiguration.getInt(SAMPLE_RATE)),
 					configuration.getInt(CHANNEL_CONFIG,
-							DEFAULT_CONFIGURATION.getInt(CHANNEL_CONFIG)),
+							mDefaultConfiguration.getInt(CHANNEL_CONFIG)),
 					configuration.getInt(AUDIO_FORMAT,
-							DEFAULT_CONFIGURATION.getInt(AUDIO_FORMAT)),
+							mDefaultConfiguration.getInt(AUDIO_FORMAT)),
 					buffersize);
 			sampleLength = configuration.getInt(SAMPLE_LENGTH,
-					DEFAULT_CONFIGURATION.getInt(SAMPLE_LENGTH));
+					mDefaultConfiguration.getInt(SAMPLE_LENGTH));
 
 		}
 
@@ -168,7 +154,7 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 				notifyDataChangedForId(id);
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
-							DEFAULT_CONFIGURATION.getLong(SAMPLE_INTERVAL))
+							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
 							+ start - System.currentTimeMillis());
 				} catch (InterruptedException e) {
 				}
@@ -177,6 +163,13 @@ public class SoundSensor extends AbstractAsynchronousSensor {
 
 		public List<TimestampedValue> getValues() {
 			return values;
+		}
+	}
+
+	@Override
+	public void onDestroySensor() {
+		for (SoundPoller soundPoller : activeThreads.values()) {
+			soundPoller.interrupt();
 		}
 	};
 
