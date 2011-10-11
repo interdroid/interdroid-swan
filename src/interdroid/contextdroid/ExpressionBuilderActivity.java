@@ -30,9 +30,14 @@ public class ExpressionBuilderActivity extends Activity {
 	private static final int DIALOG_CHOOSE_COMPARATOR = 2;
 	private static final int DIALOG_ENTER_CONSTANT_LEFT = 3;
 	private static final int DIALOG_ENTER_CONSTANT_RIGHT = 4;
+	private static final int DIALOG_CHOOSE_EXPRESSION_LEFT = 5;
+	private static final int DIALOG_CHOOSE_EXPRESSION_RIGHT = 6;
+	private static final int DIALOG_CHOOSE_OPERATOR = 7;
 
 	private static final CharSequence[] COMPARATORS = new CharSequence[] { "<",
 			"<=", "==", "!=", ">", ">=", "contains", "regexp" };
+	private static final CharSequence[] OPERATORS = new CharSequence[] { "&&",
+			"||", "!" };
 
 	private static final int TYPEDVALUE_OPTION_CONSTANT = 0;
 	private static final int TYPEDVALUE_OPTION_CONTEXT = 1;
@@ -41,8 +46,11 @@ public class ExpressionBuilderActivity extends Activity {
 	private static final CharSequence[] TYPEDVALUE_OPTIONS = new CharSequence[] {
 			"constant", "context", "combined" };
 
-	private TypedValue left;
-	private TypedValue right;
+	private TypedValue leftValue;
+	private TypedValue rightValue;
+
+	private Expression leftExpression;
+	private Expression rightExpression;
 
 	private List<Expression> expressions = new ArrayList<Expression>();
 
@@ -111,17 +119,17 @@ public class ExpressionBuilderActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						if (left == null) {
+						if (leftValue == null) {
 							Toast.makeText(
 									getApplicationContext(),
-									"Unable to create expression, please provide a value for left member",
+									"Unable to create expression, please provide a value for leftValue member",
 									Toast.LENGTH_SHORT).show();
 							return;
 						}
-						if (right == null) {
+						if (rightValue == null) {
 							Toast.makeText(
 									getApplicationContext(),
-									"Unable to create expression, please provide a value for right member",
+									"Unable to create expression, please provide a value for rightValue member",
 									Toast.LENGTH_SHORT).show();
 							return;
 						}
@@ -134,8 +142,8 @@ public class ExpressionBuilderActivity extends Activity {
 									Toast.LENGTH_SHORT).show();
 							return;
 						}
-						expressions
-								.add(new Expression(left, comparator, right));
+						expressions.add(new Expression(leftValue, comparator,
+								rightValue));
 						expressionlistAdapter.notifyDataSetChanged();
 						System.out.println("#expressions now: "
 								+ expressions.size());
@@ -149,17 +157,26 @@ public class ExpressionBuilderActivity extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
-						Expression expression = expressions.remove(position);
-						left = expression.getTypedValue(true);
+						Expression expression = expressions.get(position);
+						leftValue = expression.getTypedValue(true);
 						((Button) findViewById(R.id.typedvalue_left))
-								.setText(left.toString());
-						right = expression.getTypedValue(false);
+								.setText(leftValue.toString());
+						rightValue = expression.getTypedValue(false);
 						((Button) findViewById(R.id.typedvalue_right))
-								.setText(right.toString());
+								.setText(rightValue.toString());
 						((Button) findViewById(R.id.typedvalue_comparator))
 								.setText(expression.getComparator());
 
 						expressionlistAdapter.notifyDataSetChanged();
+					}
+				});
+
+		findViewById(R.id.expression_operator).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						showDialog(DIALOG_CHOOSE_OPERATOR);
 					}
 				});
 
@@ -235,16 +252,56 @@ public class ExpressionBuilderActivity extends Activity {
 											.findViewById(R.id.value))
 											.getText().toString();
 									if (isRightEnter) {
-										right = new ConstantTypedValue(constant);
+										rightValue = new ConstantTypedValue(
+												constant);
 										((Button) findViewById(R.id.typedvalue_right))
 												.setText(constant);
 									} else {
-										left = new ConstantTypedValue(constant);
+										leftValue = new ConstantTypedValue(
+												constant);
 										((Button) findViewById(R.id.typedvalue_left))
 												.setText(constant);
 									}
 								}
 							}).create();
+		case DIALOG_CHOOSE_OPERATOR:
+			return new AlertDialog.Builder(this).setTitle("Choose Operator")
+					.setItems(OPERATORS, new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							((Button) findViewById(R.id.expression_operator))
+									.setText(OPERATORS[which]);
+
+						}
+					}).create();
+		case DIALOG_CHOOSE_EXPRESSION_LEFT:
+			isLeft = true;
+		case DIALOG_CHOOSE_EXPRESSION_RIGHT:
+			final boolean isRightExpression = !isLeft;
+			final String[] expressionNames = new String[expressions.size()];
+			for (int i = 0; i < expressions.size(); i++) {
+				expressionNames[i] = expressions.get(i).toString();
+			}
+
+			return new AlertDialog.Builder(this)
+					.setTitle("Choose Typed Value")
+					.setItems(expressionNames,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									if (isRightExpression) {
+										rightExpression = expressions
+												.get(which);
+									} else {
+										leftExpression = expressions.get(which);
+									}
+
+								}
+							}).create();
+
 		default:
 			break;
 		}
