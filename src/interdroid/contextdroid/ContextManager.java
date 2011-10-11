@@ -7,6 +7,9 @@ import interdroid.contextdroid.contextservice.ContextDroidServiceException;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,9 +22,11 @@ import android.util.Log;
  * The Class ContextManager.
  */
 public class ContextManager extends ContextServiceConnector {
-
-	/** Logging tag */
-	protected static final String TAG = "ContextManager";
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ContextManager.class);
 
 	/** The intent action for broadcasts of new readings. */
 	public static final String ACTION_NEWREADING = "interdroid.contextdroid.NEWREADING";
@@ -78,7 +83,7 @@ public class ContextManager extends ContextServiceConnector {
 
 	/**
 	 * Instantiates a new context manager.
-	 * 
+	 *
 	 * @param context
 	 *            the application context
 	 * @param contextManagerListener
@@ -150,6 +155,7 @@ public class ContextManager extends ContextServiceConnector {
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
+			LOG.debug("Got null pointer", e);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
 		}
@@ -160,7 +166,7 @@ public class ContextManager extends ContextServiceConnector {
 	/**
 	 * Adds an expression with an explicit identifier. If the identifier already
 	 * exists, it will be overwritten.
-	 * 
+	 *
 	 * @param expressionId
 	 *            the expression id
 	 * @param expression
@@ -181,6 +187,7 @@ public class ContextManager extends ContextServiceConnector {
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
+			LOG.debug("Got null pointer.", e);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
 		}
@@ -194,7 +201,7 @@ public class ContextManager extends ContextServiceConnector {
 
 	/**
 	 * Removes the context expression.
-	 * 
+	 *
 	 * @param expressionId
 	 *            the expression id
 	 * @throws ContextDroidException
@@ -213,6 +220,7 @@ public class ContextManager extends ContextServiceConnector {
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
+			LOG.debug("Got null pointer.", e);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
 		}

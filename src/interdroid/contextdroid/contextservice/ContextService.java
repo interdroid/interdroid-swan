@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,9 +32,11 @@ import android.util.Log;
  * The Class ContextService.
  */
 public class ContextService extends Service {
-
-	/** Logging tag. */
-	public static final String TAG = "ContextService";
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ContextService.class);
 
 	/** Identifier for the notification */
 	private static final int SERVICE_NOTIFICATION_ID = 1;
@@ -114,13 +119,12 @@ public class ContextService extends Service {
 						// ignore, it's already out of the queue
 					}
 					e.printStackTrace();
-					Log.i(TAG, expression + " got deleted");
+					LOG.info("{} got deleted", expression);
 					continue;
 				}
 				if (changed) {
-					Log.i(TAG,
-							expression + " has new value: "
-									+ expression.getResult());
+					LOG.info("{} has new value: {}",
+							expression, expression.getResult());
 					// send new value to the listener (using broadcast)
 					sendExpressionChangeBroadcastIntent(expression);
 				}
@@ -196,7 +200,7 @@ public class ContextService extends Service {
 						// ignore, it's already out of the queue
 					}
 					e.printStackTrace();
-					Log.i(TAG, value + " got deleted");
+					LOG.info("{} got deleted", value);
 					continue;
 				}
 				sendValuesBroadcastIntent(value.getId(), values);
@@ -212,18 +216,18 @@ public class ContextService extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onBind(android.content.Intent)
 	 */
 	@Override
 	public IBinder onBind(Intent intent) {
-		System.out.println("onBind");
+		LOG.debug("onBind {}", mBinder);
 		return mBinder;
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		System.out.println("onUnbind");
+		LOG.debug("onUnbind");
 		synchronized (this) {
 			if (contextExpressions.size() == 0
 					&& contextTypedValues.size() == 0) {
@@ -237,12 +241,12 @@ public class ContextService extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onCreate()
 	 */
 	@Override
 	public void onCreate() {
-		System.out.println("onCreate");
+		LOG.debug("onCreate");
 		super.onCreate();
 		sensorManager = new SensorManager(this);
 		evaluationThread.start();
@@ -277,12 +281,12 @@ public class ContextService extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see android.app.Service#onDestroy()
 	 */
 	@Override
 	public void onDestroy() {
-		System.out.println("onDestroy");
+		LOG.debug("onDestroy");
 		super.onDestroy();
 		// TODO store and load expressions?
 		Intent notificationIntent = new Intent(this, LaunchService.class);
@@ -297,7 +301,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 * 
+	 *
 	 * @param expression
 	 *            the expression
 	 */
@@ -321,7 +325,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 * 
+	 *
 	 * @param expression
 	 *            the expression
 	 */
@@ -336,7 +340,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 * 
+	 *
 	 * @param expression
 	 *            the expression
 	 */
@@ -356,6 +360,7 @@ public class ContextService extends Service {
 		@Override
 		public void addContextExpression(final String expressionId,
 				final Expression expression) throws RemoteException {
+			LOG.debug("Adding context expression: {}. {}", expressionId, expression);
 			// check whether there already exists an expression with the given
 			// identifier, handle appropriately
 
@@ -388,6 +393,8 @@ public class ContextService extends Service {
 		@Override
 		public void removeContextExpression(String expressionId)
 				throws RemoteException {
+			LOG.debug("Removing expression: {}", expressionId);
+
 			synchronized (evaluationQueue) {
 				Expression expression = contextExpressions.remove(expressionId);
 				if (!evaluationQueue.remove(expression)) {
@@ -483,14 +490,18 @@ public class ContextService extends Service {
 		@Override
 		public void unregisterContextTypedValue(String id)
 				throws RemoteException {
+			LOG.debug("Unregistering: {}", id);
 			synchronized (contextTypedValueQueue) {
 				ContextTypedValue value = contextTypedValues.remove(id);
-				contextTypedValueQueue.remove(value);
-				contextTypedValueQueue.notifyAll();
-				try {
-					value.destroy(id, sensorManager);
-				} catch (ContextDroidException e) {
-					throw new ContextDroidServiceException(e);
+				if (value != null) {
+					contextTypedValueQueue.remove(value);
+					contextTypedValueQueue.notifyAll();
+					try {
+						value.destroy(id, sensorManager);
+					} catch (ContextDroidException e) {
+						LOG.warn("Exception while unregistering.", e);
+						throw new ContextDroidServiceException(e);
+					}
 				}
 			}
 		}
