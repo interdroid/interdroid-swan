@@ -34,7 +34,7 @@ public abstract class ContextServiceConnector {
 
 	/**
 	 * Checks if the context manager is connected to the context service.
-	 * 
+	 *
 	 * @return true, if connected
 	 */
 	public boolean isConnected() {
@@ -47,14 +47,14 @@ public abstract class ContextServiceConnector {
 
 	/**
 	 * Non-blocking start.
-	 * 
+	 *
 	 * Should always be called before any other calls to the ContextManager.
 	 * This method makes sure the Context Service is running and sets up the
 	 * listeners required to receive updates from the Context Service.
-	 * 
+	 *
 	 * You will generally want to call this method from an Activity's onResume()
 	 * method.
-	 * 
+	 *
 	 * @param connectionListener
 	 *            the connectionListener object to call onConnected() on after
 	 *            the context manager has been initialized.
@@ -97,6 +97,8 @@ public abstract class ContextServiceConnector {
 
 		public void onServiceDisconnected(final ComponentName name) {
 			System.out.println("service disconnected");
+			contextService = null;
+			isConnected = false;
 			if (connectionListener != null) {
 				connectionListener.onDisconnected();
 			}
@@ -105,7 +107,7 @@ public abstract class ContextServiceConnector {
 
 	/**
 	 * Instantiates a new context service connector.
-	 * 
+	 *
 	 * @param context
 	 *            the application context
 	 */
