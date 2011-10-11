@@ -24,17 +24,13 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			long now = System.currentTimeMillis();
-			if (values.get(IS_SCREEN_ON_FIELD).size() >= HISTORY_SIZE) {
-				values.get(IS_SCREEN_ON_FIELD).remove(0);
-			}
+			long expire = now + EXPIRE_TIME;
+			trimValues(HISTORY_SIZE);
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				values.get(IS_SCREEN_ON_FIELD).add(
-						new TimestampedValue(false, now, now + EXPIRE_TIME));
+				putValue(IS_SCREEN_ON_FIELD, now, expire, false);
 			} else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-				values.get(IS_SCREEN_ON_FIELD).add(
-						new TimestampedValue(true, now, now + EXPIRE_TIME));
+				putValue(IS_SCREEN_ON_FIELD, now, expire, true);
 			}
-			notifyDataChanged(IS_SCREEN_ON_FIELD);
 		}
 
 	};
@@ -83,13 +79,6 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(screenReceiver);
 		}
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }

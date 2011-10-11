@@ -37,34 +37,19 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 		public void onReceive(Context context, Intent intent) {
 			long now = System.currentTimeMillis();
 
-			while (values.get(SSID_FIELD).size() > 0
-					&& values.get(SSID_FIELD).get(0).timestamp < now
-							- HISTORY_SIZE) {
-				for (String valuePath : VALUE_PATHS) {
-					values.get(valuePath).remove(0);
-				}
-			}
+			trimValueByTime(now - HISTORY_SIZE);
+			long expire = now + EXPIRE_TIME;
 
 			List<ScanResult> results = wifiManager.getScanResults();
 			for (ScanResult scanResult : results) {
-				values.get(SSID_FIELD).add(
-						new TimestampedValue(scanResult.SSID, now, now
-								+ EXPIRE_TIME));
-				values.get(BSSID_FIELD).add(
-						new TimestampedValue(scanResult.BSSID, now, now
-								+ EXPIRE_TIME));
-				values.get(LEVEL_FIELD).add(
-						new TimestampedValue(scanResult.level, now, now
-								+ EXPIRE_TIME));
-				values.get(SCAN_RESULT_FIELD)
-						.add(new TimestampedValue(scanResult, now, now
-								+ EXPIRE_TIME));
-
-			}
-			for (String valuePath : VALUE_PATHS) {
-				notifyDataChanged(valuePath);
+				putValue(SSID_FIELD, now, expire, scanResult.SSID);
+				putValue(BSSID_FIELD, now, expire, scanResult.BSSID);
+				putValue(LEVEL_FIELD, now, expire, scanResult.level);
+				putValue(SCAN_RESULT_FIELD, now, expire, scanResult);
 			}
 		}
+
+
 
 	};
 
@@ -126,7 +111,7 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 				+ "', 'type': 'integer'},"
 				+ "            {'name': '"
 				+ SCAN_RESULT_FIELD
-				+ "', 'type': 'scanresult'}"
+				+ "', 'type': 'bytes'}"
 				+ "           ]" + "}".replace('\'', '"');
 	}
 
@@ -171,13 +156,6 @@ public class WifiSensor extends AbstractAsynchronousSensor {
 			unregisterReceiver(wifiReceiver);
 		}
 		updatePollRate();
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }

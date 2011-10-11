@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,27 +24,17 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
 				long now = System.currentTimeMillis();
-				if (values.get(LEVEL_FIELD).size() >= HISTORY_SIZE) {
-					for (String valuePath : VALUE_PATHS) {
-						values.get(valuePath).remove(0);
-					}
-				}
-				values.get(LEVEL_FIELD).add(
-						new TimestampedValue(intent.getIntExtra(
-								BatteryManager.EXTRA_LEVEL, 0), now, now
-								+ EXPIRE_TIME));
-				values.get(TEMPERATURE_FIELD).add(
-						new TimestampedValue(intent.getIntExtra(
-								BatteryManager.EXTRA_TEMPERATURE, 0), now, now
-								+ EXPIRE_TIME));
-				values.get(VOLTAGE_FIELD).add(
-						new TimestampedValue(intent.getIntExtra(
-								BatteryManager.EXTRA_VOLTAGE, 0), now, now
-								+ EXPIRE_TIME));
-				// notify all that we have new data
-				for (String valuePath : VALUE_PATHS) {
-					notifyDataChanged(valuePath);
-				}
+				long expire = now + EXPIRE_TIME;
+				trimValues(HISTORY_SIZE);
+				putValue(LEVEL_FIELD, now, expire,
+						intent.getIntExtra(
+								BatteryManager.EXTRA_LEVEL, 0));
+				putValue(TEMPERATURE_FIELD, now, expire,
+						intent.getIntExtra(
+								BatteryManager.EXTRA_TEMPERATURE, 0));
+				putValue(VOLTAGE_FIELD, now, expire,
+						intent.getIntExtra(
+								BatteryManager.EXTRA_VOLTAGE, 0));
 			}
 		}
 
@@ -102,13 +88,6 @@ public class BatterySensor extends AbstractAsynchronousSensor {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(batteryReceiver);
 		}
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }

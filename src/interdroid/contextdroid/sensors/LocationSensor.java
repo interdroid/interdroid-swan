@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,7 +24,7 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 	public static final String PROVIDER = "provider";
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 0;
+	public static final long EXPIRE_TIME = 1000;
 
 	private String currentProvider;
 
@@ -38,31 +34,14 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 	private LocationListener locationListener = new LocationListener() {
 		public void onLocationChanged(Location location) {
 			long now = System.currentTimeMillis();
-			if (values.get(LATITUDE_FIELD).size() >= HISTORY_SIZE) {
-				for (String valuePath : VALUE_PATHS) {
-					values.get(valuePath).remove(0);
-				}
-			}
-			long expireTime = now + 10000;
-			values.get(LATITUDE_FIELD).add(
-					new TimestampedValue(location.getLatitude(), now,
-							expireTime));
-			values.get(LONGITUDE_FIELD).add(
-					new TimestampedValue(location.getLongitude(), now,
-							expireTime));
-			values.get(ALTITUDE_FIELD).add(
-					new TimestampedValue(location.getAltitude(), now,
-							expireTime));
-			if (location.hasSpeed()) {
-				values.get(SPEED_FIELD).add(
-						new TimestampedValue(location.getSpeed(), now,
-								expireTime));
-			}
-			values.get(LOCATION_FIELD).add(
-					new TimestampedValue(location, now, expireTime));
-			for (String valuePath : VALUE_PATHS) {
-				notifyDataChanged(valuePath);
-			}
+			trimValues(HISTORY_SIZE);
+			long expire = now + 10000;
+			putValue(LATITUDE_FIELD, now, expire, location.getLatitude());
+			putValue(LONGITUDE_FIELD, now, expire, location.getLongitude());
+			putValue(ALTITUDE_FIELD, now, expire, location.getAltitude());
+			putValue(SPEED_FIELD, now, expire, location.getSpeed());
+			putValue(LOCATION_FIELD, now, expire, location);
+
 			System.out.println("new location: " + location);
 		}
 
@@ -187,13 +166,6 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 			updateListener();
 		}
 
-	}
-
-	@Override
-	protected List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
-		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
-				now, timespan);
 	}
 
 }
