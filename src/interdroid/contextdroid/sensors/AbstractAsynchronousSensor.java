@@ -30,7 +30,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 
 	protected Bundle currentConfiguration = new Bundle();
 
-	private Map<String, List<TimestampedValue>> values = new HashMap<String, List<TimestampedValue>>();
+	protected Map<String, List<TimestampedValue>> values = new HashMap<String, List<TimestampedValue>>();
 
 	protected Map<String, Bundle> registeredConfigurations = new HashMap<String, Bundle>();
 
