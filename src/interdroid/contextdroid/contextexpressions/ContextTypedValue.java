@@ -101,8 +101,7 @@ public class ContextTypedValue extends TypedValue implements
 			try {
 				Thread.sleep(CONNECTION_TIMEOUT);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// ignore
 			}
 			if (sensor == null) {
 				throw new ContextDroidException("Failed to bind to sensor in "
@@ -144,7 +143,6 @@ public class ContextTypedValue extends TypedValue implements
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

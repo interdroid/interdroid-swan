@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<RelativeLayout android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+	<LinearLayout android:id="@+id/typedvalue_container"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:orientation="horizontal" android:gravity="center"
+		android:layout_alignParentTop="true">
+		<Button android:id="@+id/typedvalue_left" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="left" />
+		<Button android:id="@+id/typedvalue_comparator"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text=" ? " />
+		<Button android:id="@+id/typedvalue_right"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="right" />
+		<Button android:id="@+id/typedvalue_ok" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="ok" />
+	</LinearLayout>
+	<ListView android:id="@+id/expression_list"
+		android:layout_below="@id/typedvalue_container" android:layout_width="fill_parent"
+		android:layout_height="150dp" android:background="#300">
+	</ListView>
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:gravity="center" android:layout_below="@id/expression_list">
+		<Button android:id="@+id/expression_left" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="left" />
+		<Button android:id="@+id/expression_operator"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text=" ? " />
+		<Button android:id="@+id/expression_right"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:text="right" />
+		<Button android:id="@+id/expression_ok" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="ok" />
+	</LinearLayout>
+
+	<Button android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"
+		android:id="@+id/expression_finished" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="ok" />
+
+
+</RelativeLayout>

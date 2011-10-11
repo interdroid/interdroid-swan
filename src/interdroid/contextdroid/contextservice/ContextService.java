@@ -27,7 +27,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ContextService.
  */
@@ -177,7 +176,6 @@ public class ContextService extends Service {
 					values = value.getValues(value.getId(),
 							System.currentTimeMillis());
 				} catch (ContextDroidException e) {
-					e.printStackTrace();
 					// something went wrong
 					// remove this entry from our list of context expressions
 					try {
@@ -185,11 +183,7 @@ public class ContextService extends Service {
 					} catch (NoSuchElementException e2) {
 						// ignore, it's already out of the queue
 					}
-					// contextTypedValues.remove(value.getId());
-					// and send exception to the listener (using broadcast)
-
-					// TODO: should we send an expression?
-					// sendExpressionExceptionBroadcastIntent(value, e);
+					// TODO: should we send an exception?
 					continue;
 				} catch (NullPointerException e) {
 					// can happen, it means the expression got deleted halfway
@@ -252,6 +246,7 @@ public class ContextService extends Service {
 		evaluationThread.start();
 		entityThread.start();
 		initNotification();
+		updateNotification();
 	}
 
 	/**
@@ -269,13 +264,12 @@ public class ContextService extends Service {
 	 * Update notification.
 	 */
 	private void updateNotification() {
-		int numExpressions = contextExpressions.size();
-
 		Intent notificationIntent = new Intent(this, TestActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(this, "ContextDroid", "#expressions: "
-				+ numExpressions, contentIntent);
+				+ contextExpressions.size() + ", #entities: "
+				+ contextTypedValues.size(), contentIntent);
 		mNotificationManager.notify(SERVICE_NOTIFICATION_ID, notification);
 	}
 
@@ -295,7 +289,7 @@ public class ContextService extends Service {
 		notification.setLatestEventInfo(this, "ContextService",
 				"Service stopped", contentIntent);
 		notification.flags = 0;
-		notification.tickerText = "service stopped";
+		notification.tickerText = "ContextDroid stopped";
 		mNotificationManager.notify(SERVICE_NOTIFICATION_ID, notification);
 	}
 
@@ -358,8 +352,9 @@ public class ContextService extends Service {
 	private final IContextService.Stub mBinder = new IContextService.Stub() {
 
 		@Override
-		public void addContextExpression(final String expressionId,
-				final Expression expression) throws RemoteException {
+		public ContextDroidServiceException addContextExpression(
+				final String expressionId, final Expression expression)
+				throws RemoteException {
 			LOG.debug("Adding context expression: {}. {}", expressionId, expression);
 			// check whether there already exists an expression with the given
 			// identifier, handle appropriately
@@ -367,7 +362,7 @@ public class ContextService extends Service {
 			if (contextExpressions.containsKey(expressionId)) {
 				// for now just throw an exception, may be we should do
 				// replacement,
-				throw new ContextDroidServiceException(
+				return new ContextDroidServiceException(
 						new ContextDroidException("expression with id '"
 								+ expressionId + "' already exists"));
 			}
@@ -378,7 +373,7 @@ public class ContextService extends Service {
 			try {
 				expression.initialize(expressionId, sensorManager);
 			} catch (ContextDroidException e) {
-				throw new ContextDroidServiceException(e);
+				return new ContextDroidServiceException(e);
 			}
 			contextExpressions.put(expressionId, expression);
 			// put the expression at the front of the priorityQueue
@@ -388,13 +383,14 @@ public class ContextService extends Service {
 				evaluationQueue.notifyAll();
 			}
 			updateNotification();
+			// no exception so return null
+			return null;
 		}
 
 		@Override
-		public void removeContextExpression(String expressionId)
-				throws RemoteException {
+		public ContextDroidServiceException removeContextExpression(
+				String expressionId) throws RemoteException {
 			LOG.debug("Removing expression: {}", expressionId);
-
 			synchronized (evaluationQueue) {
 				Expression expression = contextExpressions.remove(expressionId);
 				if (!evaluationQueue.remove(expression)) {
@@ -404,10 +400,12 @@ public class ContextService extends Service {
 				try {
 					expression.destroy(expressionId, sensorManager);
 				} catch (ContextDroidException e) {
-					throw new ContextDroidServiceException(e);
+					return new ContextDroidServiceException(e);
 				}
 			}
 			updateNotification();
+			// no exception so return null
+			return null;
 		}
 
 		@Override
@@ -417,16 +415,14 @@ public class ContextService extends Service {
 					contextExpressions.get(expressionId).destroy(expressionId,
 							sensorManager);
 				} catch (ContextDroidException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// ignore
 				}
 			}
 			for (String id : contextTypedValues.keySet()) {
 				try {
 					contextTypedValues.get(id).destroy(id, sensorManager);
 				} catch (ContextDroidException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// ignore
 				}
 			}
 			shouldStop = true;
@@ -461,36 +457,36 @@ public class ContextService extends Service {
 		}
 
 		@Override
-		public void registerContextTypedValue(String id,
-				ContextTypedValue contextTypedValue) throws RemoteException {
+		public ContextDroidServiceException registerContextTypedValue(
+				String id, ContextTypedValue contextTypedValue)
+				throws RemoteException {
 			if (contextTypedValues.containsKey(id)) {
 				try {
 					contextTypedValues.get(id).destroy(id, sensorManager);
 				} catch (ContextDroidException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return new ContextDroidServiceException(e);
 				}
 			}
 			contextTypedValues.put(id, contextTypedValue);
 			try {
 				contextTypedValue.initialize(id, sensorManager);
 			} catch (SensorConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return new ContextDroidServiceException(e);
 			} catch (SensorInitializationFailedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return new ContextDroidServiceException(e);
 			}
 			synchronized (contextTypedValueQueue) {
 				contextTypedValueQueue.add(contextTypedValue);
 				contextTypedValueQueue.notifyAll();
 			}
+			updateNotification();
+			// no exception so return null
+			return null;
 		}
 
 		@Override
-		public void unregisterContextTypedValue(String id)
-				throws RemoteException {
-			LOG.debug("Unregistering: {}", id);
+		public ContextDroidServiceException unregisterContextTypedValue(
+				String id) throws RemoteException {
 			synchronized (contextTypedValueQueue) {
 				ContextTypedValue value = contextTypedValues.remove(id);
 				if (value != null) {
@@ -499,11 +495,14 @@ public class ContextService extends Service {
 					try {
 						value.destroy(id, sensorManager);
 					} catch (ContextDroidException e) {
-						LOG.warn("Exception while unregistering.", e);
-						throw new ContextDroidServiceException(e);
+						return new ContextDroidServiceException(e);
 					}
 				}
 			}
+			updateNotification();
+			// no exception so return null
+			return null;
+
 		}
 
 	};

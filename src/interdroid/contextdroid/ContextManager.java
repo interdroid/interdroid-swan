@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -99,9 +100,11 @@ public class ContextManager extends ContextServiceConnector {
 	public void destroy() throws ContextDroidException {
 		for (String id : contextTypedValueListeners.keySet()) {
 			try {
-				contextService.unregisterContextTypedValue(id);
-			} catch (ContextDroidServiceException e) {
-				throw e.getContextDroidException();
+				ContextDroidServiceException exception = contextService
+						.unregisterContextTypedValue(id);
+				if (exception != null) {
+					throw exception.getContextDroidException();
+				}
 			} catch (RemoteException e) {
 				throw new ContextDroidException(e);
 			} catch (NullPointerException e) {
@@ -112,9 +115,11 @@ public class ContextManager extends ContextServiceConnector {
 		contextTypedValueListeners.clear();
 		for (String id : contextExpressionListeners.keySet()) {
 			try {
-				contextService.removeContextExpression(id);
-			} catch (ContextDroidServiceException e) {
-				throw e.getContextDroidException();
+				ContextDroidServiceException exception = contextService
+						.removeContextExpression(id);
+				if (exception != null) {
+					throw exception.getContextDroidException();
+				}
 			} catch (RemoteException e) {
 				throw new ContextDroidException(e);
 			} catch (NullPointerException e) {
@@ -129,9 +134,11 @@ public class ContextManager extends ContextServiceConnector {
 			ContextTypedValue value, ContextTypedValueListener listener)
 			throws ContextDroidException {
 		try {
-			contextService.registerContextTypedValue(id, value);
-		} catch (ContextDroidServiceException e) {
-			throw e.getContextDroidException();
+			ContextDroidServiceException exception = contextService
+					.registerContextTypedValue(id, value);
+			if (exception != null) {
+				throw exception.getContextDroidException();
+			}
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
@@ -149,9 +156,11 @@ public class ContextManager extends ContextServiceConnector {
 	public void unregisterContextTypedValue(final String id)
 			throws ContextDroidException {
 		try {
-			contextService.unregisterContextTypedValue(id);
-		} catch (ContextDroidServiceException e) {
-			throw e.getContextDroidException();
+			ContextDroidServiceException exception = contextService
+					.unregisterContextTypedValue(id);
+			if (exception != null) {
+				throw exception.getContextDroidException();
+			}
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
@@ -181,9 +190,11 @@ public class ContextManager extends ContextServiceConnector {
 		try {
 			Log.d(TAG, "attempting to add expression " + expression + " id: "
 					+ expressionId);
-			contextService.addContextExpression(expressionId, expression);
-		} catch (ContextDroidServiceException e) {
-			throw e.getContextDroidException();
+			ContextDroidServiceException exception = contextService
+					.addContextExpression(expressionId, expression);
+			if (exception != null) {
+				throw exception.getContextDroidException();
+			}
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
@@ -214,9 +225,11 @@ public class ContextManager extends ContextServiceConnector {
 		updateContextExpressionBroadcastReceiver();
 
 		try {
-			contextService.removeContextExpression(expressionId);
-		} catch (ContextDroidServiceException e) {
-			throw e.getContextDroidException();
+			ContextDroidServiceException exception = contextService
+					.removeContextExpression(expressionId);
+			if (exception != null) {
+				throw exception.getContextDroidException();
+			}
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
@@ -237,7 +250,7 @@ public class ContextManager extends ContextServiceConnector {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ACTION_NEWREADING);
 		intentFilter.addAction(ACTION_INVALIDATEREADING);
-		intentFilter.addDataScheme("contexttypedvalue");
+		intentFilter.addDataScheme("contextvalues");
 		for (String id : contextTypedValueListeners.keySet()) {
 			intentFilter.addDataAuthority(id, null);
 		}
@@ -245,7 +258,7 @@ public class ContextManager extends ContextServiceConnector {
 			context.unregisterReceiver(contextTypedValueBroadcastReceiver);
 			contextTypedValueBroadcastReceiverRegistered = false;
 		}
-		if (contextExpressionListeners.size() > 0) {
+		if (contextTypedValueListeners.size() > 0) {
 			context.registerReceiver(contextTypedValueBroadcastReceiver,
 					intentFilter);
 			contextTypedValueBroadcastReceiverRegistered = true;
@@ -292,8 +305,13 @@ public class ContextManager extends ContextServiceConnector {
 
 			if (intent.getAction().equals(ACTION_NEWREADING)) {
 				if (listener != null) {
-					listener.onReading(id, (TimestampedValue[]) intent
-							.getExtras().get("values"));
+					Parcelable[] parcelables = (Parcelable[]) intent
+							.getExtras().get("values");
+					TimestampedValue[] timestampedValues = new TimestampedValue[parcelables.length];
+					System.arraycopy(parcelables, 0, timestampedValues, 0,
+							parcelables.length);
+
+					listener.onReading(id, timestampedValues);
 				}
 			} else if (intent.getAction().equals(ACTION_INVALIDATEREADING)) {
 				if (listener != null) {

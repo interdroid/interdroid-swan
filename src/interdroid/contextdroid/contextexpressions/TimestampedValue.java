@@ -76,7 +76,7 @@ public class TimestampedValue implements Serializable, Parcelable {
 	@Override
 	public String toString() {
 		return "" + value + " (timestamp: " + timestamp + ", expires: "
-				+ expireTime + ", difference: " + (expireTime - timestamp);
+				+ expireTime + ")";
 	}
 
 	/**
@@ -163,7 +163,6 @@ public class TimestampedValue implements Serializable, Parcelable {
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

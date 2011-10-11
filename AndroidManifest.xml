@@ -15,12 +15,20 @@
 				<action android:name="interdroid.contextdroid.EXPRESSIONUNDEFINED" />
 				<action android:name="interdroid.contextdroid.NEWREADING" />
 				<data android:scheme="contextexpression" />
-				<data android:scheme="contextvalues" />
+				<data android:scheme="contextvalues" android:host="myFirstValue" />
 			</intent-filter>
 		</receiver>
 
 		<activity android:name=".test.TestActivity" android:label="CD-Test"
 			android:screenOrientation="portrait">
+			<intent-filter>
+				<!-- <action android:name="android.intent.action.MAIN"></action> <category 
+					android:name="android.intent.category.LAUNCHER" /> -->
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".ExpressionBuilderActivity"
+			android:label="Expression Builder" android:screenOrientation="portrait">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"></action>
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -163,6 +171,98 @@
 		<provider android:name="interdroid.contextdroid.sensors.WifiSensor$Provider"
 			android:authorities="interdroid.context.sensor.wifi" />
 
+		<service android:name=".sensors.ServerStatusSensor"
+			android:exported="true" android:process=":serverstatussensor">
+			<meta-data android:name="entityId" android:value="serverstatus" />
+			<meta-data android:name="valuePaths" android:value="status" />
+			<meta-data android:name="sample_interval" android:value="300000L" />
+			<meta-data android:name="connection_timeout" android:value="3000" />
+			<meta-data android:name="server_url" android:value="null" />
+
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.TrainSensor" android:exported="true"
+			android:process=":trainsensor">
+			<meta-data android:name="entityId" android:value="train" />
+			<meta-data android:name="valuePaths" android:value="departure_time,arrival_time" />
+			<meta-data android:name="sample_interval" android:value="300000L" />
+			<meta-data android:name="from_station" android:value="null" />
+			<meta-data android:name="to_station" android:value="null" />
+			<meta-data android:name="departure_hours" android:value="12" />
+			<meta-data android:name="departure_minutes" android:value="0" />
+
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.RainSensor" android:exported="true"
+			android:process=":rainsensor">
+			<meta-data android:name="entityId" android:value="rain" />
+			<meta-data android:name="valuePaths" android:value="expected_mm,start_time,stop_time" />
+			<meta-data android:name="sample_interval" android:value="300000L" />
+			<meta-data android:name="latitude" android:value="null" />
+			<meta-data android:name="longitude" android:value="null" />
+			<meta-data android:name="window" android:value="7200000L" />
+			<meta-data android:name="threshold" android:value="0.0" />
+
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.TwitterSensor"
+			android:exported="true" android:process=":twittersensor">
+			<meta-data android:name="entityId" android:value="twitter" />
+			<meta-data android:name="valuePaths" android:value="mentions" />
+			<meta-data android:name="sample_interval" android:value="300000L" />
+			<meta-data android:name="access_token" android:value="null" />
+			<meta-data android:name="secret_access_token"
+				android:value="null" />
+
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.CalendarSensor"
+			android:exported="true" android:process=":calendarsensor">
+			<meta-data android:name="entityId" android:value="calendar" />
+			<meta-data android:name="valuePaths" android:value="start_time_next_event" />
+			<meta-data android:name="sample_interval" android:value="300000L" />
+			<meta-data android:name="private_calendar_urL"
+				android:value="null" />
+			<meta-data android:name="ignore_free_events" android:value="true" />
+			<meta-data android:name="ignore_allday_events"
+				android:value="true" />
+
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.LogCatSensor"
+			android:exported="true" android:process=":logcatsensor">
+			<meta-data android:name="entityId" android:value="logcat" />
+			<meta-data android:name="valuePaths" android:value="log" />
+			<meta-data android:name="logcat_parameters" android:value="*:I" />
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
+		<service android:name=".sensors.IntentSensor"
+			android:exported="true" android:process=":intentsensor">
+			<meta-data android:name="entityId" android:value="intent" />
+			<meta-data android:name="valuePaths" android:value="started" />
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+
 
 	</application>
 
@@ -180,5 +280,6 @@
 	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 	<uses-permission android:name="interdroid.vdb.permission.READ_DATABASE" />
 	<uses-permission android:name="interdroid.vdb.permission.WRITE_DATABASE" />
+	<uses-permission android:name="android.permission.READ_LOGS"></uses-permission>
 
 </manifest>

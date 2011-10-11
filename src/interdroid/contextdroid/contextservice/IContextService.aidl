@@ -4,6 +4,7 @@ import interdroid.contextdroid.ContextEntityReading;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.ContextEntity;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
+import interdroid.contextdroid.contextservice.ContextDroidServiceException;
 
 interface IContextService {
 
@@ -17,7 +18,7 @@ interface IContextService {
    * @param serviceLevelRequest requested service level settings to use
    *  while the expression is active
    */
-	void addContextExpression(in String expressionId, in Expression expression);
+	ContextDroidServiceException addContextExpression(in String expressionId, in Expression expression);
 		
   /**
    * Removes a previously added context expression and cancels any 
@@ -25,13 +26,13 @@ interface IContextService {
    * 
    * @param expressionId the identifier of the expression 
    */	
-	void removeContextExpression(String expressionId);
+	ContextDroidServiceException removeContextExpression(String expressionId);
 	
 	void notifyDataChanged(in String[] ids);
 	
 	
-	void registerContextTypedValue(in String id, in ContextTypedValue contextTypedValue);
-	void unregisterContextTypedValue(in String id);
+	ContextDroidServiceException registerContextTypedValue(in String id, in ContextTypedValue contextTypedValue);
+	ContextDroidServiceException unregisterContextTypedValue(in String id);
 	
   /**
    * Attempt to shut down ContextDroid. Doesn't work properly for now. 
