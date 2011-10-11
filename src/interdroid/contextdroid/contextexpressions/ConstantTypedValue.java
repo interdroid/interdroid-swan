@@ -87,4 +87,8 @@ public class ConstantTypedValue extends TypedValue {
 		// nothing to do here
 	}
 
+	public String toString() {
+		return values[0].value.toString();
+	}
+
 }

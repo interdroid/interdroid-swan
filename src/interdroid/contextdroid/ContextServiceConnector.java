@@ -79,15 +79,14 @@ public abstract class ContextServiceConnector {
 		try {
 			contextService.shutdown();
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// ignore
 		}
 	}
 
 	/** The service connection to the ContextService. */
 	private ServiceConnection serviceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			System.out.println("service connected");
+			System.out.println("service connected: " + name);
 			contextService = IContextService.Stub.asInterface(service);
 			isConnected = true;
 			if (connectionListener != null) {

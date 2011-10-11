@@ -3,9 +3,8 @@ package interdroid.contextdroid.contextservice;
 import interdroid.contextdroid.ContextDroidException;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 
-public class ContextDroidServiceException extends RemoteException implements
+public class ContextDroidServiceException extends Exception implements
 		Parcelable {
 
 	/**

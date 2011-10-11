@@ -1,5 +1,6 @@
 package interdroid.contextdroid.sensors;
 
+import interdroid.contextdroid.ConnectionListener;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-// TODO: Auto-generated Javadoc
 /**
  * Abstract class that implements basic functionality for sensors. Descendants
  * only have to implement requestReading() and onEntityServiceLevelChange(). The
@@ -65,7 +65,22 @@ public abstract class AbstractAsynchronousSensor extends Service {
 	@Override
 	public void onCreate() {
 		contextServiceConnector = new SensorContextServiceConnector(this);
-		contextServiceConnector.start();
+		contextServiceConnector.start(new ConnectionListener() {
+
+			@Override
+			public void onDisconnected() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onConnected() {
+				AbstractAsynchronousSensor.this.onConnected();
+				synchronized (contextServiceConnector) {
+					contextServiceConnector.notifyAll();
+				}
+			}
+		});
 
 		SCHEMA = getScheme();
 		VALUE_PATHS = getValuePaths();
@@ -76,7 +91,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		}
 
 		initDefaultConfiguration(DEFAULT_CONFIGURATION);
-		onConnected();
+
 	}
 
 	public abstract void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION);
@@ -107,8 +122,13 @@ public abstract class AbstractAsynchronousSensor extends Service {
 	protected final void notifyDataChangedForId(String id) {
 		String rootId = getRootIdFor(id);
 		synchronized (this) {
-			if (!notified.get(rootId)) {
-				notified.put(rootId, true);
+			try {
+				if (!notified.get(rootId)) {
+					notified.put(rootId, true);
+				}
+			} catch (NullPointerException e) {
+				// if it's no longer in the notified map
+				return;
 			}
 		}
 		contextServiceConnector.notifyDataChanged(new String[] { rootId });
@@ -177,6 +197,19 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		@Override
 		public void register(String id, String valuePath, Bundle configuration)
 				throws RemoteException {
+			// any calls to register should wait until we're connected back to
+			// the context service
+
+			while (!contextServiceConnector.isConnected()) {
+				synchronized (contextServiceConnector) {
+					try {
+						contextServiceConnector.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
 			synchronized (AbstractAsynchronousSensor.this) {
 				notified.put(getRootIdFor(id), false);
 				registeredConfigurations.put(id, configuration);

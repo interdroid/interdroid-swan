@@ -4,7 +4,6 @@ import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
-import interdroid.contextdroid.contextexpressions.TypedValue.HistoryReductionMode;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -31,7 +30,6 @@ public class TestActivity extends Activity {
 		try {
 			contextManager.destroy();
 		} catch (ContextDroidException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		super.onDestroy();
@@ -42,8 +40,8 @@ public class TestActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
 
-		final ContextTypedValue left = new ContextTypedValue("wifi/ssid",
-				HistoryReductionMode.NONE, 500);
+		final ContextTypedValue left = new ContextTypedValue(
+				"logcat/log?logcat_parameters=Calendar:I *:S");
 		final String valueName = "myFirstValue";
 		contextManager = new ContextManager(TestActivity.this);
 

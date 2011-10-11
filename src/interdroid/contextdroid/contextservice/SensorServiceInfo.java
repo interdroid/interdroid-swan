@@ -78,7 +78,9 @@ public class SensorServiceInfo {
 	public boolean acceptsConfiguration(Bundle b)
 			throws SensorConfigurationException {
 		if (b != null) {
-			for (String key : b.keySet()) {
+			Set<String> keys = new HashSet<String>();
+			keys.addAll(b.keySet());
+			for (String key : keys) {
 				if (configuration.containsKey(key)) {
 					// We cannot do this, since parsing the configuration in
 					// ContextTypedValue will always put a String value
@@ -110,6 +112,17 @@ public class SensorServiceInfo {
 					throw new SensorConfigurationException(
 							"Unsupported configuration key '" + key + "' for "
 									+ entityId);
+				}
+			}
+			for (String key : configuration.keySet()) {
+				if ("null".equals(configuration.get(key))) {
+					if (b.containsKey(key)) {
+						continue;
+					} else {
+						throw new SensorConfigurationException(
+								"Missing required configuration key '" + key
+										+ "' for " + entityId);
+					}
 				}
 			}
 		}

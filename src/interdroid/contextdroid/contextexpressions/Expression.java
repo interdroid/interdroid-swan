@@ -7,7 +7,6 @@ import interdroid.contextdroid.contextservice.SensorInitializationFailedExceptio
 import interdroid.contextdroid.contextservice.SensorManager;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Scanner;
 
 import android.os.Parcel;
@@ -293,10 +292,10 @@ public class Expression implements Parcelable, Serializable,
 		} else if ("!=".equals(comparator)) {
 			int result = ((Comparable) left).compareTo(((Comparable) right));
 			return (result != 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if ("regexp ".equals(comparator)) {
+		} else if ("regexp".equals(comparator)) {
 			return ((String) left).matches((String) right) ? ContextManager.TRUE
 					: ContextManager.FALSE;
-		} else if ("contains ".equals(comparator)) {
+		} else if ("contains".equals(comparator)) {
 			return ((String) left).contains((String) right) ? ContextManager.TRUE
 					: ContextManager.FALSE;
 		}
@@ -314,7 +313,6 @@ public class Expression implements Parcelable, Serializable,
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -369,11 +367,6 @@ public class Expression implements Parcelable, Serializable,
 		}
 	};
 
-	public Collection<String> entities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public void setNextEvaluationTime(long evaluateAt) {
 		deferUntil = evaluateAt;
 	}
@@ -393,6 +386,26 @@ public class Expression implements Parcelable, Serializable,
 		} else {
 			return 1;
 		}
+	}
+
+	public String toString() {
+		if (leafNode) {
+			return leftValue + " " + comparator + " " + rightValue;
+		} else {
+			return leftExpression + " " + operator + " " + rightExpression;
+		}
+	}
+
+	public TypedValue getTypedValue(boolean left) {
+		if (left) {
+			return leftValue;
+		} else {
+			return rightValue;
+		}
+	}
+
+	public String getComparator() {
+		return comparator;
 	}
 
 }
