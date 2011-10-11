@@ -1,6 +1,6 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
-import interdroid.vdb.content.avro.AvroContentProviderProxy;
+import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

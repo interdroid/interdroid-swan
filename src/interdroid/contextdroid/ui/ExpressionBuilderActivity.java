@@ -1,5 +1,6 @@
-package interdroid.contextdroid;
+package interdroid.contextdroid.ui;
 
+import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ConstantTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.TypedValue;

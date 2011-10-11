@@ -2,7 +2,7 @@ package interdroid.contextdroid.contextservice;
 
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextManager;
-import interdroid.contextdroid.LaunchService;
+import interdroid.contextdroid.ui.LaunchService;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 /**
  * The Class ContextService.

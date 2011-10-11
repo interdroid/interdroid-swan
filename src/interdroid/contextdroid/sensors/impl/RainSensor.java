@@ -1,5 +1,6 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.BufferedReader;
@@ -16,7 +17,7 @@ import android.os.Bundle;
 
 /**
  * Based on the original WeatherSensor written by Rick de Leeuw
- * 
+ *
  * @author rkemp
  */
 public class RainSensor extends AbstractAsynchronousSensor {

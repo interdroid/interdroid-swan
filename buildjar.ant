@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
-<project name="ContextDroid" default="jar">
-	<target name="jar">
-		<jar destfile="contextdroid.jar" includes="**/*.class" excludes="org/slf4j/**/*.class" basedir="bin"/>
+<project name="ContextDroid" default="jars">
+	<target name="jars" depends="api-jar,sensor-jar">
+	</target>
+	<target name="api-jar">
+		<jar destfile="contextdroid.jar" includes="**/contextdroid/*.class,**/contextexpressions/*.class,**/*Exception*.class"  basedir="bin"/>
+	</target>
+	<target name="sensor-jar">
+		<jar destfile="contextdroid-sensor.jar" includes="**/sensors/*.class"  excludes="**/sensors/impl/*.class" basedir="bin"/>
 	</target>
 </project>

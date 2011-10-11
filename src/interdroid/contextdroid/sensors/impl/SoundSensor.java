@@ -1,5 +1,6 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;

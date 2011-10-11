@@ -1,5 +1,6 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import android.os.Bundle;
 
 /**
  * Based on the original TwitterSensor written by Rick de Leeuw
- * 
+ *
  * @author rkemp
  */
 public class TwitterSensor extends AbstractAsynchronousSensor {

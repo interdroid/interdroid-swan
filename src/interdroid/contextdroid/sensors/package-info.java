@@ -1,5 +1,4 @@
 /**
- * This package contains classes for building sensors along with various
- * sensor implementations.
+ * This package contains classes for building sensors.
  */
 package interdroid.contextdroid.sensors;

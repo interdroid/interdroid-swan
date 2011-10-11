@@ -1,10 +1,12 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.sensors.AbstractAsynchronousSensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,90 +32,78 @@ import org.xml.sax.SAXException;
 import android.os.Bundle;
 import android.util.Log;
 
-public class CalendarSensor extends AbstractAsynchronousSensor {
+public class TrainSensor extends AbstractAsynchronousSensor {
 
-	public static final String TAG = "Calendar";
+	public static final String TAG = "Train";
 
-	public static final String START_TIME_NEXT_EVENT_FIELD = "start_time_next_event";
+	public static final String DEPARTURE_TIME_FIELD = "departure_time";
+	public static final String ARRIVAL_TIME_FIELD = "arrival_time";
 
 	public static final String SAMPLE_INTERVAL = "sample_interval";
-	public static final String IGNORE_FREE_EVENTS = "ignore_free_events";
-	public static final String IGNORE_ALLDAY_EVENTS = "ignore_allday_events";
-	/**
-	 * Get your private calendar URL from Google Calendar in the browser, click
-	 * on small arrow next to a given calendar, choose calendar settings, get
-	 * the address from private address (xml), without the ending '/basic'
-	 */
-	public static final String PRIVATE_CALENDAR_URL = "private_calendar_urL";
+	public static final String FROM_STATION = "from_station";
+	public static final String TO_STATION = "to_station";
+	public static final String DEPARTURE_HOURS = "departure_hours";
+	public static final String DEPARTURE_MINUTES = "departure_minutes";
 
 	public static final long DEFAULT_SAMPLE_INTERVAL = 5 * 60 * 1000;
-	public static final boolean DEFAULT_IGNORE_FREE_EVENTS = true;
-	public static final boolean DEFAULT_IGNORE_ALLDAY_EVENTS = true;
 
 	protected static final int HISTORY_SIZE = 10;
 	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
-	// Google Calendar specific variables
-
-	private static final String FREE_EVENT = "http://schemas.google.com/g/2005#event.transparent";
-	private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-	private static final String ISO_8601_DATE_FORMAT_DAY = "yyyy-MM-dd";
-
+	// NS-API specific variables
+	private static final String BASE_URL = "http://webservices.ns.nl/ns-api-treinplanner?";
+	private static final String BASE64_CREDENTIALS = "ci5kZS5sZWV1d0B2dS5ubDpxOWpLZS1BUmRsVk1kX295NGFhOEZDbGpMZXpIYWg0c0dRT003WFJlU09hRFlFLXNtS2VpWVE=";
+	private static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 	private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(
 			ISO_8601_DATE_FORMAT, new Locale("nl", "NL"));
-	private static final SimpleDateFormat FORMATTER_DAY = new SimpleDateFormat(
-			ISO_8601_DATE_FORMAT_DAY, new Locale("nl", "NL"));
 
-	private Map<String, CalendarPoller> activeThreads = new HashMap<String, CalendarPoller>();
+	private Map<String, TrainPoller> activeThreads = new HashMap<String, TrainPoller>();
 
-	private Date sampleCalendar(String privateCalendarUrl,
-			boolean ignoreAllDay, boolean ignoreFree) {
+	private Date sampleTrain(String baseURL, int hours, int minutes,
+			boolean departure) {
+		// construct the URL
+		Date date = new Date();// current date
+		date.setHours(hours);
+		date.setMinutes(minutes);
+		date.setSeconds(0);
+
 		try {
+			baseURL += URLEncoder.encode(FORMATTER.format(date), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		// String line = null;
+
+		try {
+
 			DefaultHttpClient httpClient = new DefaultHttpClient();
-			HttpGet httpGet = new HttpGet(privateCalendarUrl);
+			HttpGet httpGet = new HttpGet(baseURL);
+			httpGet.setHeader("Authorization", "Basic " + BASE64_CREDENTIALS);
 			HttpResponse httpResponse = httpClient.execute(httpGet);
 			HttpEntity httpEntity = httpResponse.getEntity();
+			// line = EntityUtils.toString(httpEntity);
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
 			Document doc = factory.newDocumentBuilder().parse(
 					httpEntity.getContent());
+			if ("ReisMogelijkheden".equals(doc.getDocumentElement()
+					.getNodeName())) {
+				// correct
+				NodeList travelOptions = doc
+						.getElementsByTagName("ReisMogelijkheid");
 
-			Element root = doc.getDocumentElement();
-			NodeList items = root.getElementsByTagName("entry");
-
-			for (int i = 0; i < items.getLength(); i++) {
-				NodeList properties = items.item(i).getChildNodes();
-				Date result = null;
-				for (int j = 0; j < properties.getLength(); j++) {
-					Element element = (Element) properties.item(j);
-					String name = element.getNodeName();
-					if ("gd:when".equals(name)) {
-						try {
-							result = FORMATTER.parse(element
-									.getAttribute("startTime"));
-						} catch (ParseException e) {
-							// cannot be parsed, must be an allday event
-							if (ignoreAllDay) {
-								continue;
-							} else {
-								// parse it as an allday event
-								result = FORMATTER_DAY.parse(element
-										.getAttribute("startTime"));
-							}
-						}
-					}
-					if ("gd:transparency".equals(name)) {
-						if (ignoreFree
-								&& element.getAttribute("value").equals(
-										FREE_EVENT)) {
-							continue;
-						}
-					}
-
+				if (departure) {
+					return FORMATTER.parse(((Element) travelOptions.item(0))
+							.getElementsByTagName("ActueleVertrekTijd").item(0)
+							.getFirstChild().getNodeValue());
+				} else {
+					return FORMATTER.parse(((Element) travelOptions.item(0))
+							.getElementsByTagName("ActueleAankomstTijd")
+							.item(0).getFirstChild().getNodeValue());
 				}
-				if (result != null) {
-					return result;
-				}
+			} else {
+				// error
 			}
 
 		} catch (UnsupportedEncodingException e) {
@@ -142,24 +132,20 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 	}
 
 	public void onDestroy() {
-		for (CalendarPoller calendarPoller : activeThreads.values()) {
-			calendarPoller.interrupt();
+		for (TrainPoller trainPoller : activeThreads.values()) {
+			trainPoller.interrupt();
 		}
 		super.onDestroy();
 	}
 
 	@Override
 	public String[] getValuePaths() {
-		return new String[] { START_TIME_NEXT_EVENT_FIELD };
+		return new String[] { DEPARTURE_TIME_FIELD, ARRIVAL_TIME_FIELD };
 	}
 
 	@Override
 	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
 		DEFAULT_CONFIGURATION.putLong(SAMPLE_INTERVAL, DEFAULT_SAMPLE_INTERVAL);
-		DEFAULT_CONFIGURATION.putBoolean(IGNORE_ALLDAY_EVENTS,
-				DEFAULT_IGNORE_ALLDAY_EVENTS);
-		DEFAULT_CONFIGURATION.putBoolean(IGNORE_FREE_EVENTS,
-				DEFAULT_IGNORE_FREE_EVENTS);
 	}
 
 	@Override
@@ -167,9 +153,13 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 		return "{'type': 'record', 'name': 'train', 'namespace': 'context.sensor',"
 				+ " 'fields': ["
 				+ "            {'name': '"
-				+ START_TIME_NEXT_EVENT_FIELD
-				+ "', 'type': 'date'}"
-				+ "           ]" + "}".replace('\'', '"');
+				+ DEPARTURE_TIME_FIELD
+				+ "', 'type': 'long'},"
+				+ "            {'name': '"
+				+ ARRIVAL_TIME_FIELD
+				+ "', 'type': 'long'}"
+				+ "           ]"
+				+ "}".replace('\'', '"');
 	}
 
 	@Override
@@ -178,9 +168,9 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 
 	@Override
 	protected void register(String id, String valuePath, Bundle configuration) {
-		CalendarPoller calendarPoller = new CalendarPoller(id, configuration);
-		activeThreads.put(id, calendarPoller);
-		calendarPoller.start();
+		TrainPoller trainPoller = new TrainPoller(id, valuePath, configuration);
+		activeThreads.put(id, trainPoller);
+		trainPoller.start();
 	}
 
 	@Override
@@ -195,35 +185,37 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 				timespan);
 	}
 
-	class CalendarPoller extends Thread {
+	class TrainPoller extends Thread {
 
 		private Bundle configuration;
 		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
 		private String id;
+		private String valuePath;
 
-		CalendarPoller(String id, Bundle configuration) {
+		TrainPoller(String id, String valuePath, Bundle configuration) {
 			this.configuration = configuration;
+			this.valuePath = valuePath;
 			this.id = id;
 		}
 
 		public void run() {
-			boolean ignoreFreeEvents = configuration.getBoolean(
-					IGNORE_FREE_EVENTS,
-					DEFAULT_CONFIGURATION.getBoolean(IGNORE_FREE_EVENTS));
-			boolean ignoreAlldayEvents = configuration.getBoolean(
-					IGNORE_ALLDAY_EVENTS,
-					DEFAULT_CONFIGURATION.getBoolean(IGNORE_ALLDAY_EVENTS));
-			String privateCalendarURL = configuration
-					.getString(PRIVATE_CALENDAR_URL)
-					+ "/full/?max-results=5&singleevents=true&futureevents=true&orderby=starttime&sortorder=a";
+			StringBuilder url = new StringBuilder(BASE_URL);
+			url.append("fromStation=");
+			url.append(configuration.getString(FROM_STATION));
+			url.append("&toStation=");
+			url.append(configuration.getString(TO_STATION));
+			url.append("&previousAdvices=0");
+			url.append("&departure=true&dateTime=");
+			boolean departure = DEPARTURE_TIME_FIELD.equals(valuePath);
 
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
 				if (values.size() >= HISTORY_SIZE) {
 					values.remove(0);
 				}
-				Date date = sampleCalendar(privateCalendarURL,
-						ignoreAlldayEvents, ignoreFreeEvents);
+				Date date = sampleTrain(url.toString(),
+						configuration.getInt(DEPARTURE_HOURS),
+						configuration.getInt(DEPARTURE_MINUTES), departure);
 				if (date != null) {
 					values.add(new TimestampedValue(date, start, start
 							+ EXPIRE_TIME));

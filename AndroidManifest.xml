@@ -22,7 +22,7 @@
 		<activity android:name=".test.TestActivity" android:label="CD-Test"
 			android:screenOrientation="portrait">
 			<intent-filter>
-				<!-- <action android:name="android.intent.action.MAIN"></action> <category 
+				<!-- <action android:name="android.intent.action.MAIN"></action> <category
 					android:name="android.intent.category.LAUNCHER" /> -->
 			</intent-filter>
 		</activity>
@@ -50,7 +50,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.BatterySensor"
+		<service android:name=".sensors.impl.BatterySensor"
 			android:exported="true" android:process=":batterysensor">
 			<meta-data android:name="entityId" android:value="battery" />
 			<meta-data android:name="valuePaths" android:value="level,voltage,temperature" />
@@ -58,10 +58,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.BatterySensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.BatterySensor$Provider"
 			android:authorities="interdroid.context.sensor.battery" />
 
-		<service android:name=".sensors.TimeSensor" android:exported="true"
+		<service android:name=".sensors.impl.TimeSensor" android:exported="true"
 			android:process=":timesensor">
 			<meta-data android:name="entityId" android:value="time" />
 			<meta-data android:name="valuePaths" android:value="current" />
@@ -70,7 +70,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.MovementSensor"
+		<service android:name=".sensors.impl.MovementSensor"
 			android:exported="true" android:process=":movementsensor">
 			<meta-data android:name="entityId" android:value="movement" />
 			<meta-data android:name="valuePaths" android:value="x,y,z,total" />
@@ -80,7 +80,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.SoundSensor" android:exported="true"
+		<service android:name=".sensors.impl.SoundSensor" android:exported="true"
 			android:process=":soundsensor">
 			<meta-data android:name="entityId" android:value="sound" />
 			<meta-data android:name="valuePaths" android:value="dB" />
@@ -95,7 +95,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.BluetoothSensor"
+		<service android:name=".sensors.impl.BluetoothSensor"
 			android:exported="true" android:process=":bluetoothsensor">
 			<meta-data android:name="entityId" android:value="bluetooth" />
 			<!-- TODO: Make these come from a string array resource instead. -->
@@ -106,10 +106,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.BluetoothSensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.BluetoothSensor$Provider"
 			android:authorities="interdroid.context.sensor.bluetooth" />
 
-		<service android:name=".sensors.SignalStrengthSensor"
+		<service android:name=".sensors.impl.SignalStrengthSensor"
 			android:exported="true" android:process=":signalsensor">
 			<meta-data android:name="entityId" android:value="signal" />
 			<meta-data android:name="valuePahts"
@@ -119,10 +119,10 @@
 			</intent-filter>
 		</service>
 		<provider
-			android:name="interdroid.contextdroid.sensors.SignalStrengthSensor$Provider"
+			android:name="interdroid.contextdroid.sensors.impl.SignalStrengthSensor$Provider"
 			android:authorities="interdroid.context.sensor.signal" />
 
-		<service android:name=".sensors.ScreenSensor"
+		<service android:name=".sensors.impl.ScreenSensor"
 			android:exported="true" android:process=":screensensor">
 			<meta-data android:name="entityId" android:value="screen" />
 			<meta-data android:name="valuePaths" android:value="is_screen_on" />
@@ -130,10 +130,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.ScreenSensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.ScreenSensor$Provider"
 			android:authorities="interdroid.context.sensor.screen" />
 
-		<service android:name=".sensors.LocationSensor"
+		<service android:name=".sensors.impl.LocationSensor"
 			android:exported="true" android:process=":locationsensor">
 			<meta-data android:name="entityId" android:value="location" />
 			<meta-data android:name="valuePaths" android:value="latitude,longitude,altitude,speed" />
@@ -144,10 +144,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.LocationSensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.LocationSensor$Provider"
 			android:authorities="interdroid.context.sensor.location" />
 
-		<service android:name=".sensors.CallSensor" android:exported="true"
+		<service android:name=".sensors.impl.CallSensor" android:exported="true"
 			android:process=":callsensor">
 			<meta-data android:name="entityId" android:value="call" />
 			<meta-data android:name="valuePaths" android:value="call_state,phone_number" />
@@ -155,10 +155,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.CallSensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.CallSensor$Provider"
 			android:authorities="interdroid.context.sensor.call" />
 
-		<service android:name=".sensors.WifiSensor" android:exported="true"
+		<service android:name=".sensors.impl.WifiSensor" android:exported="true"
 			android:process=":wifisensor">
 			<meta-data android:name="entityId" android:value="wifi" />
 			<meta-data android:name="valuePaths" android:value="ssid,bssid,level" />
@@ -168,10 +168,10 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.WifiSensor$Provider"
+		<provider android:name="interdroid.contextdroid.sensors.impl.WifiSensor$Provider"
 			android:authorities="interdroid.context.sensor.wifi" />
 
-		<service android:name=".sensors.ServerStatusSensor"
+		<service android:name=".sensors.impl.ServerStatusSensor"
 			android:exported="true" android:process=":serverstatussensor">
 			<meta-data android:name="entityId" android:value="serverstatus" />
 			<meta-data android:name="valuePaths" android:value="status" />
@@ -184,7 +184,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.TrainSensor" android:exported="true"
+		<service android:name=".sensors.impl.TrainSensor" android:exported="true"
 			android:process=":trainsensor">
 			<meta-data android:name="entityId" android:value="train" />
 			<meta-data android:name="valuePaths" android:value="departure_time,arrival_time" />
@@ -199,7 +199,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.RainSensor" android:exported="true"
+		<service android:name=".sensors.impl.RainSensor" android:exported="true"
 			android:process=":rainsensor">
 			<meta-data android:name="entityId" android:value="rain" />
 			<meta-data android:name="valuePaths" android:value="expected_mm,start_time,stop_time" />
@@ -214,7 +214,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.TwitterSensor"
+		<service android:name=".sensors.impl.TwitterSensor"
 			android:exported="true" android:process=":twittersensor">
 			<meta-data android:name="entityId" android:value="twitter" />
 			<meta-data android:name="valuePaths" android:value="mentions" />
@@ -228,7 +228,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.CalendarSensor"
+		<service android:name=".sensors.impl.CalendarSensor"
 			android:exported="true" android:process=":calendarsensor">
 			<meta-data android:name="entityId" android:value="calendar" />
 			<meta-data android:name="valuePaths" android:value="start_time_next_event" />
@@ -244,7 +244,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.LogCatSensor"
+		<service android:name=".sensors.impl.LogCatSensor"
 			android:exported="true" android:process=":logcatsensor">
 			<meta-data android:name="entityId" android:value="logcat" />
 			<meta-data android:name="valuePaths" android:value="log" />
@@ -254,7 +254,7 @@
 			</intent-filter>
 		</service>
 
-		<service android:name=".sensors.IntentSensor"
+		<service android:name=".sensors.impl.IntentSensor"
 			android:exported="true" android:process=":intentsensor">
 			<meta-data android:name="entityId" android:value="intent" />
 			<meta-data android:name="valuePaths" android:value="started" />

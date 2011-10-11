@@ -1,4 +1,4 @@
-package interdroid.contextdroid;
+package interdroid.contextdroid.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -15,8 +15,8 @@ public class LaunchService extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		Log.d("LaunchService", "thread: " + Thread.currentThread().getId() 
-//				+ " - " + Thread.currentThread().getName() 
+//		Log.d("LaunchService", "thread: " + Thread.currentThread().getId()
+//				+ " - " + Thread.currentThread().getName()
 //				+ " Process: " + android.os.Process.myPid());
 //		startService(new Intent(ContextManager.CONTEXT_SERVICE));
 		finish();
