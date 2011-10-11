@@ -1,77 +1,146 @@
 package interdroid.contextdroid.sensors;
 
+import interdroid.vdb.content.avro.AvroContentProviderProxy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
+/**
+ * Sensor for phone state.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class CallSensor extends AbstractAsynchronousSensor {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(CallSensor.class);
 
-	public static final String TAG = "CallSensor";
-
+	/**
+	 * The call state.
+	 */
 	public static final String STATE_FIELD = "call_state";
+
+	/**
+	 * The phone number associated with the state if any.
+	 */
 	public static final String PHONE_NUMBER_FIELD = "phone_number";
 
-	protected static final int HISTORY_SIZE = 10;
+	/**
+	 * The schema for this sensor.
+	 */
+	public static final String SCHEME = getSchema();
+
+	/**
+	 * The provider for this sensor.
+	 *
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class Provider extends AvroContentProviderProxy {
+
+		/**
+		 * Construct the provider for this sensor.
+		 */
+		public Provider() {
+			super(SCHEME);
+		}
+
+	}
+
+	/**
+	 * @return the schema for this sensor.
+	 */
+	private static String getSchema() {
+		String scheme =
+				"{'type': 'record', 'name': 'call', "
+						+ "'namespace': 'interdroid.context.sensor.call',"
+						+ "\n'fields': ["
+						+ SCHEMA_TIMESTAMP_FIELDS
+						+ "\n{'name': '"
+						+ STATE_FIELD
+						+ "', 'type': 'int'},"
+						+ "\n{'name': '"
+						+ PHONE_NUMBER_FIELD
+						+ "', 'type': 'string'}"
+						+ "\n]"
+						+ "}";
+		return scheme.replace('\'', '"');
+	}
+
+	/**
+	 * The default expiration time for these sorts of readings.
+	 */
 	public static final long EXPIRE_TIME = 0;
 
-	/** The telephony manager. */
+	/**
+	 * The telephony manager we use.
+	 * */
 	private TelephonyManager telephonyManager;
 
+	/**
+	 * The phone state listener which gets notified on call state changed.
+	 */
 	private PhoneStateListener phoneStateListener = new PhoneStateListener() {
 		@Override
-		public void onCallStateChanged(int state, String incomingNumber) {
+		public void onCallStateChanged(final int state,
+				final String incomingNumber) {
+			LOG.debug("Call State: {} {}", state, incomingNumber);
+
 			long now = System.currentTimeMillis();
 			long expire = now + EXPIRE_TIME;
-			trimValues(HISTORY_SIZE);
 
-			putValue(STATE_FIELD, now, expire, state);
+			ContentValues values = new ContentValues();
+			values.put(STATE_FIELD, state);
 
 			if (incomingNumber != null && incomingNumber.length() > 0) {
-				putValue(PHONE_NUMBER_FIELD, now, now, incomingNumber);
+				values.put(PHONE_NUMBER_FIELD, incomingNumber);
 			}
+
+			putValues(values, now, expire);
 		}
 	};
 
 	@Override
-	public String[] getValuePaths() {
+	public final String[] getValuePaths() {
 		return new String[] { STATE_FIELD, PHONE_NUMBER_FIELD };
 	}
 
 	@Override
-	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
+	public final void initDefaultConfiguration(Bundle defaults) {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'call', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ PHONE_NUMBER_FIELD
-				+ "', 'type': 'string'},"
-				+ "            {'name': '"
-				+ STATE_FIELD
-				+ "', 'type': 'integer'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
+	public final String getScheme() {
+		return SCHEME;
 	}
 
 	@Override
-	public void onConnected() {
+	public final void onConnected() {
 		System.out.println("call sensor connected");
 
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	protected final void register(final String id,
+			final String valuePath, final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
-			telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			telephonyManager =
+					(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_CALL_STATE);
 		}
 	}
 
 	@Override
-	protected void unregister(String id) {
+	protected final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_NONE);

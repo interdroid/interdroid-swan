@@ -1,36 +1,96 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
+import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
+/**
+ * A sensor for if the screen is on or off.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class ScreenSensor extends AbstractAsynchronousSensor {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ScreenSensor.class);
 
-	public static final String TAG = "ScreenSensor";
-
+	/**
+	 * Is screen on field.
+	 */
 	public static final String IS_SCREEN_ON_FIELD = "is_screen_on";
 
-	protected static final int HISTORY_SIZE = 10;
+	/**
+	 * Default expire time.
+	 */
 	public static final long EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes?
 
+	/**
+	 * The schema for this sensor.
+	 */
+	public static final String SCHEME = getSchema();
+
+	/**
+	 * The provider for this sensor.
+	 *
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class Provider extends AvroContentProviderProxy {
+
+		/**
+		 * Construct the provider for this sensor.
+		 */
+		public Provider() {
+			super(SCHEME);
+		}
+
+	}
+
+	/**
+	 * @return the schema for this sensor.
+	 */
+	private static String getSchema() {
+		String scheme =
+				"{'type': 'record', 'name': 'screen', "
+						+ "'namespace': 'interdroid.context.sensor.screen',"
+						+ "\n'fields': ["
+						+ SCHEMA_TIMESTAMP_FIELDS
+						+ "\n{'name': '"
+						+ IS_SCREEN_ON_FIELD
+						+ "', 'type': 'boolean'}"
+						+ "\n]"
+						+ "}";
+		return scheme.replace('\'', '"');
+	}
+
+	/**
+	 * The receiver of screen information.
+	 */
 	private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			long now = System.currentTimeMillis();
 			long expire = now + EXPIRE_TIME;
-			trimValues(HISTORY_SIZE);
+			ContentValues values = new ContentValues();
+
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				putValue(IS_SCREEN_ON_FIELD, now, expire, false);
+				values.put(IS_SCREEN_ON_FIELD, false);
 			} else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-				putValue(IS_SCREEN_ON_FIELD, now, expire, true);
+				values.put(IS_SCREEN_ON_FIELD, true);
 			}
+			putValues(values, now, expire);
 		}
 
 	};
@@ -51,22 +111,16 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 
 	@Override
 	public String getScheme() {
-		return "{'type': 'record', 'name': 'screen', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ IS_SCREEN_ON_FIELD
-				+ "', 'type': 'boolean'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
+		return SCHEME;
 	}
 
 	@Override
-	public void onConnected() {
-		System.out.println("screen sensor connected");
+	public final void onConnected() {
+		LOG.debug("screen sensor connected");
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	protected final void register(String id, String valuePath, Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
 			IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 			filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -75,7 +129,7 @@ public class ScreenSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	protected final void unregister(String id) {
 		if (registeredConfigurations.size() == 0) {
 			unregisterReceiver(screenReceiver);
 		}

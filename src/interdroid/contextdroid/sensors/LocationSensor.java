@@ -1,5 +1,11 @@
 package interdroid.contextdroid.sensors;
 
+import interdroid.vdb.content.avro.AvroContentProviderProxy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import android.content.ContentValues;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -7,116 +13,193 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 
+/**
+ * A sensor for location.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class LocationSensor extends AbstractAsynchronousSensor {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(LocationSensor.class);
 
-	public static final String TAG = "LocationSensor";
-
+	/**
+	 * Latitude field name.
+	 */
 	public static final String LATITUDE_FIELD = "latitude";
+	/**
+	 * Longitude field name.
+	 */
 	public static final String LONGITUDE_FIELD = "longitude";
+	/**
+	 * Altitude field name.
+	 */
 	public static final String ALTITUDE_FIELD = "altitude";
+	/**
+	 * Speed field name.
+	 */
 	public static final String SPEED_FIELD = "speed";
-	public static final String LOCATION_FIELD = "location";
 
+	/**
+	 * Minimum acceptable distance.
+	 */
 	public static final String MIN_DISTANCE = "min_distance";
+	/**
+	 * Minimum acceptable time.
+	 */
 	public static final String MIN_TIME = "min_time";
+	/**
+	 * The type of provider desired.
+	 */
 	public static final String PROVIDER = "provider";
 
-	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 1000;
+	/**
+	 * The schema for this sensor.
+	 */
+	public static final String SCHEME = getSchema();
 
-	private String currentProvider;
+	/**
+	 * The provider for this sensor.
+	 *
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class Provider extends AvroContentProviderProxy {
 
-	private LocationManager locationManager;
-
-	/** The location listener. */
-	private LocationListener locationListener = new LocationListener() {
-		public void onLocationChanged(Location location) {
-			long now = System.currentTimeMillis();
-			trimValues(HISTORY_SIZE);
-			long expire = now + 10000;
-			putValue(LATITUDE_FIELD, now, expire, location.getLatitude());
-			putValue(LONGITUDE_FIELD, now, expire, location.getLongitude());
-			putValue(ALTITUDE_FIELD, now, expire, location.getAltitude());
-			putValue(SPEED_FIELD, now, expire, location.getSpeed());
-			putValue(LOCATION_FIELD, now, expire, location);
-
-			System.out.println("new location: " + location);
+		/**
+		 * Construct the provider for this sensor.
+		 */
+		public Provider() {
+			super(SCHEME);
 		}
 
-		public void onProviderDisabled(String provider) {
-			Log.d(TAG, "provider disabled: " + provider
-					+ " the location sensor uses: " + currentProvider);
+	}
+
+	/**
+	 * @return the schema for this sensor.
+	 */
+	private static String getSchema() {
+		String scheme =
+				"{'type': 'record', 'name': 'location', "
+						+ "'namespace': 'interdroid.context.sensor.location',"
+						+ "\n'fields': ["
+						+ SCHEMA_TIMESTAMP_FIELDS
+						+ "\n{'name': '"
+						+ LATITUDE_FIELD
+						+ "', 'type': 'double'},"
+						+ "\n{'name': '"
+						+ LONGITUDE_FIELD
+						+ "', 'type': 'double'},"
+						+ "\n{'name': '"
+						+ ALTITUDE_FIELD
+						+ "', 'type': 'double'},"
+						+ "\n{'name': '"
+						+ SPEED_FIELD
+						+ "', 'type': 'float'}"
+						+ "\n]"
+						+ "}";
+		return scheme.replace('\'', '"');
+	}
+
+	/**
+	 * Default expiration time.
+	 */
+	public static final long EXPIRE_TIME = 1000;
+
+	/**
+	 * The current provider we are using.
+	 */
+	private String currentProvider;
+
+	/**
+	 * The location manager we use.
+	 */
+	private LocationManager locationManager;
+
+	/**
+	 * The location listener.
+	 */
+	private LocationListener locationListener = new LocationListener() {
+
+		public void onLocationChanged(final Location location) {
+			long now = System.currentTimeMillis();
+
+			long expire = now + EXPIRE_TIME;
+			ContentValues values = new ContentValues();
+			LOG.debug("Location: {} {}", location.getLatitude(),
+					location.getLongitude());
+			values.put(LATITUDE_FIELD, location.getLatitude());
+			values.put(LONGITUDE_FIELD, location.getLongitude());
+			values.put(ALTITUDE_FIELD, location.getAltitude());
+			values.put(SPEED_FIELD, location.getSpeed());
+
+			putValues(values, now, expire);
+		}
+
+		public void onProviderDisabled(final String provider) {
+			LOG.debug("provider disabled: {}. I am using: {}",
+					provider, currentProvider);
 			if (provider.equals(currentProvider)) {
-				Log.d(TAG,
-						"location sensor cannot provide data anymore (disabled)");
+				LOG.warn(
+						"location sensor disabled due to lack of provider");
 			}
 		}
 
-		public void onProviderEnabled(String provider) {
-			Log.d(TAG, "provider enabled: " + provider);
+		public void onProviderEnabled(final String provider) {
+			LOG.debug("provider enabled: {}", provider);
 		}
 
-		public void onStatusChanged(String provider, int status, Bundle extras) {
+		public void onStatusChanged(final String provider, final int status,
+				final Bundle extras) {
 			if (provider.equals(currentProvider)
 					&& status != LocationProvider.AVAILABLE) {
-				Log.d(TAG,
-						"location sensor cannot provide data anymore (not available)");
+				LOG.warn(
+						"location sensor disabled because sensor unavailable");
 			}
 
 		}
 	};
 
 	@Override
-	public String[] getValuePaths() {
+	public final String[] getValuePaths() {
 		return new String[] { LATITUDE_FIELD, LONGITUDE_FIELD, ALTITUDE_FIELD,
-				SPEED_FIELD, LOCATION_FIELD };
+				SPEED_FIELD};
 	}
 
 	@Override
-	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
-		DEFAULT_CONFIGURATION.putLong(MIN_TIME, 0);
-		DEFAULT_CONFIGURATION.putLong(MIN_DISTANCE, 0);
-		DEFAULT_CONFIGURATION.putString(PROVIDER,
+	public final void initDefaultConfiguration(final Bundle defaults) {
+		defaults.putLong(MIN_TIME, 0);
+		defaults.putLong(MIN_DISTANCE, 0);
+		defaults.putString(PROVIDER,
 				LocationManager.NETWORK_PROVIDER);
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'location', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ LONGITUDE_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ LATITUDE_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ ALTITUDE_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ SPEED_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ LOCATION_FIELD
-				+ "', 'type': 'location'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
+	public final String getScheme() {
+		return SCHEME;
 	}
 
 	@Override
-	public void onConnected() {
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+	public final void onConnected() {
+		locationManager =
+				(LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	@Override
-	protected void register(String id, String valuePath, Bundle configuration) {
+	protected final void register(final String id, final String valuePath,
+			final Bundle configuration) {
 		if (registeredConfigurations.size() > 0) {
 			updateListener();
 		}
 	}
 
+	/**
+	 * Updates the listener.
+	 */
 	private void updateListener() {
 		long minTime = Long.MAX_VALUE;
 		long minDistance = Long.MAX_VALUE;
@@ -159,7 +242,7 @@ public class LocationSensor extends AbstractAsynchronousSensor {
 	}
 
 	@Override
-	protected void unregister(String id) {
+	protected final void unregister(final String id) {
 		if (registeredConfigurations.size() == 0) {
 			locationManager.removeUpdates(locationListener);
 		} else {

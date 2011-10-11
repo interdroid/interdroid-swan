@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -30,18 +32,44 @@ import android.os.RemoteException;
  * rest can be overridden optionally.
  */
 public abstract class AbstractAsynchronousSensor extends Service {
-
+	/**
+	 * Access to logger.
+	 */
 	private static final Logger LOG =
 			LoggerFactory.getLogger(AbstractAsynchronousSensor.class);
 
+	/**
+	 * Fied which represents the timestamp for the reading.
+	 */
 	private static final String	TIMESTAMP_FIELD	= "_timestamp";
 
+	/**
+	 * Field which represents the expiration for the reading.
+	 */
 	private static final String	EXPIRE_FIELD	= "_expiration";
 
-	protected static final String	SCHEMA_TIMESTAMP_FIELDS	=
-			"\n{'name':'" + TIMESTAMP_FIELD + "', 'type':'long'}," +
-			"\n{'name':'" + EXPIRE_FIELD + "', 'type':'long'},"
-			.replace('\'', '"');
+	/**
+	 * The schema for the timestamp fields required on all rows.
+	 */
+	protected static final String	SCHEMA_TIMESTAMP_FIELDS;
+
+	// Initialize the timestamp fields.
+	static {
+		// Bug in compiler. Set is called before .replace?
+		String temp =
+			"\n{'name':'" + TIMESTAMP_FIELD + "', "
+					+ "'ui.label':'timestamp', "
+					+ "'ui.list':'true', "
+					+ "'ui.widget':'timestamp', "
+					+ "'type':'long'},"
+
+			+ "\n{'name':'" + EXPIRE_FIELD + "', "
+					+ "'ui.label':'expiration', "
+					+ "'ui.widget':'timestamp', "
+					+ "'type':'long'},";
+
+		SCHEMA_TIMESTAMP_FIELDS = temp.replace('\'', '"');
+	}
 
 	private Uri uri;
 
@@ -98,14 +126,15 @@ public abstract class AbstractAsynchronousSensor extends Service {
 		}
 
 		schema = Schema.parse(getScheme());
-		uri = EntityUriBuilder.nativeUri(schema.getNamespace(), schema.getName());
+		uri = EntityUriBuilder.nativeUri(schema.getNamespace(),
+				schema.getName());
 		LOG.debug("Sensor storing to URI: {}", uri);
 
 		initDefaultConfiguration(DEFAULT_CONFIGURATION);
 		onConnected();
 	}
 
-	public abstract void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION);
+	public abstract void initDefaultConfiguration(Bundle defaults);
 
 	public abstract String[] getValuePaths();
 
@@ -295,10 +324,16 @@ public abstract class AbstractAsynchronousSensor extends Service {
 	}
 
 	protected void putValues(final ContentValues values,
-			long now, long expire) {
+			final long now, final long expire) {
+		putValues(getContentResolver(), uri, values, now, expire);
+	}
+
+	protected static void putValues(final ContentResolver resolver,
+			final Uri uri, final ContentValues values,
+			final long now, final long expire) {
 		values.put(TIMESTAMP_FIELD, now);
 		values.put(EXPIRE_FIELD, expire);
-		getContentResolver().insert(uri, values);
+		resolver.insert(uri, values);
 	}
 
 	protected void trimValueByTime(long expire) {
@@ -313,14 +348,7 @@ public abstract class AbstractAsynchronousSensor extends Service {
 	protected List<TimestampedValue> getValues(String id, long now, long timespan) {
 		String fieldName = registeredValuePaths.get(id);
 		Type fieldType = getType(fieldName);
-		Cursor values = getContentResolver().query(uri,
-				new String[] {TIMESTAMP_FIELD, EXPIRE_FIELD,
-					fieldName},
-				TIMESTAMP_FIELD + " > ? AND " + EXPIRE_FIELD + " < ?",
-				new String[] {String.valueOf(now - timespan),
-					String.valueOf(now)},
-				// If timespan is zero we just pull the last one in time
-				TIMESTAMP_FIELD + (timespan > 0 ? " ASC" : " DESC"));
+		Cursor values = getValuesCursor(this, uri, new String[] {fieldName}, now, timespan);
 		List<TimestampedValue> ret = null;
 		if (values != null && values.moveToFirst()) {
 			ret = new ArrayList<TimestampedValue>(values.getCount());
@@ -365,6 +393,33 @@ public abstract class AbstractAsynchronousSensor extends Service {
 			ret = new ArrayList<TimestampedValue>(0);
 		}
 		return ret;
+	}
+
+	public static Cursor getValuesCursor(final Context context,
+			final Uri uri,
+			final String[] values, final long now,
+			final long timespan) {
+		LOG.debug("timespan: {} end: {}", timespan, now);
+		String[] projection = new String[values.length + 2];
+		System.arraycopy(values, 0, projection, 2, values.length);
+		projection[0] = TIMESTAMP_FIELD;
+		projection[1] = EXPIRE_FIELD;
+		LOG.debug("Projection: {}", projection);
+		if (timespan <= 0) {
+			return context.getContentResolver().query(uri,
+					projection,
+					EXPIRE_FIELD + " >= ?",
+					new String[] {String.valueOf(now)},
+					// If timespan is zero we just pull the last one in time
+					TIMESTAMP_FIELD + " DESC");
+		}
+		return context.getContentResolver().query(uri,
+				projection,
+				TIMESTAMP_FIELD + " >= ? AND " + EXPIRE_FIELD + " >= ?",
+				new String[] {String.valueOf(now - timespan),
+				String.valueOf(now)},
+				// If timespan is zero we just pull the last one in time
+				TIMESTAMP_FIELD + " ASC");
 	}
 
 	private Type getType(String fieldName) {

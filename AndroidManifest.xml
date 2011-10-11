@@ -8,9 +8,6 @@
 		<activity android:name=".LaunchService" android:label="Launch ContextDroid Service">
 		</activity>
 
-		<provider android:name="interdroid.contextdroid.sensors.BatterySensor$Provider"
-			android:authorities="interdroid.context.sensor.battery" />
-
 		<receiver android:name=".test.TestReceiver" android:label="CD-Test-receiver">
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.EXPRESSIONTRUE" />
@@ -53,6 +50,8 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.BatterySensor$Provider"
+			android:authorities="interdroid.context.sensor.battery" />
 
 		<service android:name=".sensors.TimeSensor" android:exported="true"
 			android:process=":timesensor">
@@ -91,21 +90,29 @@
 		<service android:name=".sensors.BluetoothSensor"
 			android:exported="true" android:process=":bluetoothsensor">
 			<meta-data android:name="entityId" android:value="bluetooth" />
-			<meta-data android:name="valuePaths" android:value="name,address,bundled" />
+			<!-- TODO: Make these come from a string array resource instead. -->
+			<meta-data android:name="valuePaths"
+				android:value="name,address,bond_state,class,major_class,has_service_audio,has_service_capture,has_service_info,has_service_limited_discovery,has_service_networking,has_service_object_transfer,has_service_positioning,has_service_render,has_service_telephony" />
 			<meta-data android:name="discovery_interval" android:value="300000L" />
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.BluetoothSensor$Provider"
+			android:authorities="interdroid.context.sensor.bluetooth" />
 
-		<service android:name=".sensors.GSMSignalStrengthSensor"
-			android:exported="true" android:process=":gsmsensor">
-			<meta-data android:name="entityId" android:value="gsm" />
-			<meta-data android:name="valuePaths" android:value="signal_strength" />
+		<service android:name=".sensors.SignalStrengthSensor"
+			android:exported="true" android:process=":signalsensor">
+			<meta-data android:name="entityId" android:value="signal" />
+			<meta-data android:name="valuePahts"
+				android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider
+			android:name="interdroid.contextdroid.sensors.SignalStrengthSensor$Provider"
+			android:authorities="interdroid.context.sensor.signal" />
 
 		<service android:name=".sensors.ScreenSensor"
 			android:exported="true" android:process=":screensensor">
@@ -115,12 +122,13 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.ScreenSensor$Provider"
+			android:authorities="interdroid.context.sensor.screen" />
 
 		<service android:name=".sensors.LocationSensor"
 			android:exported="true" android:process=":locationsensor">
 			<meta-data android:name="entityId" android:value="location" />
-			<meta-data android:name="valuePaths"
-				android:value="latitude,longitude,altitude,speed,location" />
+			<meta-data android:name="valuePaths" android:value="latitude,longitude,altitude,speed" />
 			<meta-data android:name="min_distance" android:value="0L" />
 			<meta-data android:name="min_time" android:value="0L" />
 			<meta-data android:name="provider" android:value="network" />
@@ -128,6 +136,8 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.LocationSensor$Provider"
+			android:authorities="interdroid.context.sensor.location" />
 
 		<service android:name=".sensors.CallSensor" android:exported="true"
 			android:process=":callsensor">
@@ -137,17 +147,21 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.CallSensor$Provider"
+			android:authorities="interdroid.context.sensor.call" />
 
 		<service android:name=".sensors.WifiSensor" android:exported="true"
 			android:process=":wifisensor">
 			<meta-data android:name="entityId" android:value="wifi" />
-			<meta-data android:name="valuePaths" android:value="ssid,bssid,level,scanresult" />
+			<meta-data android:name="valuePaths" android:value="ssid,bssid,level" />
 			<meta-data android:name="discovery_interval" android:value="300000L" />
 
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
+		<provider android:name="interdroid.contextdroid.sensors.WifiSensor$Provider"
+			android:authorities="interdroid.context.sensor.wifi" />
 
 
 	</application>
