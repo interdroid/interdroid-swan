@@ -389,10 +389,18 @@ public class Expression implements Parcelable, Serializable,
 	}
 
 	public String toString() {
+		if (id != null) {
+			return id;
+		}
 		if (leafNode) {
 			return leftValue + " " + comparator + " " + rightValue;
 		} else {
-			return leftExpression + " " + operator + " " + rightExpression;
+			if (rightExpression == null) {
+				return operator + "(" + leftExpression + ")";
+			} else {
+				return "(" + leftExpression + " " + operator + " "
+						+ rightExpression + ")";
+			}
 		}
 	}
 
