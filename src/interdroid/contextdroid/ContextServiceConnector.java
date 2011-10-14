@@ -1,5 +1,8 @@
 package interdroid.contextdroid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import interdroid.contextdroid.contextservice.IContextService;
 import android.app.Service;
 import android.content.ComponentName;
@@ -13,9 +16,12 @@ import android.os.RemoteException;
  * The Class ContextServiceConnector.
  */
 public abstract class ContextServiceConnector {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ContextServiceConnector.class);
 
-	/** Logging tag */
-	protected static final String TAG = "ContextServiceConnector";
 
 	/** The ContextService intent action. */
 	public static final String CONTEXT_SERVICE = "interdroid.contextdroid.intent.CONTEXTSERVICE";
@@ -86,7 +92,7 @@ public abstract class ContextServiceConnector {
 	/** The service connection to the ContextService. */
 	private ServiceConnection serviceConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			System.out.println("service connected: " + name);
+			LOG.debug("service connected: {}", name);
 			contextService = IContextService.Stub.asInterface(service);
 			isConnected = true;
 			if (connectionListener != null) {
@@ -95,7 +101,7 @@ public abstract class ContextServiceConnector {
 		}
 
 		public void onServiceDisconnected(final ComponentName name) {
-			System.out.println("service disconnected");
+			LOG.debug("service disconnected");
 			contextService = null;
 			isConnected = false;
 			if (connectionListener != null) {

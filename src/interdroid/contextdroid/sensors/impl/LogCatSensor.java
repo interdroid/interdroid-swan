@@ -11,11 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.os.Bundle;
 
 public class LogCatSensor extends AbstractMemorySensor {
-
-	public static final String TAG = "LogCat";
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(LogCatSensor.class);
 
 	public static final String LOG_FIELD = "log";
 
@@ -57,7 +63,7 @@ public class LogCatSensor extends AbstractMemorySensor {
 	@Override
 	public final void register(String id, String valuePath,
 			Bundle configuration) {
-		System.out.println("Logcat got registration for: " + id);
+		LOG.debug("Logcat got registration for: {}", id);
 		LogcatPoller logcatPoller = new LogcatPoller(id, configuration);
 		activeThreads.put(id, logcatPoller);
 		logcatPoller.start();

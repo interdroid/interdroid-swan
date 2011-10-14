@@ -125,8 +125,7 @@ public class CallSensor extends AbstractVdbSensor {
 
 	@Override
 	public final void onConnected() {
-		System.out.println("call sensor connected");
-
+		LOG.debug("call sensor connected");
 	}
 
 	@Override

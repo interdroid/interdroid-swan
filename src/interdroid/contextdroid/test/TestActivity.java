@@ -1,5 +1,8 @@
 package interdroid.contextdroid.test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.R;
@@ -9,6 +12,12 @@ import android.os.Bundle;
 import android.view.View;
 
 public class TestActivity extends Activity {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(TestActivity.class);
+
 
 	private ContextManager contextManager;
 
@@ -20,7 +29,7 @@ public class TestActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		System.out.println("unbind context service from app: " + getClass());
+		LOG.debug("unbind context service from app: " + getClass());
 		contextManager.stop();
 		super.onPause();
 	}
@@ -50,7 +59,7 @@ public class TestActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						System.out.println("registering expression");
+						LOG.debug("registering expression");
 						try {
 							contextManager.registerContextTypedValue(valueName,
 									left, null);
@@ -65,7 +74,7 @@ public class TestActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						System.out.println("unregistering expression");
+						LOG.debug("unregistering expression");
 						try {
 							contextManager
 									.unregisterContextTypedValue(valueName);

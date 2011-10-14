@@ -15,12 +15,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.os.Bundle;
 
 public class ServerStatusSensor extends AbstractMemorySensor {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ServerStatusSensor.class);
 
-	public static final String TAG = "ServerStatus";
 
 	public static final String STATUS_FIELD = "status";
 
@@ -75,7 +81,7 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 
 	@Override
 	public void onConnected() {
-		System.out.println("website sensor connected!");
+		LOG.debug("website sensor connected!");
 	}
 
 	@Override

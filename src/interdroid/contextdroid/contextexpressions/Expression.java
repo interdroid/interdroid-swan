@@ -9,14 +9,22 @@ import interdroid.contextdroid.contextservice.SensorManager;
 import java.io.Serializable;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Expression implements Parcelable, Serializable,
 		Comparable<Expression> {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(Expression.class);
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1056115630721395151L;
 
@@ -123,7 +131,7 @@ public class Expression implements Parcelable, Serializable,
 	// left = TRUE, comparator = &&
 	void evaluate(long now) throws ContextDroidException {
 		if (now < deferUntil) {
-			System.out.println("not evaluating");
+			LOG.debug("not evaluating");
 			return;
 		}
 		if (leafNode) {
@@ -333,7 +341,7 @@ public class Expression implements Parcelable, Serializable,
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */

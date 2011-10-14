@@ -233,8 +233,7 @@ public class ContextTypedValue extends TypedValue implements
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		}
-		System.out.println("unbind sensor service from context typed value: "
-				+ this);
+		LOG.debug("unbind sensor service from context typed value: {}", this);
 		sensorManager.unbindSensor(serviceConnection);
 		sensor = null;
 	}

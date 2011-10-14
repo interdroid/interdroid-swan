@@ -238,7 +238,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 					if (mBluetoothAdapter != null
 							&& !mBluetoothAdapter.isDiscovering()) {
 						mBluetoothAdapter.startDiscovery();
-						System.out.println("bt started discovery");
+						LOG.debug("bt started discovery");
 					}
 				}
 				try {
