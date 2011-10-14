@@ -13,16 +13,21 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ExpressionBuilderActivity extends Activity {
 
@@ -38,7 +43,7 @@ public class ExpressionBuilderActivity extends Activity {
 	private static final CharSequence[] COMPARATORS = new CharSequence[] { "<",
 			"<=", "==", "!=", ">", ">=", "contains", "regexp" };
 	private static final CharSequence[] OPERATORS = new CharSequence[] { "&&",
-			"||", "!" };
+			"||" };
 
 	private static final int TYPEDVALUE_OPTION_CONSTANT = 0;
 	private static final int TYPEDVALUE_OPTION_CONTEXT = 1;
@@ -46,6 +51,8 @@ public class ExpressionBuilderActivity extends Activity {
 
 	private static final CharSequence[] TYPEDVALUE_OPTIONS = new CharSequence[] {
 			"constant", "context", "combined" };
+
+	private boolean not = false;
 
 	private TypedValue leftValue;
 	private TypedValue rightValue;
@@ -66,6 +73,7 @@ public class ExpressionBuilderActivity extends Activity {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				if (convertView == null) {
 					convertView = new TextView(ExpressionBuilderActivity.this);
+					((TextView) convertView).setTextSize(20.0f);
 				}
 				((TextView) convertView).setText(expressions.get(position)
 						.toString());
@@ -87,6 +95,16 @@ public class ExpressionBuilderActivity extends Activity {
 				return expressions.size();
 			}
 		};
+
+		((CheckBox) findViewById(R.id.typedvalue_not))
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						not = isChecked;
+					}
+				});
 
 		findViewById(R.id.typedvalue_left).setOnClickListener(
 				new View.OnClickListener() {
@@ -120,34 +138,29 @@ public class ExpressionBuilderActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						if (leftValue == null) {
-							Toast.makeText(
-									getApplicationContext(),
-									"Unable to create expression, please provide a value for leftValue member",
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
-						if (rightValue == null) {
-							Toast.makeText(
-									getApplicationContext(),
-									"Unable to create expression, please provide a value for rightValue member",
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
 						String comparator = ((Button) findViewById(R.id.typedvalue_comparator))
 								.getText().toString();
-						if (" ? ".equals(comparator)) {
-							Toast.makeText(
-									getApplicationContext(),
-									"Unable to create expression, please provide a comparator",
-									Toast.LENGTH_SHORT).show();
-							return;
+						Expression expression = new Expression(leftValue,
+								comparator, rightValue);
+						if (not) {
+							expressions.add(new Expression("!", expression));
+						} else {
+							expressions.add(expression);
 						}
-						expressions.add(new Expression(leftValue, comparator,
-								rightValue));
+						// reset the buttons
+						((Button) findViewById(R.id.typedvalue_right))
+								.setText(" . ");
+						((Button) findViewById(R.id.typedvalue_left))
+								.setText(" . ");
+						((Button) findViewById(R.id.typedvalue_comparator))
+								.setText(" ? ");
+						((CheckBox) findViewById(R.id.typedvalue_not))
+								.setChecked(false);
+						// reset all intermediate values
+						leftValue = rightValue = null;
+						checkTypedValueOkEnabled();
+						checkExpressionEnabled();
 						expressionlistAdapter.notifyDataSetChanged();
-						System.out.println("#expressions now: "
-								+ expressions.size());
 					}
 				});
 		((ListView) findViewById(R.id.expression_list))
@@ -159,16 +172,25 @@ public class ExpressionBuilderActivity extends Activity {
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
 						Expression expression = expressions.get(position);
-						leftValue = expression.getTypedValue(true);
-						((Button) findViewById(R.id.typedvalue_left))
-								.setText(leftValue.toString());
-						rightValue = expression.getTypedValue(false);
-						((Button) findViewById(R.id.typedvalue_right))
-								.setText(rightValue.toString());
-						((Button) findViewById(R.id.typedvalue_comparator))
-								.setText(expression.getComparator());
+					}
+				});
+		registerForContextMenu(findViewById(R.id.expression_list));
 
-						expressionlistAdapter.notifyDataSetChanged();
+		findViewById(R.id.expression_left).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						showDialog(DIALOG_CHOOSE_EXPRESSION_LEFT);
+					}
+				});
+
+		findViewById(R.id.expression_right).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						showDialog(DIALOG_CHOOSE_EXPRESSION_RIGHT);
 					}
 				});
 
@@ -180,8 +202,46 @@ public class ExpressionBuilderActivity extends Activity {
 						showDialog(DIALOG_CHOOSE_OPERATOR);
 					}
 				});
+		findViewById(R.id.expression_ok).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						String operator = ((Button) findViewById(R.id.expression_operator))
+								.getText().toString();
+						expressions.add(new Expression(leftExpression,
+								operator, rightExpression));
+						checkExpressionEnabled();
+						expressionlistAdapter.notifyDataSetChanged();
+					}
+				});
 
 	}
+
+	private void checkTypedValueOkEnabled() {
+		findViewById(R.id.typedvalue_ok)
+				.setEnabled(
+						(leftValue != null && rightValue != null && !" . "
+								.equals(((Button) findViewById(R.id.typedvalue_comparator))
+										.getText().toString())));
+	}
+
+	private void checkExpressionEnabled() {
+		findViewById(R.id.expression_left).setEnabled(expressions.size() >= 2);
+		findViewById(R.id.expression_right).setEnabled(expressions.size() >= 2);
+		findViewById(R.id.expression_operator).setEnabled(
+				expressions.size() >= 2);
+	}
+
+	private void checkExpressionOkEnabled() {
+		findViewById(R.id.expression_ok)
+				.setEnabled(
+						(leftExpression != null && rightExpression != null && !" . "
+								.equals(((Button) findViewById(R.id.expression_operator))
+										.getText().toString())));
+	}
+
+	/*********************** DIALOG STUFF ***********************/
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -230,7 +290,7 @@ public class ExpressionBuilderActivity extends Activity {
 										int which) {
 									((Button) findViewById(R.id.typedvalue_comparator))
 											.setText(COMPARATORS[which]);
-
+									checkTypedValueOkEnabled();
 								}
 							}).create();
 		case DIALOG_ENTER_CONSTANT_LEFT:
@@ -263,6 +323,7 @@ public class ExpressionBuilderActivity extends Activity {
 										((Button) findViewById(R.id.typedvalue_left))
 												.setText(constant);
 									}
+									checkTypedValueOkEnabled();
 								}
 							}).create();
 		case DIALOG_CHOOSE_OPERATOR:
@@ -273,6 +334,7 @@ public class ExpressionBuilderActivity extends Activity {
 						public void onClick(DialogInterface dialog, int which) {
 							((Button) findViewById(R.id.expression_operator))
 									.setText(OPERATORS[which]);
+							checkExpressionOkEnabled();
 
 						}
 					}).create();
@@ -280,14 +342,10 @@ public class ExpressionBuilderActivity extends Activity {
 			isLeft = true;
 		case DIALOG_CHOOSE_EXPRESSION_RIGHT:
 			final boolean isRightExpression = !isLeft;
-			final String[] expressionNames = new String[expressions.size()];
-			for (int i = 0; i < expressions.size(); i++) {
-				expressionNames[i] = expressions.get(i).toString();
-			}
 
 			return new AlertDialog.Builder(this)
-					.setTitle("Choose Typed Value")
-					.setItems(expressionNames,
+					.setTitle("Select Expression")
+					.setItems(new CharSequence[] { "test" },
 							new DialogInterface.OnClickListener() {
 
 								@Override
@@ -296,10 +354,16 @@ public class ExpressionBuilderActivity extends Activity {
 									if (isRightExpression) {
 										rightExpression = expressions
 												.get(which);
+										((Button) findViewById(R.id.expression_right))
+												.setText(rightExpression
+														.toString());
 									} else {
 										leftExpression = expressions.get(which);
+										((Button) findViewById(R.id.expression_left))
+												.setText(leftExpression
+														.toString());
 									}
-
+									checkExpressionOkEnabled();
 								}
 							}).create();
 
@@ -308,4 +372,44 @@ public class ExpressionBuilderActivity extends Activity {
 		}
 		return super.onCreateDialog(id);
 	}
+
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		switch (id) {
+		case DIALOG_CHOOSE_EXPRESSION_RIGHT:
+		case DIALOG_CHOOSE_EXPRESSION_LEFT:
+			// Create new adapter
+			ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
+					this, android.R.layout.select_dialog_singlechoice);
+			for (int i = 0; i < expressions.size(); i++) {
+				adapter.add(expressions.get(i).toString());
+			}
+
+			// Use the new adapter
+			AlertDialog alert = (AlertDialog) dialog;
+			alert.getListView().setAdapter(adapter);
+
+			break;
+
+		default:
+			break;
+		}
+
+		// TODO Auto-generated method stub
+		super.onPrepareDialog(id, dialog);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		menu.add("use");
+		menu.add("delete");
+		menu.add("rename");
+		menu.add("edit");
+		// TODO Auto-generated method stub
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+	
+	
+
 }
