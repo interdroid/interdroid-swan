@@ -85,7 +85,14 @@
 
 	<!-- gsm sensor -->
 	<string-array name="gsm_valuepaths">
-		<item>signal_strength</item>
+		<item>is_gsm</item>
+		<item>gsm_signal_strength</item>
+		<item>gsm_bit_error_rate</item>
+		<item>cdma_dbm</item>
+		<item>cdma_ecio</item>
+		<item>evdo_dbm</item>
+		<item>evdo_ecio</item>
+		<item>evdo_snr</item>
 	</string-array>
 
 	<!-- intent sensor -->
