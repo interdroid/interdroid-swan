@@ -53,57 +53,6 @@ public class BluetoothSensor extends AbstractVdbSensor {
 	private static final String	DEVICE_MAJOR_CLASS	= "major_class";
 
 	/**
-	 * Does the device have audio service.
-	 */
-	private static final String	HAS_SERVICE_AUDIO	= "has_service_audio";
-
-	/**
-	 * Does the device support capture.
-	 */
-	private static final String	HAS_SERVICE_CAPTURE	= "has_service_capture";
-
-	/**
-	 * Does the device support info.
-	 */
-	private static final String	HAS_SERVICE_INFORMATION	= "has_service_info";
-
-	/**
-	 * Does the device support limited discovery.
-	 */
-	private static final String	HAS_SERVICE_LIMITED_DISCOVERY =
-			"has_service_limited_discovery";
-
-	/**
-	 * Does the device support networking.
-	 */
-	private static final String	HAS_SERVICE_NETWORING	=
-			"has_service_networking";
-
-	/**
-	 * Does the device support object transfer.
-	 */
-	private static final String	HAS_SERVICE_OBJECT_TRANSFER	=
-			"has_service_object_transfer";
-
-	/**
-	 * Does the device support positioning.
-	 */
-	private static final String	HAS_SERVICE_POSITIONING	=
-			"has_service_positioning";
-
-	/**
-	 * Does the device support rendering.
-	 */
-	private static final String	HAS_SERVICE_RENDER	=
-			"has_service_render";
-
-	/**
-	 * Does the device support telephony.
-	 */
-	private static final String	HAS_SERVICE_TELEPHONY	=
-			"has_service_telephony";
-
-	/**
 	 * The discovery interval.
 	 */
 	public static final String DISCOVERY_INTERVAL = "discovery_interval";
@@ -162,33 +111,6 @@ public class BluetoothSensor extends AbstractVdbSensor {
 						+ "\n{'name': '"
 						+ DEVICE_MAJOR_CLASS
 						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_AUDIO
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_CAPTURE
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_INFORMATION
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_LIMITED_DISCOVERY
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_NETWORING
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_OBJECT_TRANSFER
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_POSITIONING
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_RENDER
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ HAS_SERVICE_TELEPHONY
-						+ "', 'type': 'boolean'}"
 						+ "\n]"
 						+ "}";
 		return scheme.replace('\'', '"');
@@ -256,12 +178,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 	@Override
 	public final String[] getValuePaths() {
 		return new String[] { DEVICE_ADDRESS_FIELD, DEVICE_NAME_FIELD,
-				DEVICE_BOND_STATE, DEVICE_CLASS, DEVICE_MAJOR_CLASS,
-				HAS_SERVICE_AUDIO, HAS_SERVICE_CAPTURE,
-				HAS_SERVICE_INFORMATION, HAS_SERVICE_LIMITED_DISCOVERY,
-				HAS_SERVICE_NETWORING, HAS_SERVICE_OBJECT_TRANSFER,
-				HAS_SERVICE_POSITIONING, HAS_SERVICE_RENDER,
-				HAS_SERVICE_TELEPHONY};
+				DEVICE_BOND_STATE, DEVICE_CLASS, DEVICE_MAJOR_CLASS};
 	}
 
 	@Override
