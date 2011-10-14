@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/sound_valuepaths" android:entryValues="@array/sound_valuepaths" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Sample Interval" android:key="sample_interval" />
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" samples" android:max="3600" android:defaultValue="300"
+			android:title="Sample Length" android:key="sample_length" />
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" Hz" android:max="44000" android:defaultValue="8000"
+			android:title="Sample Rate" android:key="sample_rate" />
+		<ListPreference android:title="Audio Source"
+			android:summary="Select audio source" android:key="audio_source"
+			android:entries="@array/sound_audio_source" android:entryValues="@array/sound_audio_source_values" />
+		<ListPreference android:title="Channel Config"
+			android:summary="Select	channel configuration" android:key="channel_config"
+			android:entries="@array/sound_channel_config" android:entryValues="@array/sound_channel_config_values" />
+		<ListPreference android:title="Audio Format"
+			android:summary="Select	audio format" android:key="audio_format"
+			android:entries="@array/sound_audio_format" android:entryValues="@array/sound_audio_format_values" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+

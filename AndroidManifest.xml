@@ -43,6 +43,63 @@
 		<!-- <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
 			/> -->
 
+
+		<activity android:name=".sensors.BatteryConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.BluetoothConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.CalendarConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.CallConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.GSMSignalStrengthConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.IntentConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.LocationConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.LogCatConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.MovementConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.RainConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.ScreenConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.ServerStatusConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.SoundConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.TrainConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.TimeConfigurationActivity">
+		</activity>
+
+		<activity android:name=".sensors.TwitterConfigurationActivity">
+		</activity>
+		
+		<activity android:name=".sensors.WifiConfigurationActivity">
+		</activity>
+
+
+
+
+
+
 		<service android:name=".contextservice.ContextService"
 			android:exported="true" android:process=":contextservice">
 			<intent-filter>
@@ -191,8 +248,7 @@
 			<meta-data android:name="sample_interval" android:value="300000L" />
 			<meta-data android:name="from_station" android:value="null" />
 			<meta-data android:name="to_station" android:value="null" />
-			<meta-data android:name="departure_hours" android:value="12" />
-			<meta-data android:name="departure_minutes" android:value="0" />
+			<meta-data android:name="departure_time" android:value="null" />
 
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />

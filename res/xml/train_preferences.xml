@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/train_valuepaths" android:entryValues="@array/train_valuepaths" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Sample Interval" android:key="sample_interval"
+			android:persistent="false" />
+		<EditTextPreference android:key="from_station"
+			android:title="Departure Station" android:summary="Select a Railway Station"
+			android:dialogTitle="Enter Departure Railway Station" />
+		<EditTextPreference android:key="to_station"
+			android:title="Destination Station" android:summary="Select a Railway Station"
+			android:dialogTitle="Enter Destination Railway Station" />
+		<interdroid.contextdroid.util.TimePreference
+			android:persistent="false" android:key="departure_time"
+			android:title="Departure Time" android:summary="Departure time of the train"
+			android:dialogTitle="Pick Departure Time" />
+	</PreferenceCategory>
+</PreferenceScreen>
+

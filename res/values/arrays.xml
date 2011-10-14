@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- battery sensor -->
+	<string-array name="battery_valuepaths">
+		<item>level</item>
+		<item>voltage</item>
+		<item>temperature</item>
+	</string-array>
+
+	<!-- train sensor -->
+	<string-array name="train_valuepaths">
+		<item>departure_time</item>
+		<item>arrival_time</item>
+	</string-array>
+
+	<!-- movement sensor -->
+	<string-array name="movement_valuepaths">
+		<item>x</item>
+		<item>y</item>
+		<item>z</item>
+		<item>total</item>
+	</string-array>
+
+	<!-- sound sensor -->
+	<string-array name="sound_valuepaths">
+		<item>dB</item>
+	</string-array>
+	<string-array name="sound_audio_source">
+		<item>Default</item>
+		<item>Microphone</item>
+		<item>Voice Uplink</item>
+		<item>Voice Downlink</item>
+		<item>Voice Call</item>
+		<item>Camcorder</item>
+		<item>Voice Recognition</item>
+	</string-array>
+	<string-array name="sound_audio_source_values">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>4</item>
+		<item>5</item>
+		<item>6</item>
+	</string-array>
+	<string-array name="sound_channel_config">
+		<item>Default</item>
+		<item>Mono</item>
+		<item>Stereo</item>
+	</string-array>
+	<string-array name="sound_channel_config_values">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+	</string-array>
+	<string-array name="sound_audio_format">
+		<item>Default</item>
+		<item>PCM 8-bit</item>
+		<item>PCM 16-bit</item>
+	</string-array>
+	<string-array name="sound_audio_format_values">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+	</string-array>
+
+
+	<!-- bluetooth sensor -->
+	<string-array name="bluetooth_valuepaths">
+		<item>name</item>
+		<item>address</item>
+		<item>bundled</item>
+	</string-array>
+
+	<!-- calendar sensor -->
+	<string-array name="calendar_valuepaths">
+		<item>start_time_next_event</item>
+	</string-array>
+
+	<!-- call sensor -->
+	<string-array name="call_valuepaths">
+		<item>call_state</item>
+		<item>phone_number</item>
+	</string-array>
+
+	<!-- gsm sensor -->
+	<string-array name="gsm_valuepaths">
+		<item>signal_strength</item>
+	</string-array>
+
+	<!-- intent sensor -->
+	<string-array name="intent_valuepaths">
+		<item>started</item>
+	</string-array>
+
+	<!-- location sensor -->
+	<string-array name="location_valuepaths">
+		<item>latitude</item>
+		<item>longitude</item>
+		<item>altitude</item>
+		<item>speed</item>
+		<item>location</item>
+	</string-array>
+	<string-array name="location_provider">
+		<item>gps</item>
+		<item>network</item>
+		<item>passive</item>
+	</string-array>
+	<!-- logcat sensor -->
+	<string-array name="logcat_valuepaths">
+		<item>log</item>
+	</string-array>
+
+	<!-- rain sensor -->
+	<string-array name="rain_valuepaths">
+		<item>start_time</item>
+		<item>stop_time</item>
+		<item>expected_mm</item>
+	</string-array>
+
+	<!-- screen sensor -->
+	<string-array name="screen_valuepaths">
+		<item>is_screen_on</item>
+	</string-array>
+
+	<!-- serverstatus sensor -->
+	<string-array name="serverstatus_valuepaths">
+		<item>status</item>
+	</string-array>
+
+	<!-- twitter sensor -->
+	<string-array name="twitter_valuepaths">
+		<item>mentions</item>
+	</string-array>
+
+	<!-- wifi sensor -->
+	<string-array name="wifi_valuepaths">
+		<item>ssid</item>
+		<item>bssid</item>
+		<item>level</item>
+		<item>scanresult</item>
+	</string-array>
+
+</resources>

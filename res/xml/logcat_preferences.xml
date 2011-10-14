@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/logcat_valuepaths" android:entryValues="@array/logcat_valuepaths" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Configuration">
+		<EditTextPreference android:key="logcat_parameters"
+			android:title="Logcat Parameters" android:summary="Set the logcat parameters"
+			android:dialogTitle="Enter Logcat Parameters (e.g. *:I)" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+

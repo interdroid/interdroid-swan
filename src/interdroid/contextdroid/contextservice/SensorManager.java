@@ -90,6 +90,12 @@ public class SensorManager {
 	private void discover() {
 		sensorList.clear();
 		LOG.debug("Starting sensor discovery");
+		sensorList = discover(context);
+	}
+
+	public static List<SensorServiceInfo> discover(Context context) {
+		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
+		Log.d(TAG, "Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
 		Intent queryIntent = new Intent(
 				"interdroid.contextdroid.sensor.DISCOVER");
@@ -101,7 +107,7 @@ public class SensorManager {
 			LOG.debug("\tDiscovered sensor: "
 					+ discoveredSensor.serviceInfo.packageName
 					+ discoveredSensor.serviceInfo.name);
-			sensorList.add(new SensorServiceInfo(new ComponentName(
+			result.add(new SensorServiceInfo(new ComponentName(
 					discoveredSensor.serviceInfo.packageName,
 					discoveredSensor.serviceInfo.name),
 					discoveredSensor.serviceInfo.metaData));
@@ -110,6 +116,7 @@ public class SensorManager {
 				LOG.error("Exception", e);
 			}
 		}
+		return result;
 	}
 
 	public void unbindAllSensors() {

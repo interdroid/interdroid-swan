@@ -2,8 +2,11 @@ package interdroid.contextdroid.ui;
 
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ConstantTypedValue;
+import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.TypedValue;
+import interdroid.contextdroid.contextservice.SensorManager;
+import interdroid.contextdroid.contextservice.SensorServiceInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +15,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,6 +29,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -39,6 +45,12 @@ public class ExpressionBuilderActivity extends Activity {
 	private static final int DIALOG_CHOOSE_EXPRESSION_LEFT = 5;
 	private static final int DIALOG_CHOOSE_EXPRESSION_RIGHT = 6;
 	private static final int DIALOG_CHOOSE_OPERATOR = 7;
+	private static final int DIALOG_RENAME_EXPRESSION = 8;
+	private static final int DIALOG_CHOOSE_SENSOR_LEFT = 9;
+	private static final int DIALOG_CHOOSE_SENSOR_RIGHT = 10;
+
+	private static final int REQUEST_CODE_CONFIGURE_SENSOR_LEFT = 0;
+	private static final int REQUEST_CODE_CONFIGURE_SENSOR_RIGHT = 1;
 
 	private static final CharSequence[] COMPARATORS = new CharSequence[] { "<",
 			"<=", "==", "!=", ">", ">=", "contains", "regexp" };
@@ -60,41 +72,43 @@ public class ExpressionBuilderActivity extends Activity {
 	private Expression leftExpression;
 	private Expression rightExpression;
 
+	private int currentPosition;
+
 	private List<Expression> expressions = new ArrayList<Expression>();
+
+	private final BaseAdapter expressionlistAdapter = new BaseAdapter() {
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			if (convertView == null) {
+				convertView = new TextView(ExpressionBuilderActivity.this);
+				((TextView) convertView).setTextSize(22.0f);
+			}
+			((TextView) convertView).setText(expressions.get(position)
+					.toString());
+			return convertView;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return 0;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return expressions.get(position);
+		}
+
+		@Override
+		public int getCount() {
+			return expressions.size();
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.expression_builder);
-
-		final BaseAdapter expressionlistAdapter = new BaseAdapter() {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				if (convertView == null) {
-					convertView = new TextView(ExpressionBuilderActivity.this);
-					((TextView) convertView).setTextSize(20.0f);
-				}
-				((TextView) convertView).setText(expressions.get(position)
-						.toString());
-				return convertView;
-			}
-
-			@Override
-			public long getItemId(int position) {
-				return 0;
-			}
-
-			@Override
-			public Object getItem(int position) {
-				return expressions.get(position);
-			}
-
-			@Override
-			public int getCount() {
-				return expressions.size();
-			}
-		};
 
 		((CheckBox) findViewById(R.id.typedvalue_not))
 				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -171,7 +185,7 @@ public class ExpressionBuilderActivity extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
-						Expression expression = expressions.get(position);
+						// Expression expression = expressions.get(position);
 					}
 				});
 		registerForContextMenu(findViewById(R.id.expression_list));
@@ -270,6 +284,11 @@ public class ExpressionBuilderActivity extends Activity {
 									case TYPEDVALUE_OPTION_COMBINED:
 										break;
 									case TYPEDVALUE_OPTION_CONTEXT:
+										if (isRightChoose) {
+											showDialog(DIALOG_CHOOSE_SENSOR_RIGHT);
+										} else {
+											showDialog(DIALOG_CHOOSE_SENSOR_LEFT);
+										}
 										break;
 
 									default:
@@ -366,11 +385,89 @@ public class ExpressionBuilderActivity extends Activity {
 									checkExpressionOkEnabled();
 								}
 							}).create();
+		case DIALOG_RENAME_EXPRESSION:
+			final View renameView = LayoutInflater.from(this).inflate(
+					R.layout.expression_builder_rename_dialog, null);
+			return new AlertDialog.Builder(this)
+					.setTitle("Rename Expression")
+					.setView(renameView)
+					.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									String renamed = ((EditText) renameView
+											.findViewById(R.id.value))
+											.getText().toString();
+									expressions.get(currentPosition).setId(
+											renamed);
+									expressionlistAdapter
+											.notifyDataSetChanged();
+								}
+							}).create();
+		case DIALOG_CHOOSE_SENSOR_LEFT:
+			isLeft = true;
+		case DIALOG_CHOOSE_SENSOR_RIGHT:
+			final boolean isRightSensor = !isLeft;
+			final List<SensorServiceInfo> sensors = SensorManager
+					.discover(this);
+			String[] sensorNames = new String[sensors.size()];
+			for (int i = 0; i < sensorNames.length; i++) {
+				sensorNames[i] = sensors.get(i).getEntity();
+			}
+
+			return new AlertDialog.Builder(this)
+					.setTitle("Choose Sensor")
+					.setItems(sensorNames,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									startActivityForResult(
+											sensors.get(which)
+													.getConfigurationIntent()
+													.putExtra(
+															"entityId",
+															sensors.get(which)
+																	.getEntity()),
+											isRightSensor ? REQUEST_CODE_CONFIGURE_SENSOR_RIGHT
+													: REQUEST_CODE_CONFIGURE_SENSOR_LEFT);
+								}
+							}).create();
 
 		default:
 			break;
 		}
 		return super.onCreateDialog(id);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == RESULT_OK) {
+			switch (requestCode) {
+			case REQUEST_CODE_CONFIGURE_SENSOR_LEFT:
+				leftValue = new ContextTypedValue(
+						data.getStringExtra("entityId") + "/"
+								+ data.getStringExtra("configuration"));
+				((Button) findViewById(R.id.typedvalue_left)).setText(leftValue
+						.toString());
+				checkTypedValueOkEnabled();
+				break;
+			case REQUEST_CODE_CONFIGURE_SENSOR_RIGHT:
+				rightValue = new ContextTypedValue(
+						data.getStringExtra("entityId") + "/"
+								+ data.getStringExtra("configuration"));
+				((Button) findViewById(R.id.typedvalue_right))
+						.setText(rightValue.toString());
+				checkTypedValueOkEnabled();
+				break;
+			default:
+				break;
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
@@ -390,7 +487,10 @@ public class ExpressionBuilderActivity extends Activity {
 			alert.getListView().setAdapter(adapter);
 
 			break;
-
+		case DIALOG_RENAME_EXPRESSION:
+			((EditText) dialog.findViewById(R.id.value)).setText(expressions
+					.get(currentPosition).toString());
+			break;
 		default:
 			break;
 		}
@@ -406,10 +506,21 @@ public class ExpressionBuilderActivity extends Activity {
 		menu.add("delete");
 		menu.add("rename");
 		menu.add("edit");
-		// TODO Auto-generated method stub
+
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
-	
-	
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		if (item.getTitle().toString().equals("rename")) {
+			currentPosition = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
+			showDialog(DIALOG_RENAME_EXPRESSION);
+		} else if (item.getTitle().toString().equals("delete")) {
+			expressions
+					.remove(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+			expressionlistAdapter.notifyDataSetChanged();
+		}
+		return super.onContextItemSelected(item);
+	}
 
 }

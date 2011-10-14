@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/rain_valuepaths" android:entryValues="@array/rain_valuepaths" />
+	</PreferenceCategory>
+
+
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Sample Interval" android:key="sample_interval" />
+		<EditTextPreference android:key="latitude"
+			android:title="Location Latitude" android:summary="Set Location Latitude"
+			android:dialogTitle="Enter Location Latitude" />
+		<EditTextPreference android:key="longitude"
+			android:title="Location Longitude" android:summary="Set Location Longitude"
+			android:dialogTitle="Enter Location Longitude" />
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" mm/Hr" android:max="20" android:defaultValue="0"
+			android:title="Set The Rain Threshold (mm/hr)" android:key="threshold" />
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" minutes" android:max="120" android:defaultValue="120"
+			android:title="Set The Look-Ahead Window" android:key="window" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+
