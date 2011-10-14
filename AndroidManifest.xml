@@ -27,7 +27,7 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".ExpressionBuilderActivity"
+		<activity android:name=".ui.ExpressionBuilderActivity"
 			android:label="Expression Builder" android:screenOrientation="portrait">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"></action>
@@ -112,7 +112,7 @@
 		<service android:name=".sensors.impl.SignalStrengthSensor"
 			android:exported="true" android:process=":signalsensor">
 			<meta-data android:name="entityId" android:value="signal" />
-			<meta-data android:name="valuePahts"
+			<meta-data android:name="valuePaths"
 				android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />

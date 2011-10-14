@@ -8,6 +8,9 @@ import interdroid.contextdroid.sensors.IAsynchronousContextSensor;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -18,9 +21,14 @@ import android.util.Log;
 
 public class ContextTypedValue extends TypedValue implements
 		Comparable<ContextTypedValue> {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(ContextTypedValue.class);
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 7571963465497645229L;
 
@@ -158,7 +166,7 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */
@@ -207,6 +215,7 @@ public class ContextTypedValue extends TypedValue implements
 					sensor.register(id, valuePath, configuration);
 					registrationFailed = false;
 				} catch (RemoteException e) {
+					LOG.error("Registration failed!", e);
 					registrationFailed = true;
 				}
 				ContextTypedValue.this.sensor = sensor;

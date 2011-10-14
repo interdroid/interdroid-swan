@@ -142,6 +142,9 @@ public class ContextManager extends ContextServiceConnector {
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
+			LOG.debug("Null pointer", e);
+			LOG.debug("service: {}", contextService);
+			LOG.debug("id: {} value: {}", id, value);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
 		}
@@ -164,7 +167,7 @@ public class ContextManager extends ContextServiceConnector {
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
-			LOG.debug("Got null pointer", e);
+			LOG.debug("Null Pointer", e);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
 		}

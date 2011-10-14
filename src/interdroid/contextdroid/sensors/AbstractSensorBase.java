@@ -4,6 +4,7 @@ import interdroid.contextdroid.ConnectionListener;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +40,14 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 			long now, long timespan) {
 				// make a copy of the list
 				List<TimestampedValue> result;
-			
+
 				if (timespan == 0) {
 					result =  values.
 							subList(Math.max(0, values.size() - 1), values.size());
 				} else {
 					result = new ArrayList<TimestampedValue>();
 					result.addAll(values);
-			
+
 					int startPos = 0;
 					int endPos = 0;
 					for (int i = 0; i < values.size(); i++) {
@@ -130,10 +131,14 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 				final Bundle configuration)
 				throws RemoteException {
 
+			// TODO: We should be checking if valuePath exists and if id is
+			// unique.
+
 			// any calls to register should wait until we're connected back to
 			// the context service
-			while (!contextServiceConnector.isConnected()) {
-				synchronized (contextServiceConnector) {
+			synchronized (contextServiceConnector) {
+				while (!contextServiceConnector.isConnected()) {
+					LOG.debug("Waiting for registration to complete.");
 					try {
 						contextServiceConnector.wait();
 					} catch (InterruptedException e) {
@@ -143,15 +148,26 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 			}
 
 			synchronized (mSensorInterface) {
-				notified.put(getRootIdFor(id), false);
-				registeredConfigurations.put(id, configuration);
-				registeredValuePaths.put(id, valuePath);
-				expressionIdsPerValuePath.get(valuePath).add(id);
-				if (LOG.isDebugEnabled()) {
-					printState();
+				try {
+					LOG.debug("Registering id: {} path: {}", id, valuePath);
+					notified.put(getRootIdFor(id), false);
+					registeredConfigurations.put(id, configuration);
+					registeredValuePaths.put(id, valuePath);
+					List<String> ids = expressionIdsPerValuePath.get(valuePath);
+					if (ids == null) {
+						ids = new ArrayList<String>();
+						expressionIdsPerValuePath.put(valuePath, ids);
+					}
+					ids.add(id);
+					if (LOG.isDebugEnabled()) {
+						printState();
+					}
+					LOG.debug("Registering with implementation.");
+					mSensorInterface.register(id, valuePath, configuration);
+				} catch (RuntimeException e) {
+					LOG.error("Caught exception while registering.", e);
+					throw e;
 				}
-
-				mSensorInterface.register(id, valuePath, configuration);
 			}
 		}
 

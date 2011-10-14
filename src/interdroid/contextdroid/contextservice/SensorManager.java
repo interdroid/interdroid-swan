@@ -5,6 +5,9 @@ import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +20,12 @@ import android.util.Log;
  * Keeps track of context sensors
  */
 public class SensorManager {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(SensorManager.class);
 
-	/** Logging tag. */
-	private static final String TAG = "SensorManager";
 
 	/** The sensor information */
 	private List<SensorServiceInfo> sensorList = new ArrayList<SensorServiceInfo>();
@@ -32,7 +38,7 @@ public class SensorManager {
 
 	/**
 	 * Instantiates a new sensor manager.
-	 * 
+	 *
 	 * @param context
 	 *            the context to launch new services in
 	 */
@@ -83,21 +89,26 @@ public class SensorManager {
 
 	private void discover() {
 		sensorList.clear();
-		Log.d(TAG, "Starting sensor discovery");
+		LOG.debug("Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
 		Intent queryIntent = new Intent(
 				"interdroid.contextdroid.sensor.DISCOVER");
 		List<ResolveInfo> discoveredSensors = pm.queryIntentServices(
 				queryIntent, PackageManager.GET_META_DATA);
-		Log.d(TAG, "Found " + discoveredSensors.size() + " sensors");
+		LOG.debug("Found " + discoveredSensors.size() + " sensors");
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
-			Log.d(TAG, "\tDiscovered sensor: "
+			try {
+			LOG.debug("\tDiscovered sensor: "
 					+ discoveredSensor.serviceInfo.packageName
 					+ discoveredSensor.serviceInfo.name);
 			sensorList.add(new SensorServiceInfo(new ComponentName(
 					discoveredSensor.serviceInfo.packageName,
 					discoveredSensor.serviceInfo.name),
 					discoveredSensor.serviceInfo.metaData));
+			} catch (Exception e) {
+				LOG.error("Error with discovered sensor: {}", discoveredSensor);
+				LOG.error("Exception", e);
+			}
 		}
 	}
 
