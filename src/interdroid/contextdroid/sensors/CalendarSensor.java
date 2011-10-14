@@ -44,7 +44,7 @@ public class CalendarSensor extends AbstractAsynchronousSensor {
 	 * on small arrow next to a given calendar, choose calendar settings, get
 	 * the address from private address (xml), without the ending '/basic'
 	 */
-	public static final String PRIVATE_CALENDAR_URL = "private_calendar_urL";
+	public static final String PRIVATE_CALENDAR_URL = "private_calendar_url";
 
 	public static final long DEFAULT_SAMPLE_INTERVAL = 5 * 60 * 1000;
 	public static final boolean DEFAULT_IGNORE_FREE_EVENTS = true;

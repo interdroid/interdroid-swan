@@ -236,7 +236,7 @@ public class ContextTypedValue extends TypedValue implements
 	}
 
 	public String toString() {
-		return entity + "/" + valuePath + ": " + configuration;
+		return entity + "/" + valuePath;// + ": " + configuration;
 	}
 
 	public void setNextEvaluationTime(long nextEvaluationTime) {

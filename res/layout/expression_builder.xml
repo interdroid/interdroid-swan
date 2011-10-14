@@ -12,13 +12,13 @@
 			android:text="not" />
 		<Button android:id="@+id/typedvalue_left" android:layout_width="wrap_content"
 			android:layout_height="match_parent" android:text=" . "
-			android:layout_weight="1" />
+			android:layout_weight="1" android:maxWidth="100dp" />
 		<Button android:id="@+id/typedvalue_comparator"
 			android:layout_width="wrap_content" android:layout_height="match_parent"
 			android:text=" ? " />
 		<Button android:id="@+id/typedvalue_right"
 			android:layout_width="wrap_content" android:layout_height="match_parent"
-			android:text=" . " android:layout_weight="1" />
+			android:text=" . " android:layout_weight="1" android:maxWidth="100dp" />
 		<Button android:id="@+id/typedvalue_ok" android:layout_width="wrap_content"
 			android:layout_height="match_parent" android:text="ok"
 			android:enabled="false" />

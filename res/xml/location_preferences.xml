@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/location_valuepaths" android:entryValues="@array/location_valuepaths" />
+	</PreferenceCategory>
+
+
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" meters" android:max="3600" android:defaultValue="300"
+			android:title="Minimum Distance Between Updates" android:key="min_distance" />
+
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Minimum Time Between Updates" android:key="min_time" />
+
+		<ListPreference android:title="Location Provider"
+			android:summary="Select location provider" android:key="provider"
+			android:entries="@array/location_provider" android:entryValues="@array/location_provider" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+

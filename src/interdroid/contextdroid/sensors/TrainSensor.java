@@ -41,8 +41,7 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 	public static final String SAMPLE_INTERVAL = "sample_interval";
 	public static final String FROM_STATION = "from_station";
 	public static final String TO_STATION = "to_station";
-	public static final String DEPARTURE_HOURS = "departure_hours";
-	public static final String DEPARTURE_MINUTES = "departure_minutes";
+	public static final String DEPARTURE_TIME = "departure_time";
 
 	public static final long DEFAULT_SAMPLE_INTERVAL = 5 * 60 * 1000;
 
@@ -206,15 +205,19 @@ public class TrainSensor extends AbstractAsynchronousSensor {
 			url.append("&previousAdvices=0");
 			url.append("&departure=true&dateTime=");
 			boolean departure = DEPARTURE_TIME_FIELD.equals(valuePath);
+			int hours = Integer.parseInt(configuration
+					.getString(DEPARTURE_TIME).split(":")[0]);
+			int minutes = Integer.parseInt(configuration.getString(
+					DEPARTURE_TIME).split(":")[1]);
 
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
 				if (values.size() >= HISTORY_SIZE) {
 					values.remove(0);
 				}
-				Date date = sampleTrain(url.toString(),
-						configuration.getInt(DEPARTURE_HOURS),
-						configuration.getInt(DEPARTURE_MINUTES), departure);
+
+				Date date = sampleTrain(url.toString(), hours, minutes,
+						departure);
 				if (date != null) {
 					values.add(new TimestampedValue(date, start, start
 							+ EXPIRE_TIME));

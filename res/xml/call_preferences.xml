@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/call_valuepaths" android:entryValues="@array/call_valuepaths" />
+	</PreferenceCategory>
+
+</PreferenceScreen>
+

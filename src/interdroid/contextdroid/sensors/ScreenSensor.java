@@ -1,9 +1,5 @@
 package interdroid.contextdroid.sensors;
 
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

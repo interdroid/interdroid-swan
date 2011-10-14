@@ -83,6 +83,11 @@ public class SensorManager {
 
 	private void discover() {
 		sensorList.clear();
+		sensorList = discover(context);
+	}
+
+	public static List<SensorServiceInfo> discover(Context context) {
+		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
 		Log.d(TAG, "Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
 		Intent queryIntent = new Intent(
@@ -94,11 +99,12 @@ public class SensorManager {
 			Log.d(TAG, "\tDiscovered sensor: "
 					+ discoveredSensor.serviceInfo.packageName
 					+ discoveredSensor.serviceInfo.name);
-			sensorList.add(new SensorServiceInfo(new ComponentName(
+			result.add(new SensorServiceInfo(new ComponentName(
 					discoveredSensor.serviceInfo.packageName,
 					discoveredSensor.serviceInfo.name),
 					discoveredSensor.serviceInfo.metaData));
 		}
+		return result;
 	}
 
 	public void unbindAllSensors() {

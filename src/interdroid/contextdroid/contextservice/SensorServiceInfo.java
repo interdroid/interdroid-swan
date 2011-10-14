@@ -132,4 +132,11 @@ public class SensorServiceInfo {
 	public Intent getIntent() {
 		return new Intent().setComponent(component);
 	}
+
+	public Intent getConfigurationIntent() {
+		ComponentName configurationComponent = new ComponentName(
+				component.getPackageName(), component.getClassName().replace(
+						"Sensor", "ConfigurationActivity"));
+		return new Intent().setComponent(configurationComponent);
+	}
 }

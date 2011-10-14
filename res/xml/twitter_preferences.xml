@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/twitter_valuepaths" android:entryValues="@array/twitter_valuepaths" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Sample Interval" android:key="sample_interval" />
+		<EditTextPreference android:key="access_token"
+			android:title="Access Token" android:summary="Set Twitter Access Token"
+			android:dialogTitle="Enter Twitter Access Token" />
+		<EditTextPreference android:key="secret_access_token"
+			android:title="Secret Access Token" android:summary="Set Twitter Secret Access Token"
+			android:dialogTitle="Enter Twitter Secret Access Token" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+

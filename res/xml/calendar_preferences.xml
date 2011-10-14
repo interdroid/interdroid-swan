@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Value Path">
+		<ListPreference android:title="Value Path"
+			android:summary="Select a Value Path" android:key="valuepath"
+			android:entries="@array/calendar_valuepaths" android:entryValues="@array/calendar_valuepaths" />
+	</PreferenceCategory>
+	
+	<PreferenceCategory android:title="Configuration">
+		<interdroid.contextdroid.util.SeekBarPreference
+			android:text=" seconds" android:max="3600" android:defaultValue="300"
+			android:title="Sample Interval" android:key="sample_interval" />
+		<CheckBoxPreference android:key="ignore_free_events"
+			android:title="Ignore Free Events" />
+		<CheckBoxPreference android:key="ignore_allday_events"
+			android:title="Ignore All Events" />
+		<EditTextPreference android:key="private_calendar_url"
+			android:title="Private Calendar URL"
+			android:summary="Get your private calendar URL from Google Calendar in the browser,	click on small arrow next to a given calendar, choose calendar settings, get the address from private address (xml), without the ending '/basic'"
+			android:dialogTitle="Enter Private Calendar URL" />
+
+	</PreferenceCategory>
+</PreferenceScreen>
+
