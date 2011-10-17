@@ -110,7 +110,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 						+ "', 'type': 'int'},"
 						+ "\n{'name': '"
 						+ DEVICE_MAJOR_CLASS
-						+ "', 'type': 'int'},"
+						+ "', 'type': 'int'}"
 						+ "\n]"
 						+ "}";
 		return scheme.replace('\'', '"');
