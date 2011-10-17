@@ -1,4 +1,4 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
 import android.app.Activity;
 import android.os.Bundle;

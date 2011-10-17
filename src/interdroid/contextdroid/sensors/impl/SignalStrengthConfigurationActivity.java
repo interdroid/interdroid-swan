@@ -1,9 +1,10 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
 import android.os.Bundle;
 import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 
-public class GSMSignalStrengthConfigurationActivity extends
+public class SignalStrengthConfigurationActivity extends
 		AbstractConfigurationActivity {
 
 	@Override
@@ -12,7 +13,7 @@ public class GSMSignalStrengthConfigurationActivity extends
 		setResult(
 				RESULT_OK,
 				getIntent().putExtra("configuration",
-						GSMSignalStrengthSensor.SIGNAL_STRENGTH_FIELD));
+						SignalStrengthSensor.GSM_SIGNAL_STRENGTH_FIELD));
 		finish();
 	}
 

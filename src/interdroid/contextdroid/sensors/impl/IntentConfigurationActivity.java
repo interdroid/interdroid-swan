@@ -1,7 +1,8 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
 import android.os.Bundle;
 import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 
 public class IntentConfigurationActivity extends AbstractConfigurationActivity {
 

@@ -1,8 +1,10 @@
-package interdroid.contextdroid.sensors;
+package interdroid.contextdroid.sensors.impl;
 
 import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 
-public class RainConfigurationActivity extends AbstractConfigurationActivity {
+public class RainConfigurationActivity
+	extends AbstractConfigurationActivity {
 
 	@Override
 	public int getPreferencesXML() {
