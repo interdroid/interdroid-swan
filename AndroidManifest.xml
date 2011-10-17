@@ -44,61 +44,56 @@
 			/> -->
 
 
-		<activity android:name=".sensors.impl.BatteryConfigurationActivity">
+		<activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.BluetoothConfigurationActivity">
+		<activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.CalendarConfigurationActivity">
+		<activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.CallConfigurationActivity">
+		<activity android:name=".sensors.impl.CallSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.SignalStrengthConfigurationActivity">
+		<activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.IntentConfigurationActivity">
+		<activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.LocationConfigurationActivity">
+		<activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.LogCatConfigurationActivity">
+		<activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.MovementConfigurationActivity">
+		<activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.RainConfigurationActivity">
+		<activity android:name=".sensors.impl.RainSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.ScreenConfigurationActivity">
+		<activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.ServerStatusConfigurationActivity">
+		<activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.SoundConfigurationActivity">
+		<activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.TrainConfigurationActivity">
+		<activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.TimeConfigurationActivity">
+		<activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.TwitterConfigurationActivity">
+		<activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity">
 		</activity>
 
-		<activity android:name=".sensors.impl.WifiConfigurationActivity">
+		<activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity">
 		</activity>
-
-
-
-
-
 
 		<service android:name=".contextservice.ContextService"
 			android:exported="true" android:process=":contextservice">

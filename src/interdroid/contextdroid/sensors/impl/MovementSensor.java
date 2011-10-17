@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -16,6 +18,21 @@ import android.util.Log;
 public class MovementSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "MovementSensor";
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.movement_preferences;
+		}
+
+	}
 
 	/** Value of ACCURACY must be one of SensorManager.SENSOR_DELAY_* */
 	public static final String ACCURACY = "accuracy";
@@ -47,7 +64,7 @@ public class MovementSensor extends AbstractMemorySensor {
 				}
 				float len2 = (float) Math.sqrt(event.values[0]
 						* event.values[0] + event.values[1] * event.values[1]
-						+ event.values[2] * event.values[2]);
+								+ event.values[2] * event.values[2]);
 				putValue(TOTAL_FIELD, now, expire, len2);
 
 			}

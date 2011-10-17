@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
@@ -18,6 +20,31 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	 */
 	private static final Logger LOG =
 			LoggerFactory.getLogger(SignalStrengthSensor.class);
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setResult(
+					RESULT_OK,
+					getIntent().putExtra("configuration",
+							SignalStrengthSensor.GSM_SIGNAL_STRENGTH_FIELD));
+			finish();
+		}
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.gsm_preferences;
+		}
+
+	}
 
 	/**
 	 * The gsm signal strength field.

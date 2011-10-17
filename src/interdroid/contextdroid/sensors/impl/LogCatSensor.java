@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -22,6 +24,21 @@ public class LogCatSensor extends AbstractMemorySensor {
 	 */
 	private static final Logger LOG =
 			LoggerFactory.getLogger(LogCatSensor.class);
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public int getPreferencesXML() {
+			return R.xml.logcat_preferences;
+		}
+
+	}
 
 	public static final String LOG_FIELD = "log";
 

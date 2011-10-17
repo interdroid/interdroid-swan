@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -23,6 +25,16 @@ import android.os.Bundle;
 public class RainSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Rain";
+
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.rain_preferences;
+		}
+
+	}
 
 	public static final String START_TIME_FIELD = "start_time";
 	public static final String STOP_TIME_FIELD = "stop_time";

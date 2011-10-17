@@ -6,6 +6,7 @@ import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 public class TimeSensor extends AbstractSensorBase {
@@ -13,6 +14,25 @@ public class TimeSensor extends AbstractSensorBase {
 	public static final String CURRENT_MS_FIELD = "current";
 
 	public static final String TAG = "TimeSensor";
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity extends Activity {
+
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setResult(
+					RESULT_OK,
+					getIntent().putExtra("configuration",
+							TimeSensor.CURRENT_MS_FIELD));
+			finish();
+		}
+
+	}
 
 	@Override
 	public String[] getValuePaths() {

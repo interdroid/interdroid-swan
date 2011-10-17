@@ -17,7 +17,6 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.util.Log;
 
 /**
  * The Class ContextManager.
@@ -191,8 +190,7 @@ public class ContextManager extends ContextServiceConnector {
 			final ContextExpressionListener expressionListener)
 			throws ContextDroidException {
 		try {
-			Log.d(TAG, "attempting to add expression " + expression + " id: "
-					+ expressionId);
+			LOG.debug("attempting to add expression {} id: {}", expression, expressionId);
 			ContextDroidServiceException exception = contextService
 					.addContextExpression(expressionId, expression);
 			if (exception != null) {

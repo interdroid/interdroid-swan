@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -35,6 +37,21 @@ import android.util.Log;
 public class TrainSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Train";
+
+	/**
+	 * The configuration activity for this class.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.train_preferences;
+		}
+
+	}
 
 	public static final String DEPARTURE_TIME_FIELD = "departure_time";
 	public static final String ARRIVAL_TIME_FIELD = "arrival_time";

@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -30,6 +32,16 @@ import android.os.Bundle;
 public class TwitterSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Twitter";
+
+	public static class ConfigurationActivity extends
+	AbstractConfigurationActivity {
+
+		@Override
+		public int getPreferencesXML() {
+			return R.xml.twitter_preferences;
+		}
+
+	}
 
 	public static final String NR_MENTIONS_FIELD = "mentions";
 

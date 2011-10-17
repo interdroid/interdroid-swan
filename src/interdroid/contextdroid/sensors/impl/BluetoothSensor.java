@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
@@ -27,6 +29,23 @@ public class BluetoothSensor extends AbstractVdbSensor {
 	 */
 	private static final Logger LOG =
 			LoggerFactory.getLogger(CallSensor.class);
+
+
+	/**
+	 * This configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.bluetooth_preferences;
+		}
+
+	}
+
 
 	/**
 	 * The device name field.

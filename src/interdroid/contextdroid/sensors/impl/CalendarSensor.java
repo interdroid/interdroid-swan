@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractSensorBase;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -34,6 +36,21 @@ import android.util.Log;
 public class CalendarSensor extends AbstractSensorBase {
 
 	public static final String TAG = "Calendar";
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.calendar_preferences;
+		}
+
+	}
 
 	public static final String START_TIME_NEXT_EVENT_FIELD = "start_time_next_event";
 

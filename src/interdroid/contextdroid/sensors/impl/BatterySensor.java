@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
@@ -18,6 +20,21 @@ import android.os.Bundle;
  *
  */
 public class BatterySensor extends AbstractVdbSensor {
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.battery_preferences;
+		}
+
+	}
 
 	/**
 	 * The level field.
@@ -95,11 +112,11 @@ public class BatterySensor extends AbstractVdbSensor {
 
 				ContentValues values = new ContentValues();
 				values.put(LEVEL_FIELD, intent.getIntExtra(
-					BatteryManager.EXTRA_LEVEL, 0));
+						BatteryManager.EXTRA_LEVEL, 0));
 				values.put(TEMPERATURE_FIELD, intent.getIntExtra(
-					BatteryManager.EXTRA_TEMPERATURE, 0));
+						BatteryManager.EXTRA_TEMPERATURE, 0));
 				values.put(VOLTAGE_FIELD, intent.getIntExtra(
-					BatteryManager.EXTRA_VOLTAGE, 0));
+						BatteryManager.EXTRA_VOLTAGE, 0));
 				putValues(values, now, expire);
 			}
 		}
@@ -141,7 +158,7 @@ public class BatterySensor extends AbstractVdbSensor {
 	}
 
 	@Override
-	public void onDestroySensor() {
+	public final void onDestroySensor() {
 		if (registeredConfigurations.size() > 0) {
 			unregisterReceiver(batteryReceiver);
 		}

@@ -1,5 +1,7 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -26,6 +28,21 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 	 */
 	private static final Logger LOG =
 			LoggerFactory.getLogger(ServerStatusSensor.class);
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity extends
+	AbstractConfigurationActivity {
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.serverstatus_preferences;
+		}
+
+	}
 
 
 	public static final String STATUS_FIELD = "status";

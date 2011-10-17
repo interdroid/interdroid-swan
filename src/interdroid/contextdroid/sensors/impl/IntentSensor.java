@@ -1,8 +1,10 @@
 package interdroid.contextdroid.sensors.impl;
 
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextTypedValueListener;
+import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
@@ -13,6 +15,31 @@ import android.os.Bundle;
 public class IntentSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Intent";
+
+	/**
+	 * The configuration activity for this sensor.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class ConfigurationActivity
+	extends AbstractConfigurationActivity {
+
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setResult(
+					RESULT_OK,
+					getIntent().putExtra("configuration",
+							IntentSensor.STARTED_FIELD));
+			finish();
+		}
+
+		@Override
+		public final int getPreferencesXML() {
+			return R.xml.intent_preferences;
+		}
+
+	}
 
 	public static final String STARTED_FIELD = "started";
 
