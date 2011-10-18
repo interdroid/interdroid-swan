@@ -36,8 +36,11 @@ public class ContextService extends Service {
 	private static final Logger LOG =
 			LoggerFactory.getLogger(ContextService.class);
 
-	/** Identifier for the notification */
+	/** Identifier for the notification. */
 	private static final int SERVICE_NOTIFICATION_ID = 1;
+
+	/** Are we currently running as a "foreground" service? */
+	private boolean	mForeground;
 
 	/** The sensor manager. */
 	private SensorManager sensorManager;
@@ -48,16 +51,18 @@ public class ContextService extends Service {
 	/** The notification. */
 	private Notification notification;
 
-	/** The context expressions, mapped by id */
-	private HashMap<String, Expression> contextExpressions = new HashMap<String, Expression>();
+	/** The context expressions, mapped by id. */
+	private HashMap<String, Expression> contextExpressions =
+			new HashMap<String, Expression>();
 
-	/** The context entities, mapped by id */
-	private HashMap<String, ContextTypedValue> contextTypedValues = new HashMap<String, ContextTypedValue>();
+	/** The context entities, mapped by id. */
+	private HashMap<String, ContextTypedValue> contextTypedValues =
+			new HashMap<String, ContextTypedValue>();
 
-	/** The evaluation queue */
+	/** The evaluation queue. */
 	private PriorityQueue<Expression> evaluationQueue = new PriorityQueue<Expression>();
 
-	/** The evaluation queue */
+	/** The evaluation queue. */
 	private PriorityQueue<ContextTypedValue> contextTypedValueQueue = new PriorityQueue<ContextTypedValue>();
 
 	/**
@@ -219,6 +224,14 @@ public class ContextService extends Service {
 	}
 
 	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		LOG.debug("onStart: {} {}", intent, flags);
+		// We want this service to continue running until it is explicitly
+		// stopped, so return sticky.
+		return START_STICKY;
+	}
+
+	@Override
 	public boolean onUnbind(Intent intent) {
 		LOG.debug("onUnbind");
 		synchronized (this) {
@@ -263,6 +276,8 @@ public class ContextService extends Service {
 	 * Update notification.
 	 */
 	private void updateNotification() {
+		manageForegroundState();
+
 		Intent notificationIntent = new Intent(this, TestActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
@@ -270,6 +285,24 @@ public class ContextService extends Service {
 				+ contextExpressions.size() + ", #entities: "
 				+ contextTypedValues.size(), contentIntent);
 		mNotificationManager.notify(SERVICE_NOTIFICATION_ID, notification);
+	}
+
+	/**
+	 * Manage the foreground state of the service.
+	 */
+	private void manageForegroundState() {
+		if ( contextExpressions.size() == 0 && contextTypedValues.size() == 0
+				&& mForeground) {
+			LOG.debug("Setting foreground.");
+			this.stopForeground(false);
+			mForeground = false;
+		} else if (( contextExpressions.size() > 0 ||
+				contextTypedValues.size() > 0 )
+				&& !mForeground) {
+			LOG.debug("Setting background.");
+			this.startForeground(SERVICE_NOTIFICATION_ID, notification);
+			mForeground = true;
+		}
 	}
 
 	/*
@@ -308,7 +341,7 @@ public class ContextService extends Service {
 			break;
 		case ContextManager.UNDEFINED:
 			broadcastIntent
-					.setAction(ContextManager.ACTION_EXPRESSIONUNDEFINED);
+			.setAction(ContextManager.ACTION_EXPRESSIONUNDEFINED);
 			break;
 		default:
 			broadcastIntent.setAction(ContextManager.ACTION_EXPRESSIONFALSE);
@@ -353,7 +386,7 @@ public class ContextService extends Service {
 		@Override
 		public ContextDroidServiceException addContextExpression(
 				final String expressionId, final Expression expression)
-				throws RemoteException {
+						throws RemoteException {
 			LOG.debug("Adding context expression: {}. {}", expressionId, expression);
 			// check whether there already exists an expression with the given
 			// identifier, handle appropriately
@@ -458,7 +491,7 @@ public class ContextService extends Service {
 		@Override
 		public ContextDroidServiceException registerContextTypedValue(
 				String id, ContextTypedValue contextTypedValue)
-				throws RemoteException {
+						throws RemoteException {
 			if (contextTypedValues.containsKey(id)) {
 				try {
 					contextTypedValues.get(id).destroy(id, sensorManager);
