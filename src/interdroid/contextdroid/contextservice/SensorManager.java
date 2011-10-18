@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.util.Log;
 
 /**
  * Keeps track of context sensors
@@ -95,7 +94,7 @@ public class SensorManager {
 
 	public static List<SensorServiceInfo> discover(Context context) {
 		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
-		Log.d(TAG, "Starting sensor discovery");
+		LOG.debug("Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
 		Intent queryIntent = new Intent(
 				"interdroid.contextdroid.sensor.DISCOVER");
