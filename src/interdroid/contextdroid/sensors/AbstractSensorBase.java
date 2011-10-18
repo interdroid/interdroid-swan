@@ -243,9 +243,13 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 	 */
 	@Override
 	public final void onDestroy() {
+		try {
 		LOG.debug("unbind context service from: {}", getClass());
 		contextServiceConnector.stop();
 		mSensorInterface.onDestroySensor();
+		} catch (Exception e) {
+			LOG.error("Got exception destroying sensor service", e);
+		}
 		super.onDestroy();
 	}
 
