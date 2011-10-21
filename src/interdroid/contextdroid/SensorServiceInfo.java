@@ -1,4 +1,6 @@
-package interdroid.contextdroid.contextservice;
+package interdroid.contextdroid;
+
+import interdroid.contextdroid.contextservice.SensorConfigurationException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,22 +16,27 @@ import android.os.Bundle;
  */
 public class SensorServiceInfo {
 
-	private ComponentName component;
+	private final ComponentName component;
 
-	private String entityId;
+	private final String entityId;
 
-	private ArrayList<String> valuePaths = new ArrayList<String>();
+	private final String authority;
 
-	private Bundle configuration;
+	private final ArrayList<String> valuePaths = new ArrayList<String>();
+
+	private final Bundle configuration;
 
 	public SensorServiceInfo(ComponentName component, Bundle metaData) {
 		this.component = component;
 		// strip out the entityId
 		if (metaData == null) {
-			throw new RuntimeException("no metadata!");
+			throw new IllegalArgumentException("no metadata!");
 		}
 		entityId = metaData.getString("entityId");
 		metaData.remove("entityId");
+		authority = metaData.getString("authority");
+		metaData.remove("authority");
+
 		// and the value paths
 		valuePaths.addAll(Arrays.asList(metaData.getString("valuePaths").split(
 				",")));
@@ -73,6 +80,10 @@ public class SensorServiceInfo {
 
 	public ArrayList<String> getValuePaths() {
 		return valuePaths;
+	}
+
+	public String getAuthority() {
+		return authority;
 	}
 
 	public boolean acceptsConfiguration(Bundle b)

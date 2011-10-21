@@ -5,15 +5,20 @@ import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import interdroid.contextdroid.contextservice.ContextDroidServiceException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -70,13 +75,13 @@ public class ContextManager extends ContextServiceConnector {
 	public static final int UNDEFINED = -1;
 
 	/** Stores the listeners for each context expression. */
-	private HashMap<String, ContextExpressionListener> contextExpressionListeners;
+	private final HashMap<String, ContextExpressionListener> contextExpressionListeners;
 
 	/** Has the broadcast receiver for context expressions been registered? */
 	private boolean contextExpressionBroadcastReceiverRegistered = false;
 
 	/** Stores the listeners for each context expression. */
-	private HashMap<String, ContextTypedValueListener> contextTypedValueListeners;
+	private final HashMap<String, ContextTypedValueListener> contextTypedValueListeners;
 
 	/** Has the broadcast receiver for context entities been registered? */
 	private boolean contextTypedValueBroadcastReceiverRegistered = false;
@@ -296,7 +301,7 @@ public class ContextManager extends ContextServiceConnector {
 	 * The receiver object that receives updates about the state of context
 	 * expressions.
 	 */
-	private BroadcastReceiver contextTypedValueBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver contextTypedValueBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			Uri data = intent.getData();
@@ -327,7 +332,7 @@ public class ContextManager extends ContextServiceConnector {
 	 * The receiver object that receives updates about the state of context
 	 * expressions.
 	 */
-	private BroadcastReceiver contextExpressionBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver contextExpressionBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			Uri data = intent.getData();
@@ -357,5 +362,35 @@ public class ContextManager extends ContextServiceConnector {
 		}
 
 	};
+
+	/**
+	 * @param context the context to use to fetch sensor information
+	 * @return a list of SensorServiceInfo with information about sensors.
+	 */
+	public static List<SensorServiceInfo> getSensors(Context context) {
+		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
+		LOG.debug("Starting sensor discovery");
+		PackageManager pm = context.getPackageManager();
+		Intent queryIntent = new Intent(
+				"interdroid.contextdroid.sensor.DISCOVER");
+		List<ResolveInfo> discoveredSensors = pm.queryIntentServices(
+				queryIntent, PackageManager.GET_META_DATA);
+		LOG.debug("Found " + discoveredSensors.size() + " sensors");
+		for (ResolveInfo discoveredSensor : discoveredSensors) {
+			try {
+			LOG.debug("\tDiscovered sensor: {} {}",
+					discoveredSensor.serviceInfo.packageName,
+					discoveredSensor.serviceInfo.name);
+			result.add(new SensorServiceInfo(new ComponentName(
+					discoveredSensor.serviceInfo.packageName,
+					discoveredSensor.serviceInfo.name),
+					discoveredSensor.serviceInfo.metaData));
+			} catch (Exception e) {
+				LOG.error("Error with discovered sensor: {}", discoveredSensor);
+				LOG.error("Exception", e);
+			}
+		}
+		return result;
+	}
 
 }

@@ -1,12 +1,13 @@
 package interdroid.contextdroid.ui;
 
+import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.R;
+import interdroid.contextdroid.SensorServiceInfo;
 import interdroid.contextdroid.contextexpressions.ConstantTypedValue;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.TypedValue;
 import interdroid.contextdroid.contextservice.SensorManager;
-import interdroid.contextdroid.contextservice.SensorServiceInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ExpressionBuilderActivity extends Activity {
 
 	private int currentPosition;
 
-	private List<Expression> expressions = new ArrayList<Expression>();
+	private final List<Expression> expressions = new ArrayList<Expression>();
 
 	private final BaseAdapter expressionlistAdapter = new BaseAdapter() {
 
@@ -410,8 +411,8 @@ public class ExpressionBuilderActivity extends Activity {
 			isLeft = true;
 		case DIALOG_CHOOSE_SENSOR_RIGHT:
 			final boolean isRightSensor = !isLeft;
-			final List<SensorServiceInfo> sensors = SensorManager
-					.discover(this);
+			final List<SensorServiceInfo> sensors = ContextManager
+					.getSensors(this);
 			String[] sensorNames = new String[sensors.size()];
 			for (int i = 0; i < sensorNames.length; i++) {
 				sensorNames[i] = sensors.get(i).getEntity();

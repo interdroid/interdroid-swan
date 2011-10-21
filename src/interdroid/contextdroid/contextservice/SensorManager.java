@@ -1,5 +1,7 @@
 package interdroid.contextdroid.contextservice;
 
+import interdroid.contextdroid.ContextManager;
+import interdroid.contextdroid.SensorServiceInfo;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 
 import java.util.ArrayList;
@@ -30,10 +32,10 @@ public class SensorManager {
 	private List<SensorServiceInfo> sensorList = new ArrayList<SensorServiceInfo>();
 
 	/** The service connections */
-	private List<ServiceConnection> connectionList = new ArrayList<ServiceConnection>();
+	private final List<ServiceConnection> connectionList = new ArrayList<ServiceConnection>();
 
 	/** The context (for launching new services). */
-	private Context context;
+	private final Context context;
 
 	/**
 	 * Instantiates a new sensor manager.
@@ -89,33 +91,7 @@ public class SensorManager {
 	private void discover() {
 		sensorList.clear();
 		LOG.debug("Starting sensor discovery");
-		sensorList = discover(context);
-	}
-
-	public static List<SensorServiceInfo> discover(Context context) {
-		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
-		LOG.debug("Starting sensor discovery");
-		PackageManager pm = context.getPackageManager();
-		Intent queryIntent = new Intent(
-				"interdroid.contextdroid.sensor.DISCOVER");
-		List<ResolveInfo> discoveredSensors = pm.queryIntentServices(
-				queryIntent, PackageManager.GET_META_DATA);
-		LOG.debug("Found " + discoveredSensors.size() + " sensors");
-		for (ResolveInfo discoveredSensor : discoveredSensors) {
-			try {
-			LOG.debug("\tDiscovered sensor: "
-					+ discoveredSensor.serviceInfo.packageName
-					+ discoveredSensor.serviceInfo.name);
-			result.add(new SensorServiceInfo(new ComponentName(
-					discoveredSensor.serviceInfo.packageName,
-					discoveredSensor.serviceInfo.name),
-					discoveredSensor.serviceInfo.metaData));
-			} catch (Exception e) {
-				LOG.error("Error with discovered sensor: {}", discoveredSensor);
-				LOG.error("Exception", e);
-			}
-		}
-		return result;
+		sensorList = ContextManager.getSensors(context);
 	}
 
 	public void unbindAllSensors() {
