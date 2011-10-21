@@ -73,7 +73,7 @@ public class WifiSensor extends AbstractVdbSensor {
 	/**
 	 * The interval at which to run discovery.
 	 */
-	public static final long DEFAULT_DISCOVERY_INTERVAL = 30 * 1000;
+	public static final long DEFAULT_DISCOVERY_INTERVAL = 15 * 60 * 1000;
 
 	/**
 	 * true if we should stop polling and shutdown.
