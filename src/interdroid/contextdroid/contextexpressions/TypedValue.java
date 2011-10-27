@@ -41,7 +41,7 @@ public abstract class TypedValue implements Serializable, Parcelable {
 	 * Construct from a parcel.
 	 * @param source the parcel to get data from.
 	 */
-	public TypedValue(Parcel source) {
+	public TypedValue(final Parcel source) {
 		readFromParcel(source);
 	}
 
