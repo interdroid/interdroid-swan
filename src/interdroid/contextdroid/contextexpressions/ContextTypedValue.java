@@ -2,7 +2,8 @@ package interdroid.contextdroid.contextexpressions;
 
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.contextservice.SensorConfigurationException;
-import interdroid.contextdroid.contextservice.SensorInitializationFailedException;
+import
+interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.contextservice.SensorManager;
 import interdroid.contextdroid.sensors.IAsynchronousContextSensor;
 
@@ -17,8 +18,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.util.Log;
 
+/**
+ * This represents a TypedValue where the values come from context.
+ *
+ * @author roelof &lt;rkemp@cs.vu.nl&gt;
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class ContextTypedValue extends TypedValue implements
 		Comparable<ContextTypedValue> {
 	/**
@@ -28,57 +35,85 @@ public class ContextTypedValue extends TypedValue implements
 			LoggerFactory.getLogger(ContextTypedValue.class);
 
 	/**
-	 *
+	 * Serial Version ID.
 	 */
 	private static final long serialVersionUID = 7571963465497645229L;
 
+	/**
+	 * Timeout for connection to the sensor.
+	 */
 	private static final int CONNECTION_TIMEOUT = 1000;
 
-	private static final String TAG = "ContextTypedValue";
+	/**
+	 * ID within the expression.
+	 */
+	private String mId;
 
-	String id;
-	String entity;
-	String valuePath;
-	Bundle configuration = new Bundle();
-	long timespan;
-	long deferUntil;
+	/**
+	 * The entity from which to get values.
+	 */
+	private String mEntity;
 
-	boolean registrationFailed;
+	/**
+	 * The value path to get.
+	 */
+	private String mValuePath;
 
-	private IAsynchronousContextSensor sensor;
+	/**
+	 * The configuration for the sensor.
+	 */
+	private Bundle mConfiguration = new Bundle();
 
-	private ServiceConnection serviceConnection;
+	/**
+	 * The timespan to consider.
+	 */
+	private long mTimespan;
 
-	public ContextTypedValue(String unparsedContextInfo) {
+	/**
+	 * The time at which to next evaluate the result.
+	 */
+	private long mDeferUntil;
+
+	/**
+	 * Did we fail to register with the sensor?
+	 */
+	private boolean mRegistrationFailed;
+
+	/**
+	 * The sensor to get values from.
+	 */
+	private IAsynchronousContextSensor mSensor;
+
+	/**
+	 * The connection to the sensor service.
+	 */
+	private ServiceConnection mServiceConnection;
+
+	/**
+	 * Construct from a string.
+	 * @param unparsedContextInfo the string to parse
+	 */
+	public ContextTypedValue(final String unparsedContextInfo) {
 		this(unparsedContextInfo, HistoryReductionMode.NONE, 0);
 	}
 
-	public String getEntity() {
-		return entity;
-	}
-
-	public String getValuePath() {
-		return valuePath;
-	}
-
-	public Bundle getConfiguration() {
-		return configuration;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public ContextTypedValue(String unparsedContextInfo,
-			HistoryReductionMode mode, long timespan) {
+	/**
+	 * Construct with a specific history mode and timespan.
+	 * @param unparsedContextInfo the string to parse
+	 * @param mode the mode to run with
+	 * @param timespan the timespan to consider
+	 */
+	public ContextTypedValue(final String unparsedContextInfo,
+			final HistoryReductionMode mode, final long timespan) {
+		super(mode);
 		String[] splitOnEntity = unparsedContextInfo.split("/", 2);
-		this.entity = splitOnEntity[0];
+		this.mEntity = splitOnEntity[0];
 		if (splitOnEntity.length != 2) {
 			throw new RuntimeException("bad id: '" + unparsedContextInfo
 					+ "' no valuepath");
 		}
 		String[] splitOnValuePath = splitOnEntity[1].split("\\?", 2);
-		this.valuePath = splitOnValuePath[0];
+		this.mValuePath = splitOnValuePath[0];
 		if (splitOnValuePath.length == 2) {
 			String[] splitOnConfigurationItems = splitOnValuePath[1]
 					.split("\\&");
@@ -88,41 +123,74 @@ public class ContextTypedValue extends TypedValue implements
 					if (!configurationItem.contains("=")) {
 						continue;
 					}
-					configuration.putString(configurationItem.split("=")[0],
+					mConfiguration.putString(configurationItem.split("=")[0],
 							configurationItem.split("=", 2)[1]);
 				}
 			}
 		}
 
-		this.mode = mode;
-		this.timespan = timespan;
+		this.mTimespan = timespan;
 	}
 
-	private ContextTypedValue() {
+	/**
+	 * Construct from a Parcel.
+	 * @param source the Parcel to read from
+	 */
+	public ContextTypedValue(final Parcel source) {
+		super(source);
+		readFromParcel(source);
+	}
+
+	/**
+	 * @return the entity for this value.
+	 */
+	public final String getEntity() {
+		return mEntity;
+	}
+
+	/**
+	 * @return the value path for this value.
+	 */
+	public final String getValuePath() {
+		return mValuePath;
+	}
+
+	/**
+	 * @return the configuration for this value.
+	 */
+	public final Bundle getConfiguration() {
+		return mConfiguration;
+	}
+
+	/**
+	 * @return the id for this value in the expression.
+	 */
+	public final String getId() {
+		return mId;
 	}
 
 	@Override
-	public TimestampedValue[] getValues(String id, long now)
-			throws ContextDroidException, NoValuesInIntervalException {
-		if (sensor == null) {
+	public final TimestampedValue[] getValues(final String id, final long now)
+			throws ContextDroidException {
+		if (mSensor == null) {
 			// wait a little and try again, otherwise throw exception
 			try {
 				Thread.sleep(CONNECTION_TIMEOUT);
 			} catch (InterruptedException e) {
-				// ignore
+				LOG.error("Interrupted while waiting for conncetion.");
 			}
-			if (sensor == null) {
+			if (mSensor == null) {
 				throw new ContextDroidException("Failed to bind to sensor in "
 						+ CONNECTION_TIMEOUT + " ms.");
 			}
 		}
-		if (registrationFailed) {
+		if (mRegistrationFailed) {
 			throw new ContextDroidException("Failed to register " + toString()
 					+ " to sensor");
 		}
 		List<TimestampedValue> values;
 		try {
-			values = sensor.getValues(id, now, timespan);
+			values = mSensor.getValues(id, now, mTimespan);
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		}
@@ -130,8 +198,8 @@ public class ContextTypedValue extends TypedValue implements
 		// If the previous step didn't result in any readings, there's nothing
 		// to evaluate, so the expression's value is undefined.
 		if (values.size() == 0) {
-			Log.d(TAG, "No readings so returning null.");
-			deferUntil = Long.MIN_VALUE;
+			LOG.debug("No readings so returning null.");
+			mDeferUntil = Long.MIN_VALUE;
 			throw new NoValuesInIntervalException("No values in interval for "
 					+ this);
 		}
@@ -140,28 +208,28 @@ public class ContextTypedValue extends TypedValue implements
 		TimestampedValue[] result = applyMode(values
 				.toArray(new TimestampedValue[values.size()]));
 		// set the defer time
-		deferUntil = result[result.length - 1].expireTime;
+		mDeferUntil = result[result.length - 1].getExpireTime();
 		return result;
 	}
 
 	@Override
-	public long deferUntil() {
-		return deferUntil;
+	public final long deferUntil() {
+		return mDeferUntil;
 	}
 
 	@Override
-	public int describeContents() {
+	public final int describeContents() {
 		return 0;
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(entity);
-		dest.writeString(valuePath);
-		dest.writeLong(timespan);
-		dest.writeLong(deferUntil);
-		dest.writeBundle(configuration);
-		dest.writeInt(mode.ordinal());
+	protected final void writeSubclassToParcel(final Parcel dest,
+			final int flags) {
+		dest.writeString(mEntity);
+		dest.writeString(mValuePath);
+		dest.writeLong(mTimespan);
+		dest.writeLong(mDeferUntil);
+		dest.writeBundle(mConfiguration);
 	}
 
 	/**
@@ -170,90 +238,97 @@ public class ContextTypedValue extends TypedValue implements
 	 * @param in
 	 *            the in
 	 */
-	public void readFromParcel(Parcel in) {
-		entity = in.readString();
-		valuePath = in.readString();
-		timespan = in.readLong();
-		deferUntil = in.readLong();
-		configuration = in.readBundle();
-		mode = HistoryReductionMode.values()[in.readInt()];
+	private void readFromParcel(final Parcel in) {
+		mEntity = in.readString();
+		mValuePath = in.readString();
+		mTimespan = in.readLong();
+		mDeferUntil = in.readLong();
+		mConfiguration = in.readBundle();
 	}
 
 	/** The CREATOR. */
-	public static ContextTypedValue.Creator<ContextTypedValue> CREATOR = new ContextTypedValue.Creator<ContextTypedValue>() {
+	public static final ContextTypedValue.Creator<ContextTypedValue> CREATOR =
+			new ContextTypedValue.Creator<ContextTypedValue>() {
 
 		@Override
-		public ContextTypedValue createFromParcel(Parcel source) {
-			ContextTypedValue v = new ContextTypedValue();
-			v.readFromParcel(source);
+		public ContextTypedValue createFromParcel(final Parcel source) {
+			ContextTypedValue v = new ContextTypedValue(source);
 			return v;
 		}
 
 		@Override
-		public ContextTypedValue[] newArray(int size) {
+		public ContextTypedValue[] newArray(final int size) {
 			return new ContextTypedValue[size];
 		}
 	};
 
 	@Override
-	public void initialize(final String id, SensorManager sensorManager)
+	public final void initialize(final String id,
+			final SensorManager sensorManager)
 			throws SensorConfigurationException,
-			SensorInitializationFailedException {
-		this.id = id;
-		serviceConnection = new ServiceConnection() {
+			SensorSetupFailedException {
+		this.mId = id;
+		mServiceConnection = new ServiceConnection() {
 
 			@Override
-			public void onServiceDisconnected(ComponentName name) {
-				sensor = null;
+			public void onServiceDisconnected(final ComponentName name) {
+				mSensor = null;
 			}
 
 			@Override
-			public void onServiceConnected(ComponentName name, IBinder service) {
-				IAsynchronousContextSensor sensor = IAsynchronousContextSensor.Stub
-						.asInterface(service);
+			public void onServiceConnected(final ComponentName name,
+					final IBinder service) {
+				IAsynchronousContextSensor sensor =
+						IAsynchronousContextSensor.Stub.asInterface(service);
 				try {
-					sensor.register(id, valuePath, configuration);
-					registrationFailed = false;
+					sensor.register(id, mValuePath, mConfiguration);
+					mRegistrationFailed = false;
 				} catch (RemoteException e) {
 					LOG.error("Registration failed!", e);
-					registrationFailed = true;
+					mRegistrationFailed = true;
 				}
-				ContextTypedValue.this.sensor = sensor;
+				ContextTypedValue.this.mSensor = sensor;
 			}
 		};
 
-		sensorManager.bindToSensor(this, serviceConnection);
+		sensorManager.bindToSensor(this, mServiceConnection);
 	}
 
 	@Override
-	public void destroy(final String id, SensorManager sensorManager)
+	public final void destroy(final String id,
+			final SensorManager sensorManager)
 			throws ContextDroidException {
 		try {
-			sensor.unregister(id);
+			mSensor.unregister(id);
 		} catch (RemoteException e) {
 			throw new ContextDroidException(e);
 		}
 		LOG.debug("unbind sensor service from context typed value: {}", this);
-		sensorManager.unbindSensor(serviceConnection);
-		sensor = null;
+		sensorManager.unbindSensor(mServiceConnection);
+		mSensor = null;
 	}
 
 	@Override
-	public boolean hasCurrentTime() {
-		return "time".equals(entity) && "current".equals(valuePath);
-	}
-
-	public String toString() {
-		return entity + "/" + valuePath;// + ": " + configuration;
-	}
-
-	public void setNextEvaluationTime(long nextEvaluationTime) {
-		deferUntil = nextEvaluationTime;
+	public final boolean hasCurrentTime() {
+		return "time".equals(mEntity) && "current".equals(mValuePath);
 	}
 
 	@Override
-	public int compareTo(ContextTypedValue another) {
-		long difference = deferUntil - another.deferUntil;
+	public final String toString() {
+		return mEntity + "/" + mValuePath; // + ": " + configuration;
+	}
+
+	/**
+	 * Sets the next time this value should be evaluated.
+	 * @param nextEvaluationTime the next time to evaluate at.
+	 */
+	public final void setNextEvaluationTime(final long nextEvaluationTime) {
+		mDeferUntil = nextEvaluationTime;
+	}
+
+	@Override
+	public final int compareTo(final ContextTypedValue another) {
+		long difference = mDeferUntil - another.mDeferUntil;
 		if (difference == 0) {
 			return 0;
 		} else if (difference < 0) {

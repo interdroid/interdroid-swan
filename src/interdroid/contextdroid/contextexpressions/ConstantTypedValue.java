@@ -2,93 +2,116 @@ package interdroid.contextdroid.contextexpressions;
 
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.contextservice.SensorConfigurationException;
-import interdroid.contextdroid.contextservice.SensorInitializationFailedException;
+import interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.contextservice.SensorManager;
 import android.os.Parcel;
 
+/**
+ * Represents a typed expression which is a constant.
+ *
+ * @author roelof &lt;rkemp@cs.vu.nl&gt;
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class ConstantTypedValue extends TypedValue {
 
 	/**
-	 * 
+	 * Serial version uid.
 	 */
 	private static final long serialVersionUID = 662276894518278404L;
 
-	TimestampedValue[] values;
+	/**
+	 * The values of this constant.
+	 */
+	private TimestampedValue[] values;
 
-	public ConstantTypedValue(Object constantValue) {
+	/**
+	 * Constructs a constant with the given value.
+	 * @param constantValue the value of the constant.
+	 */
+	public ConstantTypedValue(final Object constantValue) {
+		super(HistoryReductionMode.NONE);
 		values = new TimestampedValue[] { new TimestampedValue(constantValue) };
 	}
 
-	private ConstantTypedValue() {
+	/**
+	 * Construct via Parcelable interface.
+	 * @param saved the saved values to read from.
+	 */
+	private ConstantTypedValue(final Parcel saved) {
+		super(saved);
+		readFromParcel(saved);
 	}
 
 	@Override
-	public TimestampedValue[] getValues(String id, long now) {
+	public final TimestampedValue[] getValues(final String id, final long now) {
 		return values;
 	}
 
 	@Override
-	public long deferUntil() {
+	public final long deferUntil() {
 		return Long.MAX_VALUE;
 	}
 
 	@Override
-	public int describeContents() {
+	public final int describeContents() {
 		return 0;
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags) {
+	protected final void writeSubclassToParcel(final Parcel dest,
+			final int flags) {
 		dest.writeParcelableArray(values, 0);
 	}
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */
-	public void readFromParcel(Parcel in) {
+	public final void readFromParcel(final Parcel in) {
 		values = (TimestampedValue[]) in.readParcelableArray(this.getClass()
 				.getClassLoader());
 	}
 
 	/** The CREATOR. */
-	public static ConstantTypedValue.Creator<ConstantTypedValue> CREATOR = new ConstantTypedValue.Creator<ConstantTypedValue>() {
+	public static final ConstantTypedValue.Creator<ConstantTypedValue> CREATOR =
+			new ConstantTypedValue.Creator<ConstantTypedValue>() {
 
 		@Override
-		public ConstantTypedValue createFromParcel(Parcel source) {
-			ConstantTypedValue v = new ConstantTypedValue();
-			v.readFromParcel(source);
+		public ConstantTypedValue createFromParcel(final Parcel source) {
+			ConstantTypedValue v = new ConstantTypedValue(source);
 			return v;
 		}
 
 		@Override
-		public ConstantTypedValue[] newArray(int size) {
+		public ConstantTypedValue[] newArray(final int size) {
 			return new ConstantTypedValue[size];
 		}
 	};
 
 	@Override
-	public void initialize(String id, SensorManager sensorManager)
+	public void initialize(final String id, final SensorManager sensorManager)
 			throws SensorConfigurationException,
-			SensorInitializationFailedException {
+			SensorSetupFailedException {
 		// nothing to do here
 	}
 
 	@Override
-	public boolean hasCurrentTime() {
+	public final boolean hasCurrentTime() {
 		return false;
 	}
 
 	@Override
-	public void destroy(String id, SensorManager sensorManager)
+	public void destroy(final String id, final SensorManager sensorManager)
 			throws ContextDroidException {
 		// nothing to do here
 	}
 
-	public String toString() {
-		return values[0].value.toString();
+	@Override
+	public final String toString() {
+		return values[0].getValue().toString();
 	}
 
 }

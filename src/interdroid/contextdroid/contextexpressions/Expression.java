@@ -3,11 +3,10 @@ package interdroid.contextdroid.contextexpressions;
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.contextservice.SensorConfigurationException;
-import interdroid.contextdroid.contextservice.SensorInitializationFailedException;
+import interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.contextservice.SensorManager;
 
 import java.io.Serializable;
-import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,15 @@ import org.slf4j.LoggerFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * A class which represents an Expression in ContextDroid.
+ *
+ * @author roelof &lt;rkemp@cs.vu.nl&gt;
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public class Expression implements Parcelable, Serializable,
-		Comparable<Expression> {
+Comparable<Expression> {
 	/**
 	 * Access to logger.
 	 */
@@ -28,142 +34,215 @@ public class Expression implements Parcelable, Serializable,
 	 */
 	private static final long serialVersionUID = 1056115630721395151L;
 
-	private static final String COMPARE_STRATEGY_ALL = "ALL";
-	private static final String COMPARE_STRATEGY_ANY = "ANY";
+	/**
+	 * True if this is a leaf node.
+	 */
+	private boolean mLeafNode;
 
-	boolean leafNode;
-	long deferUntil;
+	/**
+	 * Time until we need to reevaluate this expression.
+	 */
+	private long mDeferUntil;
 
-	Expression leftExpression;
-	Expression rightExpression;
+	/**
+	 * The left expression if this is not a leaf expression.
+	 */
+	private Expression mLeftExpression;
+	/**
+	 * The right expression if this is not a leaf expression.
+	 */
+	private Expression mRightExpression;
 
-	String operator;
+	/**
+	 * The operator if this is a leaf expression.
+	 */
+	private String mOperator;
 
-	TypedValue leftValue;
-	TypedValue rightValue;
+	/**
+	 * The left value if this is a leaf expression.
+	 */
+	private TypedValue mLeftValue;
 
-	String comparator;
-	String compareStrategy = COMPARE_STRATEGY_ALL;
+	/**
+	 * The right value if this is a leaf expression.
+	 */
+	private TypedValue mRightValue;
 
-	int result = ContextManager.UNDEFINED;
+	/**
+	 * The comparator being used if this is not a leaf.
+	 */
+	private ComparatorStrategy mComparator;
 
-	String id;
+	/**
+	 * The result of the expression.
+	 */
+	private int mResult = ContextManager.UNDEFINED;
 
-	private Expression(Parcel in) {
+	/**
+	 * The id for this expression.
+	 */
+	private String mId;
+
+	/**
+	 * Constructs an expression from a parcel.
+	 * @param in the parcel to read from.
+	 */
+	private Expression(final Parcel in) {
 		readFromParcel(in);
 	}
 
-	public Expression(Expression left, String operator, Expression right) {
-		this.leafNode = false;
-		this.leftExpression = left;
-		this.rightExpression = right;
-		this.operator = operator;
+	/**
+	 * Constructs a non leaf node expression.
+	 * @param left the left expression.
+	 * @param operator the joining operator.
+	 * @param right the right expression.
+	 */
+	public Expression(final Expression left, final String operator,
+			final Expression right) {
+		this.mLeafNode = false;
+		this.mLeftExpression = left;
+		this.mRightExpression = right;
+		this.mOperator = operator;
 	}
 
-	public Expression(String operator, Expression expression) {
+	/**
+	 * Constructs a non leaf node expression with no right expression.
+	 * @param operator the operator.
+	 * @param expression the left expression.
+	 */
+	public Expression(final String operator, final Expression expression) {
 		this(expression, operator, null);
 	}
 
-	public Expression(TypedValue left, String comparator, TypedValue right) {
-		this.leafNode = true;
-		this.leftValue = left;
-		this.rightValue = right;
-		Scanner scanner = new Scanner(comparator);
-		this.comparator = scanner.next();
-		if (scanner.hasNext()) {
-			String strategy = scanner.next();
-			if (COMPARE_STRATEGY_ALL.equals(strategy)) {
-				compareStrategy = COMPARE_STRATEGY_ALL;
-			} else if (COMPARE_STRATEGY_ANY.equals(strategy)) {
-				compareStrategy = COMPARE_STRATEGY_ANY;
-			} else {
-				throw new AssertionError("Invalid compare strategy: '"
-						+ strategy + "', can only be " + COMPARE_STRATEGY_ALL
-						+ " or " + COMPARE_STRATEGY_ANY);
-			}
-		}
+	/**
+	 * Constructs a leaf expression.
+	 * @param left the left value
+	 * @param comparator the comparator, possibly including strategy
+	 * @param right the right value
+	 */
+	public Expression(final TypedValue left, final String comparator,
+			final TypedValue right) {
+		this.mLeafNode = true;
+		this.mLeftValue = left;
+		this.mRightValue = right;
+		this.mComparator = ComparatorStrategy.parse(comparator);
 
 	}
 
-	public String getId() {
-		return id;
+	/**
+	 * @return the ID for this expression.
+	 */
+	public final String getId() {
+		return mId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	/**
+	 * Sets the ID for this expression.
+	 * @param id the id to set to
+	 */
+	public final void setId(final String id) {
+		this.mId = id;
 	}
 
-	public void initialize(String id, SensorManager sensorManager)
-			throws SensorConfigurationException,
-			SensorInitializationFailedException {
-		this.id = id;
-		if (leafNode) {
-			leftValue.initialize(id + ".L", sensorManager);
-			if (rightValue != null) {
-				rightValue.initialize(id + ".R", sensorManager);
-			}
-		} else {
-			leftExpression.initialize(id + ".L", sensorManager);
-			if (rightExpression != null) {
-				rightExpression.initialize(id + ".R", sensorManager);
-			}
-		}
-	}
-
-	public void destroy(String id, SensorManager sensorManager)
-			throws ContextDroidException {
-		if (leafNode) {
-			leftValue.destroy(id + ".L", sensorManager);
-			if (rightValue != null) {
-				rightValue.destroy(id + ".R", sensorManager);
+	/**
+	 * Initializes this expression tree with the sensor manager.
+	 * @param id the id of the expression
+	 * @param sensorManager the sensor manager to initialize with
+	 * @throws SensorConfigurationException
+	 * 	if the sensor does not accept the configuration for the expression.
+	 * @throws SensorSetupFailedException if initializing fails.
+	 */
+	public final void initialize(final String id,
+			final SensorManager sensorManager)
+					throws SensorConfigurationException,
+					SensorSetupFailedException {
+		this.mId = id;
+		if (mLeafNode) {
+			mLeftValue.initialize(id + ".L", sensorManager);
+			if (mRightValue != null) {
+				mRightValue.initialize(id + ".R", sensorManager);
 			}
 		} else {
-			leftExpression.destroy(id + ".L", sensorManager);
-			if (rightExpression != null) {
-				rightExpression.destroy(id + ".R", sensorManager);
+			mLeftExpression.initialize(id + ".L", sensorManager);
+			if (mRightExpression != null) {
+				mRightExpression.initialize(id + ".R", sensorManager);
 			}
 		}
 	}
 
-	public boolean evaluate() throws ContextDroidException {
-		int previousResult = result;
+	/**
+	 * Destroys this expression with the sensor manager.
+	 * @param id the id for this expression.
+	 * @param sensorManager the sensor manager to destroy with
+	 * @throws ContextDroidException if something goes wrong.
+	 */
+	public final void destroy(final String id,
+			final SensorManager sensorManager)
+					throws ContextDroidException {
+		if (mLeafNode) {
+			mLeftValue.destroy(id + ".L", sensorManager);
+			if (mRightValue != null) {
+				mRightValue.destroy(id + ".R", sensorManager);
+			}
+		} else {
+			mLeftExpression.destroy(id + ".L", sensorManager);
+			if (mRightExpression != null) {
+				mRightExpression.destroy(id + ".R", sensorManager);
+			}
+		}
+	}
+
+	/**
+	 * @return the result of the expression.
+	 * @throws ContextDroidException if something goes wrong.
+	 */
+	public final boolean evaluate() throws ContextDroidException {
+		int previousResult = mResult;
 		evaluate(System.currentTimeMillis());
-		return previousResult != result;
+		return previousResult != mResult;
 	}
 
+	/**
+	 * Evaluates this expression given the requested time.
+	 * @param now the epoch time to evaluate the expression at in milliseconds
+	 * @throws ContextDroidException if something goes wrong.
+	 */
 	// TODO: shortcircuit some non leaf node evaluations
 	// left = TRUE, comparator = &&
-	void evaluate(long now) throws ContextDroidException {
-		if (now < deferUntil) {
-			LOG.debug("not evaluating");
+	public final void evaluate(final long now) throws ContextDroidException {
+		if (now < mDeferUntil) {
+			LOG.debug("deffered until: {} not evaluating", mDeferUntil);
 			return;
 		}
-		if (leafNode) {
+		if (mLeafNode) {
 			try {
 				evaluateLeafNode(now);
 			} catch (NoValuesInIntervalException e) {
 				setResult(ContextManager.UNDEFINED);
 			}
 		} else {
-			leftExpression.evaluate(now);
-			if (rightExpression != null) {
-				rightExpression.evaluate(now);
-				deferUntil = Math.min(leftExpression.deferUntil,
-						rightExpression.deferUntil);
+			mLeftExpression.evaluate(now);
+			if (mRightExpression != null) {
+				mRightExpression.evaluate(now);
+				mDeferUntil = Math.min(mLeftExpression.mDeferUntil,
+						mRightExpression.mDeferUntil);
 			} else {
-				deferUntil = leftExpression.deferUntil;
+				mDeferUntil = mLeftExpression.mDeferUntil;
 			}
 			evaluateNonLeafNode();
 		}
 	}
 
+	/**
+	 * Evaluates a non leaf node.
+	 */
 	private void evaluateNonLeafNode() {
-		int leftResult = leftExpression.getResult();
+		int leftResult = mLeftExpression.getResult();
 		int rightResult = ContextManager.UNDEFINED;
-		if (rightExpression != null) {
-			rightExpression.getResult();
+		if (mRightExpression != null) {
+			mRightExpression.getResult();
 		}
-		if ("!".equals(operator)) {
+		if ("!".equals(mOperator)) {
 			if (leftResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
 			} else if (leftResult == ContextManager.TRUE) {
@@ -171,7 +250,7 @@ public class Expression implements Parcelable, Serializable,
 			} else if (leftResult == ContextManager.FALSE) {
 				setResult(ContextManager.TRUE);
 			}
-		} else if ("&&".equals(operator)) {
+		} else if ("&&".equals(mOperator)) {
 			if (leftResult == ContextManager.UNDEFINED
 					|| rightResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
@@ -181,7 +260,7 @@ public class Expression implements Parcelable, Serializable,
 			} else {
 				setResult(ContextManager.FALSE);
 			}
-		} else if ("||".equals(operator)) {
+		} else if ("||".equals(mOperator)) {
 			if (leftResult == ContextManager.UNDEFINED
 					&& rightResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
@@ -194,19 +273,28 @@ public class Expression implements Parcelable, Serializable,
 		}
 	}
 
-	private void evaluateLeafNode(long now) throws ContextDroidException,
-			NoValuesInIntervalException {
-		TimestampedValue[] left = leftValue.getValues(id + ".L", now);
-		TimestampedValue[] right = rightValue.getValues(id + ".R", now);
+	/**
+	 * Evaluates a leaf node.
+	 * @param now the time to evaluate at
+	 * @throws ContextDroidException if something goes wrong.
+	 */
+	private void evaluateLeafNode(final long now) throws ContextDroidException {
+		TimestampedValue[] left = mLeftValue.getValues(mId + ".L", now);
+		TimestampedValue[] right = mRightValue.getValues(mId + ".R", now);
 
-		int endResult = (compareStrategy.equals(COMPARE_STRATEGY_ALL)) ? ContextManager.TRUE
-				: ContextManager.FALSE;
+		int endResult;
+		if (mComparator.getStrategy().equals(Strategy.ALL)) {
+			endResult = ContextManager.TRUE;
+		} else {
+			endResult = ContextManager.FALSE;
+		}
 
 		for (TimestampedValue leftItem : left) {
 			for (TimestampedValue rightItem : right) {
-				int tempResult = evaluateLeafItem(leftItem.value,
-						rightItem.value);
-				if (compareStrategy.equals(COMPARE_STRATEGY_ALL)) {
+				int tempResult = evaluateLeafItem(leftItem.getValue(),
+						rightItem.getValue());
+				if (mComparator.getStrategy()
+						.equals(Strategy.ALL)) {
 					if (tempResult == ContextManager.FALSE) {
 						setResult(now, ContextManager.FALSE, left, right);
 						return;
@@ -227,119 +315,170 @@ public class Expression implements Parcelable, Serializable,
 		setResult(now, endResult, left, right);
 	}
 
-	private void setResult(long now, int result, Object[] left, Object[] right) {
-		if (result == ContextManager.UNDEFINED) {
-			setResult(result);
+	/**
+	 * Sets the result for the given expression.
+	 * @param now the time that was evaluated
+	 * @param newResult the result of the evaluation
+	 * @param left the left values
+	 * @param right the right values
+	 */
+	private void setResult(final long now, final int newResult,
+			final Object[] left, final Object[] right) {
+		if (newResult == ContextManager.UNDEFINED) {
+			setResult(newResult);
 			return;
 		}
 		// TODO: cache these values?
-		if (!leftValue.hasCurrentTime() && !rightValue.hasCurrentTime()) {
-			deferUntil = Math.min(leftValue.deferUntil(),
-					rightValue.deferUntil());
-			setResult(result);
+		if (!mLeftValue.hasCurrentTime() && !mRightValue.hasCurrentTime()) {
+			mDeferUntil = Math.min(mLeftValue.deferUntil(),
+					mRightValue.deferUntil());
+			setResult(newResult);
 			return;
 		}
 
 		// TODO: think about when left or right is an array
-		long leftTime = (Long) ((TimestampedValue) left[0]).value;
-		long rightTime = (Long) ((TimestampedValue) right[0]).value;
+		long leftTime = (Long) ((TimestampedValue) left[0]).getValue();
+		long rightTime = (Long) ((TimestampedValue) right[0]).getValue();
 
-		// we're dealing with current time, now do something smart
-		if (("<".equals(comparator) || "<=".equals(comparator))) {
-			if (leftValue.hasCurrentTime()) {
-				if (result == ContextManager.TRUE) {
+		switch (mComparator.getComparator()) {
+		case LESS_THAN:
+		case LESS_THAN_OR_EQUALS:
+			if (mLeftValue.hasCurrentTime()) {
+				if (newResult == ContextManager.TRUE) {
 					// set defer until to right - left
-					deferUntil = now + rightTime - leftTime;
+					mDeferUntil = now + rightTime - leftTime;
 				} else {
 					// it's FALSE and won't be TRUE anymore
-					deferUntil = Long.MAX_VALUE;
+					mDeferUntil = Long.MAX_VALUE;
 				}
 			} else {
 				// right has current time
-				if (result == ContextManager.TRUE) {
+				if (newResult == ContextManager.TRUE) {
 					// it's TRUE and won't be FALSE anymore
-					deferUntil = Long.MAX_VALUE;
+					mDeferUntil = Long.MAX_VALUE;
 				} else {
 					// set defer until to left - right
-					deferUntil = now + leftTime - rightTime;
+					mDeferUntil = now + leftTime - rightTime;
 				}
 			}
-		} else if ((">".equals(comparator) || ">=".equals(comparator))) {
-			if (leftValue.hasCurrentTime()) {
-				if (result == ContextManager.TRUE) {
+			break;
+		case GREATER_THAN:
+		case GREATER_THAN_OR_EQUALS:
+			if (mLeftValue.hasCurrentTime()) {
+				if (newResult == ContextManager.TRUE) {
 					// it's TRUE and won't be FALSE anymore
-					deferUntil = Long.MAX_VALUE;
+					mDeferUntil = Long.MAX_VALUE;
 				} else {
 					// set defer until to right - left
-					deferUntil = now + rightTime - leftTime;
+					mDeferUntil = now + rightTime - leftTime;
 				}
 			} else {
-				if (result == ContextManager.TRUE) {
+				if (newResult == ContextManager.TRUE) {
 					// set defer until to left - right
-					deferUntil = now + leftTime - rightTime;
+					mDeferUntil = now + leftTime - rightTime;
 				} else {
 					// it's FALSE and won't be TRUE anymore
-					deferUntil = Long.MAX_VALUE;
+					mDeferUntil = Long.MAX_VALUE;
 				}
 			}
+			break;
+		default:
+			break;
 		}
 	}
 
-	private int evaluateLeafItem(Object left, Object right) {
-		if ("<".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result < 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if ("<=".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result <= 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if (">".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result > 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if (">=".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result >= 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if ("==".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result == 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if ("!=".equals(comparator)) {
-			int result = ((Comparable) left).compareTo(((Comparable) right));
-			return (result != 0) ? ContextManager.TRUE : ContextManager.FALSE;
-		} else if ("regexp".equals(comparator)) {
-			return ((String) left).matches((String) right) ? ContextManager.TRUE
-					: ContextManager.FALSE;
-		} else if ("contains".equals(comparator)) {
-			return ((String) left).contains((String) right) ? ContextManager.TRUE
-					: ContextManager.FALSE;
+	/**
+	 * Evaluates a leaf item performing the comparison.
+	 * @param left the left side values
+	 * @param right the right side values
+	 * @return ContextManager.FALSE or ContextManager.TRUE
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private int evaluateLeafItem(final Object left, final Object right) {
+		int result = ContextManager.FALSE;
+		switch (mComparator.getComparator()) {
+		case LESS_THAN:
+			if (((Comparable) left).compareTo(right) < 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case LESS_THAN_OR_EQUALS:
+			if (((Comparable) left).compareTo(right) <= 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case GREATER_THAN:
+			if (((Comparable) left).compareTo(right) > 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case GREATER_THAN_OR_EQUALS:
+			if (((Comparable) left).compareTo(right) >= 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case EQUALS:
+			if (((Comparable) left).compareTo(right) == 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case EQUALS_NOT:
+			if (((Comparable) left).compareTo(right) != 0) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case REGEX_MATCH:
+			if (((String) left).matches((String) right)) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		case STRING_CONTAINS:
+			if (((String) left).contains((String) right)) {
+				result = ContextManager.TRUE;
+			}
+			break;
+		default:
+			throw new AssertionError("Unknown comparator '" + mComparator
+					+ "'. Should not happen");
 		}
-		throw new AssertionError("Unknown comparator '" + comparator
-				+ "'. Should not happen");
-	}
-
-	public void setResult(int result) {
-		this.result = result;
-	}
-
-	public int getResult() {
 		return result;
 	}
 
+	/**
+	 * Sets the result of the last evaluation.
+	 * @param newResult the result to set to.
+	 */
+	protected final void setResult(final int newResult) {
+		mResult = newResult;
+	}
+
+	/**
+	 * @return the result of the last evaluation.
+	 */
+	public final int getResult() {
+		return mResult;
+	}
+
 	@Override
-	public int describeContents() {
+	public final int describeContents() {
 		return 0;
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(leafNode ? 1 : 0);
-		if (leafNode) {
-			dest.writeParcelable(leftValue, 0);
-			dest.writeParcelable(rightValue, 0);
-			dest.writeString(comparator);
-			dest.writeString(compareStrategy);
+	public final void writeToParcel(final Parcel dest, final int flags) {
+		if (mLeafNode) {
+			dest.writeInt(1);
 		} else {
-			dest.writeParcelable(leftExpression, 0);
-			dest.writeParcelable(rightExpression, 0);
-			dest.writeString(operator);
+			dest.writeInt(0);
+		}
+		if (mLeafNode) {
+			dest.writeParcelable(mLeftValue, 0);
+			dest.writeParcelable(mRightValue, 0);
+			dest.writeInt(mComparator.convert());
+		} else {
+			dest.writeParcelable(mLeftExpression, 0);
+			dest.writeParcelable(mRightExpression, 0);
+			dest.writeString(mOperator);
 		}
 	}
 
@@ -349,46 +488,53 @@ public class Expression implements Parcelable, Serializable,
 	 * @param in
 	 *            the in
 	 */
-	public void readFromParcel(Parcel in) {
-		leafNode = (in.readInt() == 1);
-		if (leafNode) {
-			leftValue = in.readParcelable(this.getClass().getClassLoader());
-			rightValue = in.readParcelable(this.getClass().getClassLoader());
-			comparator = in.readString();
-			compareStrategy = in.readString();
+	private void readFromParcel(final Parcel in) {
+		mLeafNode = (in.readInt() == 1);
+		if (mLeafNode) {
+			mLeftValue = in.readParcelable(this.getClass().getClassLoader());
+			mRightValue = in.readParcelable(this.getClass().getClassLoader());
+			mComparator = ComparatorStrategy.convert(in.readInt());
 		} else {
-			leftExpression = in
+			mLeftExpression = in
 					.readParcelable(this.getClass().getClassLoader());
-			rightExpression = in.readParcelable(this.getClass()
+			mRightExpression = in.readParcelable(this.getClass()
 					.getClassLoader());
-			operator = in.readString();
+			mOperator = in.readString();
 		}
 	}
 
 	/** The CREATOR. */
-	public static Expression.Creator<Expression> CREATOR = new Expression.Creator<Expression>() {
+	public static final Expression.Creator<Expression> CREATOR =
+			new Expression.Creator<Expression>() {
 
 		@Override
-		public Expression createFromParcel(Parcel source) {
+		public Expression createFromParcel(final Parcel source) {
 			return new Expression(source);
 		}
 
 		@Override
-		public Expression[] newArray(int size) {
+		public Expression[] newArray(final int size) {
 			return new Expression[size];
 		}
 	};
 
-	public void setNextEvaluationTime(long evaluateAt) {
-		deferUntil = evaluateAt;
+	/**
+	 * Sets the next time this expression should be evaluated.
+	 * @param evaluateAt the time to evalue next at
+	 */
+	public final void setNextEvaluationTime(final long evaluateAt) {
+		mDeferUntil = evaluateAt;
 	}
 
-	public long getNextEvaluationTime() {
-		return deferUntil;
+	/**
+	 * @return the next time this expression should be evaluated
+	 */
+	public final long getNextEvaluationTime() {
+		return mDeferUntil;
 	}
 
 	@Override
-	public int compareTo(Expression another) {
+	public final int compareTo(final Expression another) {
 		long difference = getNextEvaluationTime()
 				- another.getNextEvaluationTime();
 		if (difference == 0) {
@@ -400,32 +546,40 @@ public class Expression implements Parcelable, Serializable,
 		}
 	}
 
-	public String toString() {
-		if (id != null) {
-			return id;
+	@Override
+	public final String toString() {
+		if (mId != null) {
+			return mId;
 		}
-		if (leafNode) {
-			return leftValue + " " + comparator + " " + rightValue;
+		if (mLeafNode) {
+			return mLeftValue + " " + mComparator + " " + mRightValue;
 		} else {
-			if (rightExpression == null) {
-				return operator + "(" + leftExpression + ")";
+			if (mRightExpression == null) {
+				return mOperator + "(" + mLeftExpression + ")";
 			} else {
-				return "(" + leftExpression + " " + operator + " "
-						+ rightExpression + ")";
+				return "(" + mLeftExpression + " " + mOperator + " "
+						+ mRightExpression + ")";
 			}
 		}
 	}
 
-	public TypedValue getTypedValue(boolean left) {
+	/**
+	 * @param left true if the side desired is the left side
+	 * @return the typedValue side requested or null
+	 */
+	public final TypedValue getTypedValue(final boolean left) {
 		if (left) {
-			return leftValue;
+			return mLeftValue;
 		} else {
-			return rightValue;
+			return mRightValue;
 		}
 	}
 
-	public String getComparator() {
-		return comparator;
+	/**
+	 * @return the comparison strategy for this expression.
+	 */
+	public final ComparatorStrategy getComparator() {
+		return mComparator;
 	}
 
 }

@@ -51,10 +51,10 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 					int startPos = 0;
 					int endPos = 0;
 					for (int i = 0; i < values.size(); i++) {
-						if ((now - timespan) > values.get(i).timestamp) {
+						if ((now - timespan) > values.get(i).getTimestamp()) {
 							startPos++;
 						}
-						if (now > values.get(i).timestamp) {
+						if (now > values.get(i).getTimestamp()) {
 							endPos++;
 						}
 					}
@@ -83,10 +83,11 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 	/** The context manager. */
 	protected SensorContextServiceConnector contextServiceConnector;
 
-	private HashMap<String, Boolean> notified = new HashMap<String, Boolean>();
+	private final HashMap<String, Boolean> notified = new HashMap<String, Boolean>();
 
 	public abstract void initDefaultConfiguration(Bundle defaults);
 
+	@Override
 	public abstract String[] getValuePaths();
 
 	/*

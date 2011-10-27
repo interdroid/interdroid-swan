@@ -85,16 +85,18 @@ public class IntentSensor extends AbstractMemorySensor {
 						public void onReading(String relayedId,
 								TimestampedValue[] newValues) {
 							// values is always of length 1
-							if (newValues[0].value.toString().contains(
+							if (newValues[0].getValue().toString().contains(
 									"Starting: Intent {")) {
 								if (getValues().size() >= HISTORY_SIZE) {
 									getValues().remove(0);
 								}
 								getValues().get(valuePath)
 										.add(new TimestampedValue(
-												getIntentFrom(newValues[0].value),
-												newValues[0].timestamp,
-												newValues[0].expireTime));
+												getIntentFrom(
+														newValues[0]
+																.getValue()),
+												newValues[0].getTimestamp(),
+												newValues[0].getExpireTime()));
 								notifyDataChangedForId(id);
 							}
 

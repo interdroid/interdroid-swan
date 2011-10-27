@@ -49,10 +49,10 @@ public class SensorManager {
 
 	public void bindToSensor(ContextTypedValue value,
 			ServiceConnection connection) throws SensorConfigurationException,
-			SensorInitializationFailedException {
+			SensorSetupFailedException {
 		try {
 			bindToSensor(value, connection, false);
-		} catch (SensorInitializationFailedException e) {
+		} catch (SensorSetupFailedException e) {
 			// retry with discovery to true
 			bindToSensor(value, connection, true);
 		}
@@ -64,7 +64,7 @@ public class SensorManager {
 	private void bindToSensor(ContextTypedValue value,
 			ServiceConnection connection, boolean discover)
 			throws SensorConfigurationException,
-			SensorInitializationFailedException {
+			SensorSetupFailedException {
 		if (discover) {
 			discover();
 		}
@@ -80,7 +80,7 @@ public class SensorManager {
 				return;
 			}
 		}
-		throw new SensorInitializationFailedException(
+		throw new SensorSetupFailedException(
 				"Failed to bind to service for: " + value.toString());
 	}
 

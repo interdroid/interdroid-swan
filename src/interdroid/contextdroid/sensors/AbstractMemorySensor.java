@@ -27,7 +27,7 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	/**
 	 * The map of values for this sensor.
 	 */
-	private Map<String, List<TimestampedValue>> values =
+	private final Map<String, List<TimestampedValue>> values =
 			new HashMap<String, List<TimestampedValue>>();
 
 
@@ -38,6 +38,7 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 		return values;
 	}
 
+	@Override
 	public void init() {
 		for (String valuePath : VALUE_PATHS) {
 			expressionIdsPerValuePath.put(valuePath, new ArrayList<String>());
@@ -64,12 +65,13 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	protected void trimValueByTime(long expire) {
 		for (String valuePath : VALUE_PATHS) {
 			while ((getValues().get(valuePath).size() > 0
-					&& getValues().get(valuePath).get(0).timestamp < expire)) {
+					&& getValues().get(valuePath).get(0).getTimestamp() < expire)) {
 				getValues().get(valuePath).remove(0);
 			}
 		}
 	}
 
+	@Override
 	public final List<TimestampedValue> getValues(final String id,
 			final long now, final long timespan) {
 		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),

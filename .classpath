@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="interdroid/contextdroid/contextexpressions/package_info.java|interdroid/contextdroid/contextexpressions/package-info.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="lib" path="/vdb/external/avro-1.6.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/ibis-util-2.2.jar"/>
@@ -9,11 +9,11 @@
 	<classpathentry kind="lib" path="/vdb/external/jackson-mapper-asl-1.7.3.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/jsch-0.1.44-1.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/paranamer-2.3.jar"/>
-	<classpathentry kind="src" path="slf4android_src"/>
 	<classpathentry kind="lib" path="/slf4android/external/slf4j-1.6.2/slf4j-api-1.6.2.jar" sourcepath="/slf4android/external/slf4j-1.6.2"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.jgit"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/smartsockets"/>
 	<classpathentry kind="lib" path="/vdb/vdb.jar" sourcepath="/vdb/src"/>
 	<classpathentry kind="lib" path="external/scribe-1.2.0.jar"/>
+	<classpathentry kind="src" path="slf4android_src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

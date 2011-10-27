@@ -21,6 +21,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
@@ -58,6 +60,20 @@ public class ContextService extends Service {
 	/** The context entities, mapped by id. */
 	private HashMap<String, ContextTypedValue> contextTypedValues =
 			new HashMap<String, ContextTypedValue>();
+
+	/**
+	 * Handles boot notifications so we can reregister expressions.
+	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 *
+	 */
+	public static class BootHandler extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			LOG.debug("Got boot notification!");
+		}
+
+	}
 
 	/** The evaluation queue. */
 	private PriorityQueue<Expression> evaluationQueue = new PriorityQueue<Expression>();
@@ -380,14 +396,15 @@ public class ContextService extends Service {
 		sendBroadcast(broadcastIntent);
 	}
 
-	/** The remote interface */
+	/** The remote interface. */
 	private final IContextService.Stub mBinder = new IContextService.Stub() {
 
 		@Override
 		public ContextDroidServiceException addContextExpression(
 				final String expressionId, final Expression expression)
 						throws RemoteException {
-			LOG.debug("Adding context expression: {}. {}", expressionId, expression);
+			LOG.debug("Adding context expression: {}. {}",
+					expressionId, expression);
 			// check whether there already exists an expression with the given
 			// identifier, handle appropriately
 
@@ -504,7 +521,7 @@ public class ContextService extends Service {
 				contextTypedValue.initialize(id, sensorManager);
 			} catch (SensorConfigurationException e) {
 				return new ContextDroidServiceException(e);
-			} catch (SensorInitializationFailedException e) {
+			} catch (SensorSetupFailedException e) {
 				return new ContextDroidServiceException(e);
 			}
 			synchronized (contextTypedValueQueue) {
