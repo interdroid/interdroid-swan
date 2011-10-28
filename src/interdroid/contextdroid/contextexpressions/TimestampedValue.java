@@ -222,7 +222,7 @@ implements Serializable, Parcelable, Comparable<TimestampedValue> {
 	 * @param in
 	 *            the in
 	 */
-	public final void readFromParcel(final Parcel in) {
+	private void readFromParcel(final Parcel in) {
 		mTimestamp = in.readLong();
 		mExpireTime = in.readLong();
 		mValue = in.readValue(

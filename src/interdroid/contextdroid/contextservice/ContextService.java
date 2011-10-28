@@ -180,7 +180,7 @@ public class ContextService extends Service {
 					}
 				} else {
 					synchronized (contextTypedValueQueue) {
-						long waitingTime = value.deferUntil()
+						long waitingTime = value.getDeferUntil()
 								- System.currentTimeMillis();
 						if (waitingTime > 0) {
 							try {

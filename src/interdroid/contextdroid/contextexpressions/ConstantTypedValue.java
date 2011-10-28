@@ -49,7 +49,7 @@ public class ConstantTypedValue extends TypedValue {
 	}
 
 	@Override
-	public final long deferUntil() {
+	public final long getDeferUntil() {
 		return Long.MAX_VALUE;
 	}
 
@@ -99,7 +99,7 @@ public class ConstantTypedValue extends TypedValue {
 	}
 
 	@Override
-	public final boolean hasCurrentTime() {
+	protected final boolean hasCurrentTime() {
 		return false;
 	}
 

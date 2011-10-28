@@ -6,7 +6,9 @@ import interdroid.contextdroid.SensorServiceInfo;
 import interdroid.contextdroid.contextexpressions.ConstantTypedValue;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
+import interdroid.contextdroid.contextexpressions.LogicExpression;
 import interdroid.contextdroid.contextexpressions.TypedValue;
+import interdroid.contextdroid.contextexpressions.ValueExpression;
 import interdroid.contextdroid.contextservice.SensorManager;
 
 import java.util.ArrayList;
@@ -155,10 +157,10 @@ public class ExpressionBuilderActivity extends Activity {
 					public void onClick(View v) {
 						String comparator = ((Button) findViewById(R.id.typedvalue_comparator))
 								.getText().toString();
-						Expression expression = new Expression(leftValue,
+						Expression expression = new ValueExpression(leftValue,
 								comparator, rightValue);
 						if (not) {
-							expressions.add(new Expression("!", expression));
+							expressions.add(new LogicExpression("!", expression));
 						} else {
 							expressions.add(expression);
 						}
@@ -224,7 +226,7 @@ public class ExpressionBuilderActivity extends Activity {
 					public void onClick(View v) {
 						String operator = ((Button) findViewById(R.id.expression_operator))
 								.getText().toString();
-						expressions.add(new Expression(leftExpression,
+						expressions.add(new LogicExpression(leftExpression,
 								operator, rightExpression));
 						checkExpressionEnabled();
 						expressionlistAdapter.notifyDataSetChanged();

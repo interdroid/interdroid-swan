@@ -31,7 +31,7 @@ public class CombinedTypedValue extends TypedValue {
 	private TypedValue mRight;
 
 	/** The combination operator for this expression. */
-	private Operator mOperator;
+	private MathOperator mOperator;
 
 	/**
 	 * Constructs a combined typed value with no history reduction.
@@ -39,8 +39,8 @@ public class CombinedTypedValue extends TypedValue {
 	 * @param operator the operator
 	 * @param right the right side.
 	 */
-	public CombinedTypedValue(final TypedValue left, final Operator operator,
-			final TypedValue right) {
+	public CombinedTypedValue(final TypedValue left,
+			final MathOperator operator, final TypedValue right) {
 		this(left, operator, right, HistoryReductionMode.NONE);
 	}
 
@@ -51,8 +51,9 @@ public class CombinedTypedValue extends TypedValue {
 	 * @param right the right side.
 	 * @param mode the history reduction mode
 	 */
-	public CombinedTypedValue(final TypedValue left, final Operator operator,
-			final TypedValue right, final HistoryReductionMode mode) {
+	public CombinedTypedValue(final TypedValue left,
+			final MathOperator operator, final TypedValue right,
+			final HistoryReductionMode mode) {
 		super(mode);
 		this.mLeft = left;
 		this.mRight = right;
@@ -100,7 +101,7 @@ public class CombinedTypedValue extends TypedValue {
 	 * @return the timestamped values
 	 * @throws ContextDroidException if someting goes wrong
 	 */
-	public final TimestampedValue operate(final TimestampedValue left,
+	private TimestampedValue operate(final TimestampedValue left,
 			final TimestampedValue right) throws ContextDroidException {
 		if (left.getValue() instanceof Double
 				&& right.getValue() instanceof Double) {
@@ -240,8 +241,8 @@ public class CombinedTypedValue extends TypedValue {
 	}
 
 	@Override
-	public final long deferUntil() {
-		return Math.min(mLeft.deferUntil(), mRight.deferUntil());
+	public final long getDeferUntil() {
+		return Math.min(mLeft.getDeferUntil(), mRight.getDeferUntil());
 	}
 
 	@Override
@@ -266,7 +267,7 @@ public class CombinedTypedValue extends TypedValue {
 	private void readFromParcel(final Parcel in) {
 		mLeft = in.readParcelable(this.getClass().getClassLoader());
 		mRight = in.readParcelable(this.getClass().getClassLoader());
-		mOperator = Operator.convert(in.readInt());
+		mOperator = MathOperator.convert(in.readInt());
 	}
 
 	/** The CREATOR. */
@@ -303,7 +304,7 @@ public class CombinedTypedValue extends TypedValue {
 	}
 
 	@Override
-	public final boolean hasCurrentTime() {
+	protected final boolean hasCurrentTime() {
 		return mLeft.hasCurrentTime() || mRight.hasCurrentTime();
 	}
 

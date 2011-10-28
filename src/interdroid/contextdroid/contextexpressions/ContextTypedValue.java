@@ -213,7 +213,7 @@ public class ContextTypedValue extends TypedValue implements
 	}
 
 	@Override
-	public final long deferUntil() {
+	public final long getDeferUntil() {
 		return mDeferUntil;
 	}
 

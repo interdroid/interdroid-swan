@@ -58,7 +58,7 @@ public abstract class TypedValue implements Serializable, Parcelable {
 	/**
 	 * @return the time until this should be evaluated again.
 	 */
-	public abstract long deferUntil();
+	public abstract long getDeferUntil();
 
 	/**
 	 * Applies the reduction mode to the values.
@@ -108,7 +108,7 @@ public abstract class TypedValue implements Serializable, Parcelable {
 	/**
 	 * @return true if this value has the current time.
 	 */
-	public abstract boolean hasCurrentTime();
+	protected abstract boolean hasCurrentTime();
 
 	/**
 	 * Sets values from a parcel.
