@@ -34,27 +34,14 @@ public class CombinedTypedValue extends TypedValue {
 	private MathOperator mOperator;
 
 	/**
-	 * Constructs a combined typed value with no history reduction.
+	 * Constructs a combined typed value with history reduction.
 	 * @param left the left side
 	 * @param operator the operator
 	 * @param right the right side.
 	 */
 	public CombinedTypedValue(final TypedValue left,
 			final MathOperator operator, final TypedValue right) {
-		this(left, operator, right, HistoryReductionMode.NONE);
-	}
-
-	/**
-	 * Constructs a combined typed value with history reduction.
-	 * @param left the left side
-	 * @param operator the operator
-	 * @param right the right side.
-	 * @param mode the history reduction mode
-	 */
-	public CombinedTypedValue(final TypedValue left,
-			final MathOperator operator, final TypedValue right,
-			final HistoryReductionMode mode) {
-		super(mode);
+		super(HistoryReductionMode.NONE);
 		this.mLeft = left;
 		this.mRight = right;
 		this.mOperator = operator;
@@ -306,6 +293,12 @@ public class CombinedTypedValue extends TypedValue {
 	@Override
 	protected final boolean hasCurrentTime() {
 		return mLeft.hasCurrentTime() || mRight.hasCurrentTime();
+	}
+
+	@Override
+	public final String toParseString() {
+		return mLeft.toParseString() + " " + mOperator.toParseString()
+				+ " " + mRight.toParseString();
 	}
 
 }

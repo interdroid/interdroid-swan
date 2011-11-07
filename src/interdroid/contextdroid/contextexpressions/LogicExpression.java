@@ -47,29 +47,11 @@ public class LogicExpression extends Expression {
 	}
 
 	/**
-	 * Constructs am operator expression.
-	 * @param left the left expression.
-	 * @param operator the joining operator.
-	 * @param right the right expression.
-	 * @deprecated use the LogicOperator version
-	 */
-	@Deprecated
-	public LogicExpression(final Expression left, final String operator,
-			final Expression right) {
-		this.mLeftExpression = left;
-		this.mRightExpression = right;
-		this.mOperator = LogicOperator.valueOf(operator);
-		if (this.mOperator == null) {
-			throw new IllegalArgumentException("Unknown operator.");
-		}
-	}
-
-	/**
 	 * Constructs an operator expression with no right expression.
 	 * @param operator the operator.
 	 * @param expression the left expression.
 	 */
-	public LogicExpression(final String operator,
+	public LogicExpression(final LogicOperator operator,
 			final Expression expression) {
 		this(expression, operator, null);
 	}
@@ -215,5 +197,15 @@ public class LogicExpression extends Expression {
 		return LOGIC_EXPRESSION_TYPE;
 	}
 
+	@Override
+	protected final String toParseStringImpl() {
+		if (mRightExpression == null) {
+			return mOperator.toString() + " " + mLeftExpression.toParseString();
+		} else {
+			return mLeftExpression.toParseString()
+					+ " " + mOperator + " "
+					+ mLeftExpression.toParseString();
+		}
+	}
 
 }

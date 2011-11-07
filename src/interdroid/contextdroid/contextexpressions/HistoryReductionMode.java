@@ -9,32 +9,31 @@ package interdroid.contextdroid.contextexpressions;
 public enum HistoryReductionMode
 implements ParseableEnum<HistoryReductionMode> {
 	/** No reduction is performed. */
-	NONE (0),
+	NONE (0, "all"),
 	/** Takes the maximum value. */
-	MAX (1),
+	MAX (1, "max"),
 	/** Takes the minimum value. */
-	MIN (2),
+	MIN (2, "min"),
 	/** Takes the mean value. */
-	MEAN (3),
+	MEAN (3, "mean"),
 	/** Takes the median value. */
-	MEDIAN (4);
+	MEDIAN (4, "median");
 
 	/** The convert value. */
 	private final int mValue;
 
+	/** The name for the mode. */
+	private final String mName;
+
 	/**
 	 * Construct with the given convert value.
 	 * @param value the convert value.
+	 * @param name the name
 	 */
-	private HistoryReductionMode(final int value) {
+	private HistoryReductionMode(final int value, final String name) {
 		mValue = value;
+		mName = name;
 	}
-
-	/** The value of this enumeration. */
-	private static final HistoryReductionMode[] VALUES = {
-		NONE, MAX, MIN, MEAN, MEDIAN
-	};
-
 	@Override
 	public int convert() {
 		return mValue;
@@ -42,15 +41,26 @@ implements ParseableEnum<HistoryReductionMode> {
 
 	@Override
 	public HistoryReductionMode convertInt(final int val) {
-		return VALUES[val];
+		HistoryReductionMode ret = null;
+		for (HistoryReductionMode mode : HistoryReductionMode.values()) {
+			if (mode.convert() == val) {
+				ret = mode;
+				break;
+			}
+		}
+		return ret;
 	}
 
-	@Override
-	public HistoryReductionMode parseString(final String val) {
+	/**
+	 * Parses a string and returns the appropriate mode.
+	 * @param val the string to parse
+	 * @return the reduction mode
+	 */
+	private HistoryReductionMode parseString(final String val) {
 		HistoryReductionMode ret = null;
-		for (int i = 0; i < VALUES.length; i++) {
-			if (VALUES[i].name().equals(val)) {
-				ret = VALUES[i];
+		for (HistoryReductionMode mode : HistoryReductionMode.values()) {
+			if (mode.toParseString().equals(val)) {
+				ret = mode;
 				break;
 			}
 		}
@@ -73,5 +83,15 @@ implements ParseableEnum<HistoryReductionMode> {
 	 */
 	public static HistoryReductionMode convert(final int value) {
 		return NONE.convertInt(value);
+	}
+
+	@Override
+	public final String toString() {
+		return mName;
+	}
+
+	@Override
+	public final String toParseString() {
+		return mName;
 	}
 }

@@ -8,6 +8,8 @@ import interdroid.contextdroid.contextservice.SensorManager;
 import interdroid.contextdroid.sensors.IAsynchronousContextSensor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +97,60 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	public ContextTypedValue(final String unparsedContextInfo) {
 		this(unparsedContextInfo, HistoryReductionMode.NONE, 0);
+	}
+
+	/**
+	 * Construct from an entity and path.
+	 * @param entity the entity id
+	 * @param path the value path
+	 */
+	public ContextTypedValue(final String entity, final String path) {
+		this(entity, path, null, HistoryReductionMode.NONE, 0);
+	}
+
+	/**
+	 * Construct from an entity and path and config map.
+	 * @param entity the entity id
+	 * @param path the value path
+	 * @param config the map with configuration data
+	 */
+	public ContextTypedValue(final String entity, final String path,
+			final Map<String, String> config) {
+		this(entity, path, config, HistoryReductionMode.NONE, 0);
+	}
+
+	/**
+	 * Construct from an entity and path and config map with mode and timespan.
+	 * @param entity the entity id
+	 * @param path the value path
+	 * @param mode the history reduction mode
+	 * @param timespan the timespan to limit to
+	 */
+	public ContextTypedValue(final String entity, final String path,
+			final HistoryReductionMode mode, final long timespan) {
+		this(entity, path, null, mode, timespan);
+	}
+
+	/**
+	 * Construct from an entity and path and config map.
+	 * @param entity the entity id
+	 * @param path the value path
+	 * @param config the map with configuration data
+	 * @param mode the history reduction mode
+	 * @param timespan the timespan to limit to
+	 */
+	public ContextTypedValue(final String entity, final String path,
+			final Map<String, String> config, final HistoryReductionMode mode,
+			final long timespan) {
+		super(mode);
+		mEntity = entity;
+		mValuePath = path;
+		mTimespan = timespan;
+		if (config != null) {
+			for (Entry<String, String> entry : config.entrySet()) {
+				mConfiguration.putString(entry.getKey(), entry.getValue());
+			}
+		}
 	}
 
 	/**
@@ -336,5 +392,50 @@ public class ContextTypedValue extends TypedValue implements
 		} else {
 			return 1;
 		}
+	}
+
+	@Override
+	public final String toParseString() {
+		return mEntity + "/" + mValuePath + getParseConfig() + getModeString();
+	}
+
+	/**
+	 * @return a parseable string for the mode we are running in.
+	 */
+	private String getModeString() {
+		String ret;
+		if (!(getHistoryReductionMode().equals(HistoryReductionMode.NONE)
+				&& mTimespan == 0)) {
+			ret = " {" + getHistoryReductionMode().toParseString() + ","
+					+ mTimespan + "}";
+		} else {
+			ret = "";
+		}
+		return ret;
+	}
+
+	/**
+	 *
+	 * @return a string with the configuration for this value.
+	 */
+	private String getParseConfig() {
+		String ret;
+		if (mConfiguration.size() > 0) {
+			StringBuffer buf = new StringBuffer('?');
+			boolean first = true;
+			for (String key : mConfiguration.keySet()) {
+				if (!first) {
+					buf.append("&");
+					first = false;
+				}
+				buf.append(key);
+				buf.append("=");
+				buf.append(mConfiguration.getString(key));
+			}
+			ret = buf.toString();
+		} else {
+			ret = "";
+		}
+		return ret;
 	}
 }

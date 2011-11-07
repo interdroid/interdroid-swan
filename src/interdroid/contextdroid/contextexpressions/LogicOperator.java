@@ -8,42 +8,27 @@ package interdroid.contextdroid.contextexpressions;
  */
 public enum LogicOperator implements ParseableEnum<LogicOperator> {
 	/** Logical AND. */
-	AND (0),
+	AND (0, "&&"),
 	/** Logical OR. */
-	OR (1),
+	OR (1, "||"),
 	/** Logical NOT. */
-	NOT (3);
+	NOT (2, "!");
 
 	/** The converted value of this value. */
 	private int mValue;
 
+	/** The string version of the enum. */
+	private String mName;
+
 	/**
 	 * Construct a Logical Operator.
 	 * @param value the converted value.
+	 * @param name the name of the operator.
 	 */
-	private LogicOperator(final int value) {
+	private LogicOperator(final int value, final String name) {
 		mValue = value;
+		mName = name;
 	}
-
-
-	/**
-	 * The values of this enumeration.
-	 */
-	private static final LogicOperator[] VALUES = {
-			AND, OR, NOT
-	};
-
-	/** String representing minus. */
-	private static final String AND_STRING = "&&";
-	/** String representing plus. */
-	private static final String OR_STRING = "||";
-	/** String representing times. */
-	private static final String NOT_STRING = "!";
-
-	/** The operators we know of. */
-	private static final String[] OPERATORS = new String[] {
-		AND_STRING, OR_STRING, NOT_STRING
-	};
 
 	@Override
 	public int convert() {
@@ -52,15 +37,26 @@ public enum LogicOperator implements ParseableEnum<LogicOperator> {
 
 	@Override
 	public LogicOperator convertInt(final int val) {
-		return VALUES[val];
+		LogicOperator ret = null;
+		for (LogicOperator op : LogicOperator.values()) {
+			if (op.convert() == val) {
+				ret = op;
+				break;
+			}
+		}
+		return ret;
 	}
 
-	@Override
-	public LogicOperator parseString(final String val) {
+	/**
+	 * Parses and returns a LogicOperation.
+	 * @param val the string to parse
+	 * @return the corresponding LogicOperation
+	 */
+	private LogicOperator parseString(final String val) {
 		LogicOperator ret = null;
-		for (int i = 0; i < OPERATORS.length; i++) {
-			if (OPERATORS[i].equals(val)) {
-				ret = VALUES[i];
+		for (LogicOperator op : LogicOperator.values()) {
+			if (op.toParseString().equals(val)) {
+				ret = op;
 				break;
 			}
 		}
@@ -84,5 +80,15 @@ public enum LogicOperator implements ParseableEnum<LogicOperator> {
 	 */
 	public static LogicOperator convert(final int value) {
 		return AND.convertInt(value);
+	}
+
+	@Override
+	public String toString() {
+		return mName;
+	}
+
+	@Override
+	public String toParseString() {
+		return mName;
 	}
 }

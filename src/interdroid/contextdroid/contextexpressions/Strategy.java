@@ -6,30 +6,28 @@ package interdroid.contextdroid.contextexpressions;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public enum Strategy implements ParseableEnum<Strategy> {
+public enum Strategy implements ParseableEnum<Strategy>, Parseable<Strategy> {
 
 	/** Strategy where all values in the window must match. */
-	ALL (0),
+	ALL (0, "ALL"),
 	/** Strategy where any value in the window must match. */
-	ANY (1);
+	ANY (1, "ANY");
 
 	/** The converted value of this enumeration. */
 	private final int mValue;
 
+	/** The parseable name. */
+	private final String mName;
+
 	/**
 	 * Construct a strategy.
 	 * @param value the convert value
+	 * @param name the name
 	 */
-	private Strategy(final int value) {
+	private Strategy(final int value, final String name) {
 		mValue = value;
+		mName = name;
 	}
-
-	/**
-	 * All the strategies in this enumeration.
-	 */
-	private static final Strategy[] VALUES = new Strategy[] {
-		ALL, ANY
-	};
 
 	@Override
 	public int convert() {
@@ -38,16 +36,25 @@ public enum Strategy implements ParseableEnum<Strategy> {
 
 	@Override
 	public Strategy convertInt(final int val) {
-		return VALUES[val];
+		Strategy ret = null;
+		for (Strategy strat : Strategy.values()) {
+			if (strat.convert() == val) {
+				ret = strat;
+			}
+		}
+		return ret;
 	}
 
-	@Override
-	public Strategy parseString(final String value) {
+	/**
+	 * Parse and return a Strategy.
+	 * @param value the string to parse
+	 * @return the Strategy
+	 */
+	private Strategy parseString(final String value) {
 		Strategy ret = null;
-		for (int i = 0; i < VALUES.length; i++) {
-			if (VALUES[i].name().equals(value)) {
-				ret = VALUES[i];
-				break;
+		for (Strategy strat : Strategy.values()) {
+			if (strat.toParseString().equals(value)) {
+				ret = strat;
 			}
 		}
 		return ret;
@@ -69,6 +76,16 @@ public enum Strategy implements ParseableEnum<Strategy> {
 	 */
 	public static Strategy convert(final int value) {
 		return ALL.convertInt(value);
+	}
+
+	@Override
+	public String toString() {
+		return  mName;
+	}
+
+	@Override
+	public String toParseString() {
+		return  mName;
 	}
 
 }

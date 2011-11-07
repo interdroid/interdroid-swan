@@ -9,46 +9,30 @@ package interdroid.contextdroid.contextexpressions;
  */
 public enum MathOperator implements ParseableEnum<MathOperator> {
 	/** The minus operator. Can be used for Locations as well. */
-	MINUS (0),
+	MINUS (0, "-"),
 	/** The plus operator. */
-	PLUS (1),
+	PLUS (1, "+"),
 	/** The times operator. */
-	TIMES (2),
+	TIMES (2, "*"),
 	/** The divide operator. */
-	DIVIDE (3);
+	DIVIDE (3, "/");
 
 	/**
 	 * The persistence value of the enum.
 	 */
 	private final int mValue;
 
-	/**
-	 * The values of this enumeration.
-	 */
-	private static final MathOperator[] VALUES = {
-			MINUS, PLUS, TIMES, DIVIDE
-	};
-
-	/** String representing minus. */
-	private static final String MINUS_STRING = "-";
-	/** String representing plus. */
-	private static final String PLUS_STRING = "+";
-	/** String representing times. */
-	private static final String TIMES_STRING = "*";
-	/** String representing divide. */
-	private static final String DIVIDE_STRING = "/";
-
-	/** The operators we know of. */
-	private static final String[] OPERATORS = new String[] {
-		MINUS_STRING, PLUS_STRING, TIMES_STRING, DIVIDE_STRING
-	};
+	/** The string version of the enum. */
+	private String mName;
 
 	/**
 	 * Construct an operator.
 	 * @param value the convert value for the enum
+	 * @param name the name of the operation
 	 */
-	private MathOperator(final int value) {
+	private MathOperator(final int value, final String name) {
 		mValue = value;
+		mName = name;
 	}
 
 	@Override
@@ -58,15 +42,26 @@ public enum MathOperator implements ParseableEnum<MathOperator> {
 
 	@Override
 	public MathOperator convertInt(final int val) {
-		return VALUES[val];
+		MathOperator ret = null;
+		for (MathOperator op : MathOperator.values()) {
+			if (op.convert() == val) {
+				ret = op;
+				break;
+			}
+		}
+		return ret;
 	}
 
-	@Override
-	public MathOperator parseString(final String val) {
+	/**
+	 * Parse and return a MathOperator.
+	 * @param val the string to parse
+	 * @return the corresponding MathOperator
+	 */
+	private MathOperator parseString(final String val) {
 		MathOperator ret = null;
-		for (int i = 0; i < OPERATORS.length; i++) {
-			if (OPERATORS[i].equals(val)) {
-				ret = VALUES[i];
+		for (MathOperator op : MathOperator.values()) {
+			if (op.toParseString().equals(val)) {
+				ret = op;
 				break;
 			}
 		}
@@ -90,5 +85,15 @@ public enum MathOperator implements ParseableEnum<MathOperator> {
 	 */
 	public static MathOperator convert(final int value) {
 		return MINUS.convertInt(value);
+	}
+
+	@Override
+	public String toString() {
+		return mName;
+	}
+
+	@Override
+	public String toParseString() {
+		return mName;
 	}
 }

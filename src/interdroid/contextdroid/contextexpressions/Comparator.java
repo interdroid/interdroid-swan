@@ -10,78 +10,44 @@ package interdroid.contextdroid.contextexpressions;
 public enum Comparator implements ParseableEnum<Comparator> {
 
 	/** greater than. */
-	GREATER_THAN (0),
+	GREATER_THAN (0, ">"),
 	/** less than. */
-	LESS_THAN (1),
+	LESS_THAN (1, "<"),
 	/** greater than or equal to. */
-	GREATER_THAN_OR_EQUALS (2),
+	GREATER_THAN_OR_EQUALS (2, ">="),
 	/** less than or equal to. */
-	LESS_THAN_OR_EQUALS (3),
+	LESS_THAN_OR_EQUALS (3, "<="),
 	/** equal to. */
-	EQUALS (4),
+	EQUALS (4, "="),
 	/** not equal to. */
-	EQUALS_NOT (5),
+	NOT_EQUALS (5, "!="),
 	/** Regular Expression Match. */
-	REGEX_MATCH (6),
+	REGEX_MATCH (6, "regex"),
 	/** String contains. */
-	STRING_CONTAINS (7);
+	STRING_CONTAINS (7, "contains");
 
-	/** The string version of greater than. */
-	private static final String GREATER_STRING = ">";
-	/** The string verson of less than. */
-	private static final String LESS_STRING = "<";
-	/** The string version of greater than or equal to.*/
-	private static final String GREATER_EQUAL_STRING = ">=";
-	/** The string version of less than or equal to. */
-	private static final String LESS_EQUAL_STRING = "<=";
-	/** The string version of equals. */
-	private static final String EQUAL_STRING = "=";
-	/** The string version of not equals. */
-	private static final String NOT_EQUAL_STRING = "!=";
-	/** The string version of regex match. */
-	private static final String REGEX_MATCH_STRING = "regex";
-	/** The string version of string contains. */
-	private static final String STRING_CONTAINS_STRING = "contains";
 
 	/**
 	 * The converted value for this enum.
 	 */
 	private final int mValue;
 
+	/** The string version of the enum. */
+	private String mName;
+
 	/**
 	 * Constructs a Comparator.
 	 * @param value the convert value
+	 * @param name the name of the comparator
 	 */
-	private Comparator(final int value) {
+	private Comparator(final int value, final String name) {
 		mValue = value;
+		mName = name;
 	}
-
-	/**
-	 * The comparators we know about.
-	 */
-	private static final String[] COMPARATORS = {
-		GREATER_STRING, LESS_STRING, GREATER_EQUAL_STRING,
-		LESS_EQUAL_STRING, EQUAL_STRING, NOT_EQUAL_STRING,
-		REGEX_MATCH_STRING, STRING_CONTAINS_STRING
-	};
-
-	/**
-	 * The values of the enumeration.
-	 */
-	private static final Comparator[] VALUES = {
-		GREATER_THAN,
-		LESS_THAN,
-		GREATER_THAN_OR_EQUALS,
-		LESS_THAN_OR_EQUALS,
-		EQUALS,
-		EQUALS_NOT,
-		REGEX_MATCH,
-		STRING_CONTAINS
-	};
 
 	@Override
 	public final String toString() {
-		return COMPARATORS[convert()];
+		return mName;
 	}
 
 	@Override
@@ -91,15 +57,26 @@ public enum Comparator implements ParseableEnum<Comparator> {
 
 	@Override
 	public Comparator convertInt(final int val) {
-		return VALUES[val];
+		Comparator ret = null;
+		for (Comparator comp : Comparator.values()) {
+			if (comp.convert() == val) {
+				ret = comp;
+				break;
+			}
+		}
+		return ret;
 	}
 
-	@Override
-	public Comparator parseString(final String val) {
+	/**
+	 * Parses a string and returns a Comparator.
+	 * @param val a string to parse
+	 * @return the parsed Comparator
+	 */
+	private Comparator parseString(final String val) {
 		Comparator ret = null;
-		for (int i = 0; i < COMPARATORS.length; i++) {
-			if (COMPARATORS[i].equals(val)) {
-				ret = VALUES[i];
+		for (Comparator comp : Comparator.values()) {
+			if (comp.toParseString().equals(val)) {
+				ret = comp;
 				break;
 			}
 		}
@@ -123,5 +100,11 @@ public enum Comparator implements ParseableEnum<Comparator> {
 	 */
 	public static Comparator convert(final int value) {
 		return GREATER_THAN.convertInt(value);
+	}
+
+
+	@Override
+	public String toParseString() {
+		return mName;
 	}
 }

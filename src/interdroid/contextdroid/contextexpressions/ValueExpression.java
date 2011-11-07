@@ -23,7 +23,12 @@ public class ValueExpression extends Expression {
 	/**
 	 * The comparator used to compare the values.
 	 */
-	private final ComparatorStrategy mComparator;
+	private final Comparator mComparator;
+
+	/**
+	 * The strategy used when comparing the values.
+	 */
+	private final Strategy mStrategy;
 
 	/**
 	 * The left value.
@@ -43,33 +48,17 @@ public class ValueExpression extends Expression {
 	/**
 	 * Constructs a value expression.
 	 * @param left the left value
-	 * @param comparator the comparator, possibly including strategy
+	 * @param comparator the comparator
+	 * @param strategy the strategy used when comparing.
 	 * @param right the right value
 	 */
 	public ValueExpression(final TypedValue left,
-			final ComparatorStrategy comparator, final TypedValue right) {
-		this.mLeftValue = left;
-		this.mRightValue = right;
-		this.mComparator = comparator;
-	}
-
-	/**
-	 * Constructs a value expression.
-	 * @param left the left value
-	 * @param comparator the comparator, possibly including strategy
-	 * @param right the right value
-	 * @deprecated Use the ComparatorStrategy version for safety
-	 */
-	@Deprecated
-	public ValueExpression(final TypedValue left, final String comparator,
+			final Comparator comparator, final Strategy strategy,
 			final TypedValue right) {
 		this.mLeftValue = left;
 		this.mRightValue = right;
-		this.mComparator = ComparatorStrategy.parse(comparator);
-		if (this.mComparator == null) {
-			throw new IllegalArgumentException("Unknown comparator strategy.");
-		}
-
+		this.mComparator = comparator;
+		this.mStrategy = strategy;
 	}
 
 	/**
@@ -79,7 +68,8 @@ public class ValueExpression extends Expression {
 	protected ValueExpression(final Parcel in) {
 		super(in);
 		mLeftValue = in.readParcelable(ValueExpression.class.getClassLoader());
-		mComparator = ComparatorStrategy.convert(in.readInt());
+		mComparator = Comparator.convert(in.readInt());
+		mStrategy = Strategy.convert(in.readInt());
 		mRightValue = in.readParcelable(ValueExpression.class.getClassLoader());
 	}
 
@@ -112,10 +102,17 @@ public class ValueExpression extends Expression {
 	}
 
 	/**
-	 * @return the comparison strategy for this expression.
+	 * @return the comparison for this expression.
 	 */
-	protected final ComparatorStrategy getComparator() {
+	protected final Comparator getComparator() {
 		return mComparator;
+	}
+
+	/**
+	 * @return the strategy for this expression.
+	 */
+	protected final Strategy getStrategy() {
+		return mStrategy;
 	}
 
 	@Override
@@ -155,7 +152,7 @@ public class ValueExpression extends Expression {
 		TimestampedValue[] right = mRightValue.getValues(getId() + ".R", now);
 
 		int endResult;
-		if (mComparator.getStrategy().equals(Strategy.ALL)) {
+		if (mStrategy.equals(Strategy.ALL)) {
 			endResult = ContextManager.TRUE;
 		} else {
 			endResult = ContextManager.FALSE;
@@ -165,7 +162,7 @@ public class ValueExpression extends Expression {
 			for (TimestampedValue rightItem : right) {
 				int tempResult = evaluateLeafItem(leftItem.getValue(),
 						rightItem.getValue());
-				if (mComparator.getStrategy()
+				if (mStrategy
 						.equals(Strategy.ALL)) {
 					if (tempResult == ContextManager.FALSE) {
 						endResult = ContextManager.FALSE;
@@ -201,7 +198,7 @@ public class ValueExpression extends Expression {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private int evaluateLeafItem(final Object left, final Object right) {
 		int result = ContextManager.FALSE;
-		switch (mComparator.getComparator()) {
+		switch (mComparator) {
 		case LESS_THAN:
 			if (((Comparable) left).compareTo(right) < 0) {
 				result = ContextManager.TRUE;
@@ -227,7 +224,7 @@ public class ValueExpression extends Expression {
 				result = ContextManager.TRUE;
 			}
 			break;
-		case EQUALS_NOT:
+		case NOT_EQUALS:
 			if (((Comparable) left).compareTo(right) != 0) {
 				result = ContextManager.TRUE;
 			}
@@ -267,7 +264,7 @@ public class ValueExpression extends Expression {
 			long leftTime = (Long) ((TimestampedValue) left[0]).getValue();
 			long rightTime = (Long) ((TimestampedValue) right[0]).getValue();
 
-			switch (mComparator.getComparator()) {
+			switch (mComparator) {
 			case LESS_THAN:
 			case LESS_THAN_OR_EQUALS:
 				if (mLeftValue.hasCurrentTime()) {
@@ -322,7 +319,7 @@ public class ValueExpression extends Expression {
 					}
 				}
 				break;
-			case EQUALS_NOT:
+			case NOT_EQUALS:
 				if (getResult() == ContextManager.FALSE) {
 					// it's TRUE and will be FALSE in an instant
 					mDeferUntil = now + 1;
@@ -337,7 +334,7 @@ public class ValueExpression extends Expression {
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown time comparator: "
-						+ mComparator.getComparator());
+						+ mComparator);
 			}
 		}
 	}
@@ -345,6 +342,13 @@ public class ValueExpression extends Expression {
 	@Override
 	protected final String toStringImpl() {
 		return mLeftValue + " " + mComparator + " " + mRightValue;
+	}
+
+	@Override
+	protected final String toParseStringImpl() {
+		return mLeftValue.toParseString()
+				+ " " + mComparator.toParseString() + " "
+				+ mRightValue.toParseString();
 	}
 
 	@Override
@@ -364,4 +368,5 @@ public class ValueExpression extends Expression {
 	protected final int getSubtypeId() {
 		return VALUE_EXPRESSION_TYPE;
 	}
+
 }

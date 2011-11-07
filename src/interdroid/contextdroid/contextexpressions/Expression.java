@@ -21,7 +21,8 @@ import android.os.Parcelable;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public abstract class Expression implements Parcelable, Serializable,
+public abstract class Expression implements Parseable<Expression>,
+	Parcelable, Serializable,
 Comparable<Expression> {
 	/**
 	 * Access to logger.
@@ -247,6 +248,15 @@ Comparable<Expression> {
 		return toStringImpl();
 	}
 
+	/**
+	 * @return A parseable version of the expression.
+	 */
+	@Override
+	public final String toParseString() {
+		String result = "(" + this.toParseStringImpl() + ")";
+		return result;
+	}
+
 	/* =-=-=-=- Subclass methods -=-=-=-= */
 
 	/**
@@ -279,6 +289,12 @@ Comparable<Expression> {
 	protected abstract String toStringImpl();
 
 	/**
+	 * Subclass toParseString implementation.
+	 * @return the subclass portion of the parse string
+	 */
+	protected abstract String toParseStringImpl();
+
+	/**
 	 * The subclass implementation of evalute.
 	 * @param now the timestamp for the evaluation
 	 * @throws ContextDroidException if something goes wrong.
@@ -297,4 +313,15 @@ Comparable<Expression> {
 	 * @return the time until this expression should be defered.
 	 */
 	protected abstract long getDeferUntilImpl();
+
+	/**
+	 * Parses a string into an expression.
+	 * @param expression the string to parse
+	 * @return An expression version of the string
+	 * @throws ExpressionParseException if the expression has a problem
+	 */
+	public static final Expression parse(final String expression)
+			throws ExpressionParseException {
+		return ContextExpressionParser.parseExpression(expression);
+	}
 }

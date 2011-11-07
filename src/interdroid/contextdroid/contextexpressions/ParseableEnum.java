@@ -30,7 +30,7 @@ package interdroid.contextdroid.contextexpressions;
  *
  * @param <E>
  */
-public interface ParseableEnum <E extends Enum<E> & ParseableEnum<E>> {
+public interface ParseableEnum<E extends Enum<E>> extends Parseable<E> {
 
 	/**
 	 * Converts this enum to an int value.
@@ -56,15 +56,8 @@ public interface ParseableEnum <E extends Enum<E> & ParseableEnum<E>> {
 	*/
 
 	/**
-	 * Parse the enum from the string.
-	 * @param val the value to parse
-	 * @return the enumeration which matches the string.
-	 */
-	E parseString(String val);
-
-	/**
 	 * @return a parseable version of the enum value.
 	 */
 	@Override
-	String toString();
+	String toParseString();
 }

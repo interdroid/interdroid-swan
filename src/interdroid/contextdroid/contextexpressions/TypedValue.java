@@ -17,7 +17,8 @@ import android.os.Parcelable;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public abstract class TypedValue implements Serializable, Parcelable {
+public abstract class TypedValue
+implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Serial version id.
@@ -43,6 +44,13 @@ public abstract class TypedValue implements Serializable, Parcelable {
 	 */
 	public TypedValue(final Parcel source) {
 		readFromParcel(source);
+	}
+
+	/**
+	 * @return the reduction mode
+	 */
+	public final HistoryReductionMode getHistoryReductionMode() {
+		return mMode;
 	}
 
 	/**
@@ -130,4 +138,15 @@ public abstract class TypedValue implements Serializable, Parcelable {
 	 * @param flags the flags for writing
 	 */
 	protected abstract void writeSubclassToParcel(Parcel dest, int flags);
+
+	/**
+	 * Parses a string version of a TypedValue.
+	 * @param value the string to parse
+	 * @return the string version
+	 * @throws ExpressionParseException if the string is not recognized
+	 */
+	public static final TypedValue parse(final String value)
+			throws ExpressionParseException {
+		return ContextExpressionParser.parseTypedValue(value);
+	}
 }
