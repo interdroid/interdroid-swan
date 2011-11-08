@@ -1,12 +1,9 @@
 <?xml version="1.0"?>
 <project name="ContextDroid" default="grammar">
 	<target name="grammar">
-		<echo>${user.dir}</echo>
-		<echo>${basedir}</echo>
-			<java fork="true" dir="${basedir}" classname="org.antlr.Tool"
-				classpath="${basedir}/external/antlr-3.4-complete-no-antlrv2.jar">
-				<arg line="-o ${basedir}/gen/interdroid/contextdroid/contextexpressions/ ${basedir}/ContextExpression.g"/>
-			</java>
-			<sleep seconds="10" />
+		<java fork="true" dir="${basedir}" classname="org.antlr.Tool"
+			classpath="${basedir}/external/antlr-3.4-complete-no-antlrv2.jar">
+			<arg line="-o ${basedir}/gen/interdroid/contextdroid/contextexpressions/ ${basedir}/ContextExpression.g"/>
+		</java>
 	</target>
 </project>
