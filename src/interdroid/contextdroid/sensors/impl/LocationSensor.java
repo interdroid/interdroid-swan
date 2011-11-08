@@ -1,8 +1,9 @@
 package interdroid.contextdroid.sensors.impl;
 
+import java.lang.reflect.Field;
+
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
-import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
@@ -223,7 +224,17 @@ public class LocationSensor extends AbstractVdbSensor {
 	private void updateListener() {
 		long minTime = Long.MAX_VALUE;
 		long minDistance = Long.MAX_VALUE;
-		String mostAccurateProvider = LocationManager.PASSIVE_PROVIDER;
+		String mostAccurateProvider;
+		String passiveProvider = null;
+		// Reflect out PASSIVE_PROVIDER so we can still run on 7.
+		try {
+			Field passive = LocationManager.class.getField("PASSIVE_PROVIDER");
+			passiveProvider = (String) passive.get(null);
+			mostAccurateProvider = passiveProvider;
+		} catch (Exception e) {
+			LOG.warn("Caught exception checking for PASSIVE_PROVIDER.");
+			mostAccurateProvider = LocationManager.NETWORK_PROVIDER;
+		}
 
 		for (Bundle configuration : registeredConfigurations.values()) {
 			if (configuration.containsKey(MIN_TIME)) {
@@ -234,8 +245,8 @@ public class LocationSensor extends AbstractVdbSensor {
 						configuration.getLong(MIN_DISTANCE));
 			}
 			if (configuration.containsKey(PROVIDER)) {
-				if (LocationManager.PASSIVE_PROVIDER
-						.equals(mostAccurateProvider)) {
+				if (mostAccurateProvider
+						.equals(passiveProvider)) {
 					// if current is passive, anything is better
 					mostAccurateProvider = configuration.getString(PROVIDER);
 				} else if (LocationManager.NETWORK_PROVIDER

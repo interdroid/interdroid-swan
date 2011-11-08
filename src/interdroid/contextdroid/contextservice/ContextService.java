@@ -7,9 +7,11 @@ import interdroid.contextdroid.ui.LaunchService;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
+import interdroid.contextdroid.contextexpressions.Parseable;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import interdroid.contextdroid.test.TestActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,12 +56,20 @@ public class ContextService extends Service {
 	/**
 	 * The current version of the database.
 	 */
-	private static final int	DB_VERSION	= 1;
+	private static final int	DB_VERSION	= 3;
 
 	/**
-	 * The database.
+	 * The expression type. Used for table and column names.
 	 */
-	private SQLiteDatabase	mExpressionDatabase;
+	private static final String	EXPRESSION_TYPE = "expressions";
+	/**
+	 * The value type. Used for table and column names.
+	 */
+	private static final String	VALUE_TYPE = "contextvalues";
+	/**
+	 * The table and column names for types we persist.
+	 */
+	private static final String[] DB_TYPES = {EXPRESSION_TYPE, VALUE_TYPE};
 
 	/** Are we currently running as a "foreground" service? */
 	private boolean	mForeground;
@@ -74,7 +84,7 @@ public class ContextService extends Service {
 	private Notification notification;
 
 	/** The context expressions, mapped by id. */
-	private HashMap<String, Expression> contextExpressions =
+	private final HashMap<String, Expression> contextExpressions =
 			new HashMap<String, Expression>() {
 		/**
 		 *
@@ -83,21 +93,38 @@ public class ContextService extends Service {
 
 		@Override
 		public Expression remove(final Object key) {
-			removeFromDb((String) key);
+			removeFromDb((String) key, EXPRESSION_TYPE);
 			return super.remove(key);
 		}
 
 		@Override
 		public Expression put(final String key, final Expression value) {
-			storeToDb(key, value);
+			storeToDb(key, value, EXPRESSION_TYPE);
 			return super.put(key, value);
 		}
 	};
 
 	/** The context entities, mapped by id. */
-	private HashMap<String, ContextTypedValue> contextTypedValues =
-			new HashMap<String, ContextTypedValue>();
+	private final HashMap<String, ContextTypedValue> contextTypedValues =
+			new HashMap<String, ContextTypedValue>() {
+		/**
+		 *
+		 */
+		private static final long	serialVersionUID	= 1L;
 
+		@Override
+		public ContextTypedValue remove(final Object key) {
+			removeFromDb((String) key, VALUE_TYPE);
+			return super.remove(key);
+		}
+
+		@Override
+		public ContextTypedValue put(final String key,
+				final ContextTypedValue value) {
+			storeToDb(key, value, VALUE_TYPE);
+			return super.put(key, value);
+		}
+	};
 	/**
 	 * Handles boot notifications so we can reregister expressions.
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
@@ -140,12 +167,13 @@ public class ContextService extends Service {
 	/**
 	 * True if we have restored saved expressions.
 	 */
-	private boolean restoredExpressions = false;
+	private boolean restoredRegistrations = false;
 
 	/**
 	 * Thread responsible for evaluating expressions.
 	 */
 	private final Thread evaluationThread = new Thread() {
+		@Override
 		public void run() {
 			boolean changed;
 			while (!shouldStop) {
@@ -227,7 +255,8 @@ public class ContextService extends Service {
 	/**
 	 * Thread responsible for managing entities in our expressions.
 	 */
-	private Thread entityThread = new Thread() {
+	private final Thread entityThread = new Thread() {
+		@Override
 		public void run() {
 			TimestampedValue[] values;
 			while (!shouldStop) {
@@ -256,6 +285,7 @@ public class ContextService extends Service {
 					}
 				}
 				try {
+					LOG.debug("Getting values for: {}", value);
 					values = value.getValues(value.getId(),
 							System.currentTimeMillis());
 				} catch (ContextDroidException e) {
@@ -302,56 +332,116 @@ public class ContextService extends Service {
 	// =-=-=-=- Expression Database -=-=-=-=
 
 	/**
+	 *
+	 * @return all typed values saved in the database.
+	 */
+	private ContextTypedValue[] getSavedValues() {
+		SQLiteDatabase db = openDb();
+		ContextTypedValue[] result = null;
+
+		try {
+			Cursor c = db.query(VALUE_TYPE,
+					new String[] {"key", VALUE_TYPE},
+					null, null, null, null, null);
+			ArrayList<ContextTypedValue> values =
+					new ArrayList<ContextTypedValue>();
+			if (c != null) {
+				try {
+					if (c.getCount() > 0) {
+						while (c.moveToNext()) {
+							try {
+								LOG.debug("Parsing: {} {}",
+										c.getString(0), c.getString(1));
+								ContextTypedValue value =
+										(ContextTypedValue)
+										ContextTypedValue.parse(c.getString(1));
+								value.setId(c.getString(0));
+								values.add(value);
+							} catch (Exception e) {
+								LOG.error("Error while parsing.", e);
+							}
+						}
+					}
+					result = new ContextTypedValue[values.size()];
+					values.toArray(result);
+				} finally {
+					try {
+						c.close();
+					} catch (Exception e) {
+						LOG.warn("Got exception closing cursor.", e);
+					}
+				}
+			}
+		} finally {
+			closeDb(db);
+		}
+		return result;
+	}
+
+	/**
 	 * @return all expressions saved in the database.
 	 */
 	private Expression[] getSavedExpressions() {
 		SQLiteDatabase db = openDb();
-		Cursor c = db.query("expressions", new String[] {"key", "expression"},
-				null, null, null, null, null);
 		Expression[] result = null;
-		ArrayList<Expression> expressions = new ArrayList<Expression>();
-		if (c != null) {
-			try {
-				if (c.getCount() > 0) {
-					result = new Expression[c.getCount()];
-					while (c.moveToNext()) {
-						try {
-							Expression expression =
-									Expression.parse(c.getString(1));
-							expression.setId(c.getString(0));
-							expressions.add(expression);
-						} catch (Exception e) {
-							LOG.error("Error while parsing.", e);
+
+		try {
+			Cursor c = db.query(EXPRESSION_TYPE,
+					new String[] {"key", EXPRESSION_TYPE},
+					null, null, null, null, null);
+			ArrayList<Expression> expressions = new ArrayList<Expression>();
+			if (c != null) {
+				try {
+					if (c.getCount() > 0) {
+						while (c.moveToNext()) {
+							try {
+								Expression expression =
+										Expression.parse(c.getString(1));
+								expression.setId(c.getString(0));
+								expressions.add(expression);
+							} catch (Exception e) {
+								LOG.error("Error while parsing.", e);
+							}
 						}
 					}
-				}
-			} finally {
-				try {
-					c.close();
-				} catch (Exception e) {
-					LOG.warn("Got exception closing cursor.", e);
+					result = new Expression[expressions.size()];
+					expressions.toArray(result);
+				} finally {
+					try {
+						c.close();
+					} catch (Exception e) {
+						LOG.warn("Got exception closing cursor.", e);
+					}
 				}
 			}
+		} finally {
+			closeDb(db);
 		}
+
 		return result;
 	}
 
 	/**
 	 * Delete's an expression from the database.
 	 * @param key The id for the expression.
+	 * @param type The type being removed.
 	 */
-	private void removeFromDb(final String key) {
+	private void removeFromDb(final String key, final String type) {
 		SQLiteDatabase db = openDb();
-		db.execSQL("DELETE FROM expressions WHERE key = ?",
-				new String[] {key});
+		try {
+			db.execSQL("DELETE FROM " + type + " WHERE key = ?",
+					new String[] {key});
+		} finally {
+			closeDb(db);
+		}
 	}
 
 	/**
 	 * Closes the expression database.
 	 */
-	private void closeDb() {
-		if (mExpressionDatabase != null) {
-			mExpressionDatabase.close();
+	private void closeDb(final SQLiteDatabase db) {
+		if (db != null) {
+			db.close();
 		}
 	}
 
@@ -359,43 +449,65 @@ public class ContextService extends Service {
 	 * @return an open database for expressions.
 	 */
 	private synchronized SQLiteDatabase openDb() {
-		if (mExpressionDatabase == null) {
-			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
-					DATABASE_NAME, null);
-			if (db.getVersion() < DB_VERSION) {
-				db.setVersion(DB_VERSION);
-				db.execSQL("CREATE TABLE expressions ("
-						+ "_id integer autoincrement,"
+		File dbDir = getDir("databases", Context.MODE_PRIVATE);
+		LOG.debug("Created db dir: {}", dbDir);
+		SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
+				new File(dbDir, DATABASE_NAME), null);
+		LOG.debug("Got database: {}", db.getVersion());
+		if (db.getVersion() < DB_VERSION) {
+			for (String type : DB_TYPES) {
+				LOG.debug("Creating table: {}", type);
+				db.execSQL("DROP TABLE IF EXISTS " + type);
+				db.execSQL("CREATE TABLE " + type + " ("
+						+ "_id integer primary key autoincrement,"
 						+ "key string,"
-						+ "expression string)");
+						+ type + " string)");
 			}
-			mExpressionDatabase = db;
+			db.setVersion(DB_VERSION);
 		}
-		return mExpressionDatabase;
+		return db;
 	}
 
 	/**
 	 * Stores an expression to the database.
 	 * @param key the key for the expression
 	 * @param value the expression
+	 * @param type the type being stored
 	 */
-	private void storeToDb(final String key, final Expression value) {
+	private void storeToDb(final String key, final Parseable<?> value,
+			final String type) {
 		SQLiteDatabase db = openDb();
-		ContentValues values = new ContentValues();
-		values.put("key", key);
-		values.put("expression", value.toParseString());
-		db.insert("Expression", "key", values);
+		try {
+			// Make sure it doesn't exist first in case we are reloading it.
+			db.delete(type, "key=?", new String[] {key});
+			ContentValues values = new ContentValues();
+			values.put("key", key);
+			values.put(type, value.toParseString());
+			db.insert(type, "key", values);
+		} finally {
+			closeDb(db);
+		}
 	}
 
 	/**
 	 * Restores all expressions from the database.
 	 */
-	private void restoreExpressions() {
+	private void restoreRegistrations() {
 		final Expression[] expressions = getSavedExpressions();
 
 		for (Expression expression : expressions) {
 			try {
 				mBinder.addContextExpression(expression.getId(), expression);
+			} catch (RemoteException e) {
+				LOG.error("Got exception re-registering expression.", e);
+			}
+		}
+
+		final ContextTypedValue[] values = getSavedValues();
+
+		for (ContextTypedValue value : values) {
+			try {
+				mBinder.registerContextTypedValue(value.getId(), value);
 			} catch (RemoteException e) {
 				LOG.error("Got exception re-registering expression.", e);
 			}
@@ -410,9 +522,9 @@ public class ContextService extends Service {
 		LOG.debug("onStart: {} {}", intent, flags);
 
 		synchronized (this) {
-			if (!restoredExpressions) {
-				restoreExpressions();
-				restoredExpressions = true;
+			if (!restoredRegistrations) {
+				restoreRegistrations();
+				restoredRegistrations = true;
 			}
 		}
 
@@ -510,8 +622,6 @@ public class ContextService extends Service {
 		notification.flags = 0;
 		notification.tickerText = "ContextDroid stopped";
 		mNotificationManager.notify(SERVICE_NOTIFICATION_ID, notification);
-
-		closeDb();
 	}
 
 	/**

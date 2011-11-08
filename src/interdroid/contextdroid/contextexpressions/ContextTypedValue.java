@@ -438,4 +438,12 @@ public class ContextTypedValue extends TypedValue implements
 		}
 		return ret;
 	}
+
+	/**
+	 * Sets the id for this TypedValue.
+	 * @param id the id to set to
+	 */
+	public final void setId(final String id) {
+		mId = id;
+	}
 }
