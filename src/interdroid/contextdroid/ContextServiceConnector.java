@@ -24,30 +24,35 @@ public abstract class ContextServiceConnector {
 
 
 	/** The ContextService intent action. */
-	public static final String CONTEXT_SERVICE = "interdroid.contextdroid.intent.CONTEXTSERVICE";
+	public static final String CONTEXT_SERVICE =
+			"interdroid.contextdroid.intent.CONTEXTSERVICE";
 
 	/** The context service interface. */
-	protected IContextService contextService;
+	private IContextService contextService;
 
 	/** The context of the application using the Context Service Connector. */
-	Context context;
+	private final Context context;
 
 	/** The context manager listener. */
 	private ConnectionListener connectionListener;
 
 	/** Is the context service connected? */
-	boolean isConnected = false;
+	private boolean isConnected = false;
 
 	/**
 	 * Checks if the context manager is connected to the context service.
 	 *
 	 * @return true, if connected
 	 */
-	public boolean isConnected() {
+	public final boolean isConnected() {
 		return isConnected;
 	}
 
-	public void start() {
+	/**
+	 * Starts the connector.
+	 * @see start(ConnectionListener)
+	 */
+	public final void start() {
 		start(null);
 	}
 
@@ -61,13 +66,13 @@ public abstract class ContextServiceConnector {
 	 * You will generally want to call this method from an Activity's onResume()
 	 * method.
 	 *
-	 * @param connectionListener
+	 * @param listener
 	 *            the connectionListener object to call onConnected() on after
 	 *            the context manager has been initialized.
 	 */
-	public void start(ConnectionListener connectionListener) {
-		this.connectionListener = connectionListener;
-		context.bindService(new Intent(CONTEXT_SERVICE), serviceConnection,
+	public final void start(final ConnectionListener listener) {
+		this.connectionListener = listener;
+		getContext().bindService(new Intent(CONTEXT_SERVICE), serviceConnection,
 				Service.BIND_AUTO_CREATE);
 	}
 
@@ -76,33 +81,42 @@ public abstract class ContextServiceConnector {
 	 * You will generally want to call this method from an Activity's onPause()
 	 * method to prevent leaked bindings
 	 */
-	public void stop() {
-		context.unbindService(serviceConnection);
+	public final void stop() {
+		getContext().unbindService(serviceConnection);
 		isConnected = false;
 	}
 
-	public void shutdown() {
+	/**
+	 * Shuts down the context service entirely.
+	 */
+	// TODO: Should we support this even? One app shouldn't be able to
+	// shut down the service for another.
+	public final void shutdown() {
 		try {
-			contextService.shutdown();
+			getContextService().shutdown();
 		} catch (RemoteException e) {
-			// ignore
+			LOG.warn("Ignoring exception while shutting down.", e);
 		}
 	}
 
 	/** The service connection to the ContextService. */
-	private ServiceConnection serviceConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName name, IBinder service) {
+	private final ServiceConnection serviceConnection =
+			new ServiceConnection() {
+		@Override
+		public void onServiceConnected(final ComponentName name,
+				final IBinder service) {
 			LOG.debug("service connected: {}", name);
-			contextService = IContextService.Stub.asInterface(service);
+			setContextService(IContextService.Stub.asInterface(service));
 			isConnected = true;
 			if (connectionListener != null) {
 				connectionListener.onConnected();
 			}
 		}
 
+		@Override
 		public void onServiceDisconnected(final ComponentName name) {
 			LOG.debug("service disconnected");
-			contextService = null;
+			setContextService(null);
 			isConnected = false;
 			if (connectionListener != null) {
 				connectionListener.onDisconnected();
@@ -113,11 +127,32 @@ public abstract class ContextServiceConnector {
 	/**
 	 * Instantiates a new context service connector.
 	 *
-	 * @param context
+	 * @param serviceContext
 	 *            the application context
 	 */
-	public ContextServiceConnector(final Context context) {
-		this.context = context;
+	public ContextServiceConnector(final Context serviceContext) {
+		this.context = serviceContext;
+	}
+
+	/**
+	 * @return the contextService
+	 */
+	public final IContextService getContextService() {
+		return contextService;
+	}
+
+	/**
+	 * @param service the contextService to set
+	 */
+	private void setContextService(final IContextService service) {
+		this.contextService = service;
+	}
+
+	/**
+	 * @return the context
+	 */
+	public final Context getContext() {
+		return context;
 	}
 
 }

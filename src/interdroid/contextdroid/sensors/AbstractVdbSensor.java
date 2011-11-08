@@ -17,6 +17,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+/**
+ * Base class for sensors which store their data into a VDB database.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
 	/**
@@ -58,10 +64,20 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 		SCHEMA_TIMESTAMP_FIELDS = temp.replace('\'', '"');
 	}
 
+	/**
+	 * The uri for the database.
+	 */
 	private Uri uri;
 
+	/**
+	 * The schema for the sensor.
+	 */
 	private Schema schema;
 
+	/**
+	 * Initialize this sensor.
+	 */
+	@Override
 	public final void init() {
 		schema = Schema.parse(getScheme());
 		uri = EntityUriBuilder.nativeUri(schema.getNamespace(),
@@ -91,6 +107,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param resolver the resolver to store with
 	 * @param values the values to store
 	 * @param now the timestamp
+	 * @param uri the uri to store into
 	 * @param expire the expiration time
 	 */
 	public static final void putValues(final ContentResolver resolver,
@@ -101,12 +118,17 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 		resolver.insert(uri, values);
 	}
 
-	private Type getType(String fieldName) {
+	/**
+	 * @param fieldName the name of the field
+	 * @return the type of the field
+	 */
+	private Type getType(final String fieldName) {
 		return schema.getField(fieldName).schema().getType();
 	}
 
-	public List<TimestampedValue> getValues(final String id, final long now,
-			final long timespan) {
+	@Override
+	public final List<TimestampedValue> getValues(final String id,
+			final long now, final long timespan) {
 		String fieldName = registeredValuePaths.get(id);
 		Type fieldType = getType(fieldName);
 		Cursor values = getValuesCursor(this, uri,

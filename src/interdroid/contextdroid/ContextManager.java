@@ -34,36 +34,42 @@ public class ContextManager extends ContextServiceConnector {
 			LoggerFactory.getLogger(ContextManager.class);
 
 	/** The intent action for broadcasts of new readings. */
-	public static final String ACTION_NEWREADING = "interdroid.contextdroid.NEWREADING";
+	public static final String ACTION_NEWREADING =
+			"interdroid.contextdroid.NEWREADING";
 
 	/**
-	 * The intent action for announcing the expiration of a the previous reading
+	 * The intent action for announcing the expiration of the previous reading.
 	 */
-	public static final String ACTION_INVALIDATEREADING = "interdroid.contextdroid.INVALIDATEREADING";
+	public static final String ACTION_INVALIDATEREADING =
+			"interdroid.contextdroid.INVALIDATEREADING";
 
 	/**
 	 * The intent action for broadcasts of expressions changing their state to
 	 * TRUE.
 	 */
-	public static final String ACTION_EXPRESSIONTRUE = "interdroid.contextdroid.EXPRESSIONTRUE";
+	public static final String ACTION_EXPRESSIONTRUE =
+			"interdroid.contextdroid.EXPRESSIONTRUE";
 
 	/**
 	 * The intent action for broadcasts of expressions changing their state to
 	 * FALSE.
 	 */
-	public static final String ACTION_EXPRESSIONFALSE = "interdroid.contextdroid.EXPRESSIONFALSE";
+	public static final String ACTION_EXPRESSIONFALSE =
+			"interdroid.contextdroid.EXPRESSIONFALSE";
 
 	/**
 	 * The intent action for broadcasts of expressions changing their state to
 	 * UNDEFINED.
 	 */
-	public static final String ACTION_EXPRESSIONUNDEFINED = "interdroid.contextdroid.EXPRESSIONUNDEFINED";
+	public static final String ACTION_EXPRESSIONUNDEFINED =
+			"interdroid.contextdroid.EXPRESSIONUNDEFINED";
 
 	/**
 	 * The intent action for broadcasts of expressions changing their state to
 	 * UNDEFINED.
 	 */
-	public static final String ACTION_EXPRESSIONERROR = "interdroid.contextdroid.EXPRESSIONERROR";
+	public static final String ACTION_EXPRESSIONERROR =
+			"interdroid.contextdroid.EXPRESSIONERROR";
 
 	/** The Constant TRUE. */
 	public static final int TRUE = 1;
@@ -75,13 +81,15 @@ public class ContextManager extends ContextServiceConnector {
 	public static final int UNDEFINED = -1;
 
 	/** Stores the listeners for each context expression. */
-	private final HashMap<String, ContextExpressionListener> contextExpressionListeners;
+	private final HashMap<String, ContextExpressionListener>
+	contextExpressionListeners;
 
 	/** Has the broadcast receiver for context expressions been registered? */
 	private boolean contextExpressionBroadcastReceiverRegistered = false;
 
 	/** Stores the listeners for each context expression. */
-	private final HashMap<String, ContextTypedValueListener> contextTypedValueListeners;
+	private final HashMap<String, ContextTypedValueListener>
+	contextTypedValueListeners;
 
 	/** Has the broadcast receiver for context entities been registered? */
 	private boolean contextTypedValueBroadcastReceiverRegistered = false;
@@ -91,20 +99,24 @@ public class ContextManager extends ContextServiceConnector {
 	 *
 	 * @param context
 	 *            the application context
-	 * @param contextManagerListener
-	 *            the ContextManagerListener object to call onConnected() on
-	 *            after the context manager has been initialized.
 	 */
 	public ContextManager(final Context context) {
 		super(context);
-		contextExpressionListeners = new HashMap<String, ContextExpressionListener>();
-		contextTypedValueListeners = new HashMap<String, ContextTypedValueListener>();
+		contextExpressionListeners =
+				new HashMap<String, ContextExpressionListener>();
+		contextTypedValueListeners =
+				new HashMap<String, ContextTypedValueListener>();
 	}
 
-	public void destroy() throws ContextDroidException {
+	/**
+	 * Destroy this ContextManager. This should be called in
+	 * <code>onStop</code> of the activity that started this ContextManager.
+	 * @throws ContextDroidException if something goes wrong.
+	 */
+	public final void destroy() throws ContextDroidException {
 		for (String id : contextTypedValueListeners.keySet()) {
 			try {
-				ContextDroidServiceException exception = contextService
+				ContextDroidServiceException exception = getContextService()
 						.unregisterContextTypedValue(id);
 				if (exception != null) {
 					throw exception.getContextDroidException();
@@ -119,7 +131,7 @@ public class ContextManager extends ContextServiceConnector {
 		contextTypedValueListeners.clear();
 		for (String id : contextExpressionListeners.keySet()) {
 			try {
-				ContextDroidServiceException exception = contextService
+				ContextDroidServiceException exception = getContextService()
 						.removeContextExpression(id);
 				if (exception != null) {
 					throw exception.getContextDroidException();
@@ -134,11 +146,19 @@ public class ContextManager extends ContextServiceConnector {
 		contextExpressionListeners.clear();
 	}
 
-	public void registerContextTypedValue(final String id,
-			ContextTypedValue value, ContextTypedValueListener listener)
-			throws ContextDroidException {
+	/**
+	 * Registers a context typed value with the system.
+	 * @param id the id for the value.
+	 * @param value the value to register.
+	 * @param listener the listener for callbacks for the value.
+	 * @throws ContextDroidException if registration fails.
+	 */
+	public final void registerContextTypedValue(final String id,
+			final ContextTypedValue value,
+			final ContextTypedValueListener listener)
+					throws ContextDroidException {
 		try {
-			ContextDroidServiceException exception = contextService
+			ContextDroidServiceException exception = getContextService()
 					.registerContextTypedValue(id, value);
 			if (exception != null) {
 				throw exception.getContextDroidException();
@@ -147,7 +167,7 @@ public class ContextManager extends ContextServiceConnector {
 			throw new ContextDroidException(e);
 		} catch (NullPointerException e) {
 			LOG.debug("Null pointer", e);
-			LOG.debug("service: {}", contextService);
+			LOG.debug("service: {}", getContextService());
 			LOG.debug("id: {} value: {}", id, value);
 			throw new ContextServiceNotBoundException(
 					"Context Service is not yet bound. Try again later.");
@@ -160,10 +180,15 @@ public class ContextManager extends ContextServiceConnector {
 		updateContextTypedValueBroadcastReceiver();
 	}
 
-	public void unregisterContextTypedValue(final String id)
+	/**
+	 * Unregisters the ContextTypedValue with the given id.
+	 * @param id the id of the TypedValue to unregister
+	 * @throws ContextDroidException if something goes wrong.
+	 */
+	public final void unregisterContextTypedValue(final String id)
 			throws ContextDroidException {
 		try {
-			ContextDroidServiceException exception = contextService
+			ContextDroidServiceException exception = getContextService()
 					.unregisterContextTypedValue(id);
 			if (exception != null) {
 				throw exception.getContextDroidException();
@@ -187,16 +212,19 @@ public class ContextManager extends ContextServiceConnector {
 	 *            the expression id
 	 * @param expression
 	 *            the expression
+	 * @param expressionListener
+	 *            the listener for expression events
 	 * @throws ContextDroidException
 	 *             the context droid exception
 	 */
-	public void registerContextExpression(final String expressionId,
+	public final void registerContextExpression(final String expressionId,
 			final Expression expression,
 			final ContextExpressionListener expressionListener)
-			throws ContextDroidException {
+					throws ContextDroidException {
 		try {
-			LOG.debug("attempting to add expression {} id: {}", expression, expressionId);
-			ContextDroidServiceException exception = contextService
+			LOG.debug("attempting to add expression {} id: {}",
+					expression, expressionId);
+			ContextDroidServiceException exception = getContextService()
 					.addContextExpression(expressionId, expression);
 			if (exception != null) {
 				throw exception.getContextDroidException();
@@ -224,14 +252,14 @@ public class ContextManager extends ContextServiceConnector {
 	 * @throws ContextDroidException
 	 *             the context droid exception
 	 */
-	public void unregisterContextExpression(String expressionId)
+	public final void unregisterContextExpression(final String expressionId)
 			throws ContextDroidException {
 		contextExpressionListeners.remove(expressionId);
 
 		updateContextExpressionBroadcastReceiver();
 
 		try {
-			ContextDroidServiceException exception = contextService
+			ContextDroidServiceException exception = getContextService()
 					.removeContextExpression(expressionId);
 			if (exception != null) {
 				throw exception.getContextDroidException();
@@ -248,7 +276,7 @@ public class ContextManager extends ContextServiceConnector {
 	/*** PRIVATE HELPER FUNCTIONS ***/
 
 	/**
-	 * Reregister context expression broadcast receiver. Updates the
+	 * Re-register context expression broadcast receiver. Updates the
 	 * IntentFilter of the receiver or removes it altogether if there are no
 	 * context expression listeners left.
 	 */
@@ -261,18 +289,18 @@ public class ContextManager extends ContextServiceConnector {
 			intentFilter.addDataAuthority(id, null);
 		}
 		if (contextTypedValueBroadcastReceiverRegistered) {
-			context.unregisterReceiver(contextTypedValueBroadcastReceiver);
+			getContext().unregisterReceiver(contextTypedValueBroadcastReceiver);
 			contextTypedValueBroadcastReceiverRegistered = false;
 		}
 		if (contextTypedValueListeners.size() > 0) {
-			context.registerReceiver(contextTypedValueBroadcastReceiver,
+			getContext().registerReceiver(contextTypedValueBroadcastReceiver,
 					intentFilter);
 			contextTypedValueBroadcastReceiverRegistered = true;
 		}
 	}
 
 	/**
-	 * Reregister context expression broadcast receiver. Updates the
+	 * Re-register context expression broadcast receiver. Updates the
 	 * IntentFilter of the receiver or removes it altogether if there are no
 	 * context expression listeners left.
 	 */
@@ -287,11 +315,11 @@ public class ContextManager extends ContextServiceConnector {
 			intentFilter.addDataAuthority(expressionId, null);
 		}
 		if (contextExpressionBroadcastReceiverRegistered) {
-			context.unregisterReceiver(contextExpressionBroadcastReceiver);
+			getContext().unregisterReceiver(contextExpressionBroadcastReceiver);
 			contextExpressionBroadcastReceiverRegistered = false;
 		}
 		if (contextExpressionListeners.size() > 0) {
-			context.registerReceiver(contextExpressionBroadcastReceiver,
+			getContext().registerReceiver(contextExpressionBroadcastReceiver,
 					intentFilter);
 			contextExpressionBroadcastReceiverRegistered = true;
 		}
@@ -301,7 +329,8 @@ public class ContextManager extends ContextServiceConnector {
 	 * The receiver object that receives updates about the state of context
 	 * expressions.
 	 */
-	private final BroadcastReceiver contextTypedValueBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver contextTypedValueBroadcastReceiver
+	= new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			Uri data = intent.getData();
@@ -313,7 +342,8 @@ public class ContextManager extends ContextServiceConnector {
 				if (listener != null) {
 					Parcelable[] parcelables = (Parcelable[]) intent
 							.getExtras().get("values");
-					TimestampedValue[] timestampedValues = new TimestampedValue[parcelables.length];
+					TimestampedValue[] timestampedValues =
+							new TimestampedValue[parcelables.length];
 					System.arraycopy(parcelables, 0, timestampedValues, 0,
 							parcelables.length);
 
@@ -332,7 +362,8 @@ public class ContextManager extends ContextServiceConnector {
 	 * The receiver object that receives updates about the state of context
 	 * expressions.
 	 */
-	private final BroadcastReceiver contextExpressionBroadcastReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver contextExpressionBroadcastReceiver =
+			new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			Uri data = intent.getData();
@@ -354,7 +385,8 @@ public class ContextManager extends ContextServiceConnector {
 				}
 			} else if (intent.getAction().equals(ACTION_EXPRESSIONERROR)) {
 				if (listener != null) {
-					ContextDroidException exception = (ContextDroidException) intent
+					ContextDroidException exception =
+							(ContextDroidException) intent
 							.getSerializableExtra("exception");
 					listener.onException(expressionId, exception);
 				}
@@ -367,7 +399,7 @@ public class ContextManager extends ContextServiceConnector {
 	 * @param context the context to use to fetch sensor information
 	 * @return a list of SensorServiceInfo with information about sensors.
 	 */
-	public static List<SensorServiceInfo> getSensors(Context context) {
+	public static List<SensorServiceInfo> getSensors(final Context context) {
 		List<SensorServiceInfo> result = new ArrayList<SensorServiceInfo>();
 		LOG.debug("Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
@@ -378,13 +410,13 @@ public class ContextManager extends ContextServiceConnector {
 		LOG.debug("Found " + discoveredSensors.size() + " sensors");
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
 			try {
-			LOG.debug("\tDiscovered sensor: {} {}",
-					discoveredSensor.serviceInfo.packageName,
-					discoveredSensor.serviceInfo.name);
-			result.add(new SensorServiceInfo(new ComponentName(
-					discoveredSensor.serviceInfo.packageName,
-					discoveredSensor.serviceInfo.name),
-					discoveredSensor.serviceInfo.metaData));
+				LOG.debug("\tDiscovered sensor: {} {}",
+						discoveredSensor.serviceInfo.packageName,
+						discoveredSensor.serviceInfo.name);
+				result.add(new SensorServiceInfo(new ComponentName(
+						discoveredSensor.serviceInfo.packageName,
+						discoveredSensor.serviceInfo.name),
+						discoveredSensor.serviceInfo.metaData));
 			} catch (Exception e) {
 				LOG.error("Error with discovered sensor: {}", discoveredSensor);
 				LOG.error("Exception", e);

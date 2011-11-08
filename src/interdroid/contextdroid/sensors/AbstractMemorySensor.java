@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Abstract class that implements basic functionality for sensors. Descendants
@@ -18,11 +15,6 @@ import org.slf4j.LoggerFactory;
  * rest can be overridden optionally.
  */
 public abstract class AbstractMemorySensor extends AbstractSensorBase {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(AbstractMemorySensor.class);
 
 	/**
 	 * The map of values for this sensor.
@@ -34,12 +26,12 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	/**
 	 * @return the values
 	 */
-	public Map<String, List<TimestampedValue>> getValues() {
+	public final Map<String, List<TimestampedValue>> getValues() {
 		return values;
 	}
 
 	@Override
-	public void init() {
+	public final void init() {
 		for (String valuePath : VALUE_PATHS) {
 			expressionIdsPerValuePath.put(valuePath, new ArrayList<String>());
 			getValues().put(valuePath, Collections
@@ -47,7 +39,11 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 		}
 	}
 
-	protected void trimValues(int history) {
+	/**
+	 * Trims the values to the given length.
+	 * @param history the number of items to keep
+	 */
+	protected final void trimValues(final int history) {
 		for (String path : VALUE_PATHS) {
 			if (getValues().get(path).size() >= history) {
 				getValues().get(path).remove(0);
@@ -55,17 +51,29 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 		}
 	}
 
-	protected void putValue(String valuePath, long now, long expire,
-			Object value) {
+	/**
+	 * Adds a value for the given value path to the history.
+	 * @param valuePath the value path
+	 * @param now the current time
+	 * @param expire the expire time for the value
+	 * @param value the value
+	 */
+	protected final void putValue(final String valuePath, final long now,
+			final long expire, final Object value) {
 		getValues().get(valuePath).add(
 				new TimestampedValue(value, now, expire));
 		notifyDataChanged(valuePath);
 	}
 
-	protected void trimValueByTime(long expire) {
+	/**
+	 * Trims values past the given expire time.
+	 * @param expire the time to trim after
+	 */
+	protected final void trimValueByTime(final long expire) {
 		for (String valuePath : VALUE_PATHS) {
 			while ((getValues().get(valuePath).size() > 0
-					&& getValues().get(valuePath).get(0).getTimestamp() < expire)) {
+					&& getValues().get(
+							valuePath).get(0).getTimestamp() < expire)) {
 				getValues().get(valuePath).remove(0);
 			}
 		}

@@ -4,7 +4,6 @@ import interdroid.contextdroid.ConnectionListener;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-public abstract class AbstractSensorBase extends Service implements SensorInterface {
+/**
+ * This class is the abstract base for all Sensor services.
+ * Sensor implementors are advised to use AbstractVdbSensor or
+ * AbstractMemorySensor as a basis for their sensors instead of
+ * using this class directly.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
+public abstract class AbstractSensorBase extends Service
+implements SensorInterface {
 	/**
 	 * Access to logger.
 	 */
@@ -34,16 +43,20 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 	 *            the start
 	 * @param timespan
 	 *            the end
+	 * @param values
+	 *            the values
 	 * @return All readings in the timespan between timespan seconds ago and now
 	 */
-	protected static final List<TimestampedValue> getValuesForTimeSpan(final List<TimestampedValue> values,
-			long now, long timespan) {
+	protected static final List<TimestampedValue> getValuesForTimeSpan(
+			final List<TimestampedValue> values, final long now,
+			final long timespan) {
 				// make a copy of the list
 				List<TimestampedValue> result;
 
 				if (timespan == 0) {
 					result =  values.
-							subList(Math.max(0, values.size() - 1), values.size());
+							subList(Math.max(0, values.size() - 1),
+									values.size());
 				} else {
 					result = new ArrayList<TimestampedValue>();
 					result.addAll(values);
@@ -63,29 +76,68 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 				return result;
 			}
 
+	/**
+	 * The sensor interface.
+	 */
 	private final SensorInterface mSensorInterface = this;
 
+	// Designed for direct use by subclasses.
+	// CHECKSTYLE:OFF
+	/**
+	 * The value paths we support.
+	 */
 	protected final String[] VALUE_PATHS = getValuePaths();
 
+	/**
+	 * The default configuration.
+	 */
 	protected final Bundle mDefaultConfiguration = new Bundle();
 
+	/**
+	 * The current configuration of the sensor.
+	 */
 	protected final Bundle currentConfiguration = new Bundle();
 
+	/**
+	 * The registered configurations for the sensor.
+	 */
 	protected final Map<String, Bundle> registeredConfigurations =
 			new HashMap<String, Bundle>();
 
+	/**
+	 * The value paths registered as watched.
+	 */
 	protected final Map<String, String> registeredValuePaths = new
 			HashMap<String, String>();
 
+	/**
+	 * The expression ids for each value path.
+	 */
 	protected final Map<String, List<String>> expressionIdsPerValuePath =
 			new HashMap<String, List<String>>();
 
-	/** The context manager. */
+	/** Access to the sensor service to send notifications. */
 	protected SensorContextServiceConnector contextServiceConnector;
 
-	private final HashMap<String, Boolean> notified = new HashMap<String, Boolean>();
+	// CHECKSTYLE:ON
 
+	/**
+	 * A map of what has been notified.
+	 */
+	private final HashMap<String, Boolean> notified =
+			new HashMap<String, Boolean>();
+
+	/**
+	 * Initializes the default configuration for this sensor.
+	 * @param defaults the bundle to add defaults to
+	 */
 	public abstract void initDefaultConfiguration(Bundle defaults);
+
+	/**
+	 * Called when the sensor is starting to allow subclasses to handle
+	 * any setup that needs to be done.
+	 */
+	protected abstract void init();
 
 	@Override
 	public abstract String[] getValuePaths();
@@ -120,8 +172,6 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 		init();
 		initDefaultConfiguration(mDefaultConfiguration);
 	}
-
-	protected abstract void init();
 
 	/** The binder. */
 	private final IAsynchronousContextSensor.Stub mBinder =
@@ -186,8 +236,8 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 		}
 
 		@Override
-		public List<TimestampedValue> getValues(String id, long now,
-				long timespan) throws RemoteException {
+		public List<TimestampedValue> getValues(final String id, final long now,
+				final long timespan) throws RemoteException {
 			synchronized (AbstractSensorBase.this) {
 				notified.put(getRootIdFor(id), false);
 			}
@@ -207,6 +257,9 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 
 	};
 
+	/**
+	 * Debug helper which prints the state for this sensor.
+	 */
 	private void printState() {
 		for (String key : notified.keySet()) {
 			LOG.debug("not: {} : {}", key, notified.get(key));
@@ -231,7 +284,7 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 	 * returns the sensor interface
 	 */
 	@Override
-	public final IBinder onBind(Intent arg0) {
+	public final IBinder onBind(final Intent arg0) {
 		return mBinder;
 	}
 
@@ -260,14 +313,19 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 	 * @param id the id to find the root of
 	 * @return the id of the root expression
 	 */
-	protected String getRootIdFor(String id) {
-		while (id.endsWith(".R") || id.endsWith(".L")) {
-			id = id.substring(0, id.length() - 2);
+	protected final String getRootIdFor(final String id) {
+		String rootId = id;
+		while (rootId.endsWith(".R") || rootId.endsWith(".L")) {
+			rootId = rootId.substring(0, rootId.length() - 2);
 		}
-		return id;
+		return rootId;
 	}
 
-	protected final void notifyDataChangedForId(String id) {
+	/**
+	 * Send a notification that data changed for the given id.
+	 * @param id the id of the value to notify for.
+	 */
+	protected final void notifyDataChangedForId(final String id) {
 		String rootId = getRootIdFor(id);
 		synchronized (this) {
 			try {
@@ -282,7 +340,11 @@ public abstract class AbstractSensorBase extends Service implements SensorInterf
 		contextServiceConnector.notifyDataChanged(new String[] { rootId });
 	}
 
-	protected final void notifyDataChanged(String valuePath) {
+	/**
+	 * Send a notification that data for the given value path changed.
+	 * @param valuePath the value path to notify for.
+	 */
+	protected final void notifyDataChanged(final String valuePath) {
 		List<String> notify = new ArrayList<String>();
 
 		synchronized (this) {

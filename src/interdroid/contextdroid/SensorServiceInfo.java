@@ -7,27 +7,56 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * Stores and keeps tracks of sensor service state
+ * Stores and keeps tracks of sensor service information.
  */
 public class SensorServiceInfo {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(SensorServiceInfo.class);
 
+	/**
+	 * The name of the component the sensor runs in.
+	 */
 	private final ComponentName component;
 
+	/**
+	 * The entity Id for this service.
+	 */
 	private final String entityId;
 
+	/**
+	 * The authority for this sensors database.
+	 */
 	private final String authority;
 
+	/**
+	 * The value paths this sensor supports.
+	 */
 	private final ArrayList<String> valuePaths = new ArrayList<String>();
 
+	/**
+	 * The configuration for this sensor.
+	 */
 	private final Bundle configuration;
 
-	public SensorServiceInfo(ComponentName component, Bundle metaData) {
-		this.component = component;
+	/**
+	 * Construct information about a sensor.
+	 * @param sensorComponent The component the sensor lives in
+	 * @param metaData metadata bundle for the service from the package manager
+	 */
+	public SensorServiceInfo(final ComponentName sensorComponent,
+			final Bundle metaData) {
+		this.component = sensorComponent;
 		// strip out the entityId
 		if (metaData == null) {
 			throw new IllegalArgumentException("no metadata!");
@@ -56,37 +85,52 @@ public class SensorServiceInfo {
 					metaData.remove(key);
 					metaData.putLong(key, longValue);
 				} catch (NumberFormatException e) {
-					// ignore this, just keep the string version
+					LOG.debug("Can't convert number. Using string.");
 				}
 			}
 			if (metaData.get(key).toString().endsWith("D")) {
 				try {
 					double doubleValue = Double.parseDouble(metaData.getString(
 							key).substring(0,
-							metaData.getString(key).length() - 1));
+									metaData.getString(key).length() - 1));
 					metaData.remove(key);
 					metaData.putDouble(key, doubleValue);
 				} catch (NumberFormatException e) {
-					// ignore this, just keep the string version
+					LOG.debug("Can't convert number. Using string.");
 				}
 			}
 		}
 
 	}
 
-	public String getEntity() {
+	/**
+	 * @return the entity Id for this sensor.
+	 */
+	public final String getEntity() {
 		return entityId;
 	}
 
-	public ArrayList<String> getValuePaths() {
+	/**
+	 * @return the value paths this sensor supports.
+	 */
+	public final ArrayList<String> getValuePaths() {
 		return valuePaths;
 	}
 
-	public String getAuthority() {
+	/**
+	 * @return the authority for this sensors database if appropriate.
+	 */
+	public final String getAuthority() {
 		return authority;
 	}
 
-	public boolean acceptsConfiguration(Bundle b)
+	/**
+	 * Checks if this sensor accepts the given configuration.
+	 * @param b the bundle to check
+	 * @return true if this sensor supports the given bundle
+	 * @throws SensorConfigurationException if the sensor is not configured
+	 */
+	public final boolean acceptsConfiguration(final Bundle b)
 			throws SensorConfigurationException {
 		if (b != null) {
 			Set<String> keys = new HashSet<String>();
@@ -100,23 +144,29 @@ public class SensorServiceInfo {
 						try {
 							String value = b.getString(key);
 							b.remove(key);
-							if (configuration.get(key).getClass() == Integer.class) {
+							if (configuration.get(key).getClass()
+									== Integer.class) {
 								b.putInt(key, Integer.parseInt(value));
-							} else if (configuration.get(key).getClass() == Long.class) {
+							} else if (configuration.get(key).getClass()
+									== Long.class) {
 								b.putLong(key, Long.parseLong(value));
-							} else if (configuration.get(key).getClass() == Float.class) {
+							} else if (configuration.get(key).getClass()
+									== Float.class) {
 								b.putFloat(key, Float.parseFloat(value));
-							} else if (configuration.get(key).getClass() == Double.class) {
+							} else if (configuration.get(key).getClass()
+									== Double.class) {
 								b.putDouble(key, Double.parseDouble(value));
-							} else if (configuration.get(key).getClass() == Boolean.class) {
+							} else if (configuration.get(key).getClass()
+									== Boolean.class) {
 								b.putBoolean(key, Boolean.parseBoolean(value));
 							}
 						} catch (NumberFormatException e) {
 							throw new SensorConfigurationException(
-									"Unable to parse value for configuration key '"
+									"Unable to parse value for configuration '"
 											+ key + "' in entity " + entityId
 											+ " to type "
-											+ configuration.get(key).getClass());
+											+ configuration.get(key)
+											.getClass());
 						}
 					}
 				} else {
@@ -132,7 +182,7 @@ public class SensorServiceInfo {
 					} else {
 						throw new SensorConfigurationException(
 								"Missing required configuration key '" + key
-										+ "' for " + entityId);
+								+ "' for " + entityId);
 					}
 				}
 			}
@@ -140,14 +190,24 @@ public class SensorServiceInfo {
 		return true;
 	}
 
-	public Intent getIntent() {
+	/**
+	 * Returns an intent to launch this sensor.
+	 * @return new Intent().setComponent(getComponent())
+	 */
+	public final Intent getIntent() {
 		return new Intent().setComponent(component);
 	}
 
-	public Intent getConfigurationIntent() {
+	/**
+	 * Returns an intent with component.getClassName() +
+	 * "$ConfigurationActivity" for launching the sensors configuration
+	 * activity.
+	 * @return an intent for launching the configuration activity
+	 */
+	public final Intent getConfigurationIntent() {
 		ComponentName configurationComponent = new ComponentName(
-				component.getPackageName(), component.getClassName().replace(
-						"Sensor", "ConfigurationActivity"));
+				component.getPackageName(), component.getClassName()
+				+ "$ConfigurationActivity");
 		return new Intent().setComponent(configurationComponent);
 	}
 }

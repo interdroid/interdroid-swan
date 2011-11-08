@@ -1,11 +1,13 @@
 package interdroid.contextdroid.contextexpressions;
 
+import interdroid.contextdroid.ContextDroidException;
+
 /**
  * An exception which represents a problem with parsing.
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class ExpressionParseException extends Exception {
+public class ExpressionParseException extends ContextDroidException {
 
 	/**
 	 *

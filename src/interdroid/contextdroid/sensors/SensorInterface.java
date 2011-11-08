@@ -21,19 +21,19 @@ public interface SensorInterface {
 	 * @param valuePath the value path being registered
 	 * @param configuration the configuration for the expression
 	 */
-	public abstract void register(String id, String valuePath,
+	void register(String id, String valuePath,
 			Bundle configuration);
 
 	/**
 	 * Handle unregistering an expression.
 	 * @param id the expression to unregister
 	 */
-	public abstract void unregister(String id);
+	void unregister(String id);
 
 	/**
 	 * @return the scheme for this sensor
 	 */
-	public abstract String getScheme();
+	String getScheme();
 
 	/**
 	 *
@@ -42,22 +42,22 @@ public interface SensorInterface {
 	 * @param timespan the timespan desired
 	 * @return the values requested
 	 */
-	public abstract List<TimestampedValue> getValues(String id, long now,
+	List<TimestampedValue> getValues(String id, long now,
 			long timespan);
 
 	/**
 	 * @return the value paths this sensor puts out
 	 */
-	public abstract String[] getValuePaths();
+	String[] getValuePaths();
 
 	/**
 	 * Callback when a sensor is being destroyed.
 	 */
-	public abstract void onDestroySensor();
+	void onDestroySensor();
 
 	/**
 	 * Callback when connection to ContextDroid has been set up.
 	 */
-	public void onConnected();
+	void onConnected();
 
 }

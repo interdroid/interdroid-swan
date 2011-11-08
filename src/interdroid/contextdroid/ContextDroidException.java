@@ -1,6 +1,5 @@
 package interdroid.contextdroid;
 
-import android.os.RemoteException;
 
 /**
  * Exception thrown by the ContextManager.
@@ -12,19 +11,19 @@ public class ContextDroidException extends Exception {
 
 	/**
 	 * Instantiates a new context framework exception.
-	 * 
+	 *
 	 * @param string the string
 	 */
-	public ContextDroidException(String string) {
+	public ContextDroidException(final String string) {
 		super(string);
 	}
 
 	/**
 	 * Instantiates a new context framework exception.
-	 * 
+	 *
 	 * @param e the e
 	 */
-	public ContextDroidException(RemoteException e) {
+	public ContextDroidException(final Exception e) {
 		super(e);
 	}
 

@@ -10,7 +10,6 @@ import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import interdroid.contextdroid.test.TestActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

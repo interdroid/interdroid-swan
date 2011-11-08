@@ -2,6 +2,9 @@ package interdroid.contextdroid.sensors;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -11,24 +14,50 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 
+/**
+ * Base for ConfigurationActivities for configuring sensors.
+ *
+ * @author nick &lt;palmer@cs.vu.nl&gt;
+ *
+ */
 public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		implements OnPreferenceChangeListener {
+	/**
+	 * Access to logger.
+	 */
+	private static final Logger LOG =
+			LoggerFactory.getLogger(AbstractConfigurationActivity.class);
 
+
+	/**
+	 * Returns the id for the sensors preferences XML setup.
+	 * @return the id for the preferences XML
+	 */
 	public abstract int getPreferencesXML();
 
+	// Android includes lifecycle checks ensuring super.onCreate() was called.
+	// CHECKSTYLE:OFF
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
 		setResult(RESULT_CANCELED);
 	}
+	// CHECKSTYLE:ON
 
+	/**
+	 * Sets up this activity.
+	 */
 	private void setupPrefs() {
 		setupPref(getPreferenceScreen());
 	}
 
-	private void setupPref(Preference preference) {
+	/**
+	 * Sets up using the given preferences.
+	 * @param preference the preferences for the sensor.
+	 */
+	private void setupPref(final Preference preference) {
 		if (preference instanceof PreferenceGroup) {
 			for (int i = 0; i < ((PreferenceGroup) preference)
 					.getPreferenceCount(); i++) {
@@ -45,7 +74,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 					summary = ((ListPreference) preference).getValue()
 							.toString();
 				} catch (NullPointerException e) {
-					// ignore
+					LOG.warn("Got null pointer while getting summary.", e);
 				}
 			} else if (preference instanceof EditTextPreference) {
 				summary = ((EditTextPreference) preference).getText();
@@ -69,7 +98,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	}
 
 	@Override
-	public void onBackPressed() {
+	public final void onBackPressed() {
 		setResult(
 				RESULT_OK,
 				getIntent().putExtra("configuration",
@@ -77,7 +106,11 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		finish();
 	}
 
-	private String prefsToConfigurationString() {
+	/**
+	 * Converts the prefs to a parseable configuration string.
+	 * @return the prefs as a string.
+	 */
+	private  String prefsToConfigurationString() {
 		Map<String, ?> map = PreferenceManager.getDefaultSharedPreferences(
 				getBaseContext()).getAll();
 		String result = map.remove("valuepath").toString() + "?";
@@ -88,9 +121,12 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	}
 
 	@Override
-	public boolean onPreferenceChange(Preference preference, Object newValue) {
+	public final boolean onPreferenceChange(final Preference preference,
+			final Object newValue) {
 		if (preference instanceof ListPreference) {
-			for (int i = 0; i < ((ListPreference) preference).getEntryValues().length; i++) {
+			for (int i = 0;
+					i < ((ListPreference) preference).getEntryValues().length;
+					i++) {
 				if (((ListPreference) preference).getEntryValues()[i]
 						.toString().equals(newValue.toString()
 								)) {
