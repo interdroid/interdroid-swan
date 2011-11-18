@@ -52,8 +52,8 @@ public static final TypedValue parseTypedValue(final String expression) throws E
 
 configuration_options returns [Map<String, String> config]
 	:	{config = new HashMap<String, String>();}
-	(id=ID '=' val=RAW_VALUE) {config.put($id.getText(), $val.getText());}
-	('&' id=ID '=' val=RAW_VALUE {config.put($id.getText(), $val.getText());})*
+	(id=ID val=CONFIG_VAL) {config.put($id.getText(), $val.getText().substring(1));}
+	(CONFIG_AND id=ID val=CONFIG_VAL {config.put($id.getText(), $val.getText().substring(1));})*
 	;
 
 value_path	returns [String path]
@@ -63,37 +63,48 @@ value_path	returns [String path]
 		{$path = buf.toString();}
 	;
 
+// Various enumeration values
+
 strategy	returns [Strategy strategy]
-	:	'ALL' {$strategy = Strategy.ALL;}
-	|	'ANY' {$strategy = Strategy.ANY;}
+	:	ALL {$strategy = Strategy.ALL;}
+	|	ANY {$strategy = Strategy.ANY;}
 	;
 
 comparator	returns [Comparator comp]
-	:	'>' {$comp = Comparator.GREATER_THAN;}
-	|	'<' {$comp = Comparator.LESS_THAN;}
-	|	'>=' {$comp = Comparator.GREATER_THAN_OR_EQUALS;}
-	|	'<=' {$comp = Comparator.LESS_THAN_OR_EQUALS;}
-	|	'==' {$comp = Comparator.EQUALS;}
-	|	'!=' {$comp = Comparator.NOT_EQUALS;}
-	|	'regex' {$comp = Comparator.REGEX_MATCH;}
-	|	'contains' {$comp = Comparator.STRING_CONTAINS;}
+	:	GT {$comp = Comparator.GREATER_THAN;}
+	|	LT {$comp = Comparator.LESS_THAN;}
+	|	GTEQ {$comp = Comparator.GREATER_THAN_OR_EQUALS;}
+	|	LTEQ {$comp = Comparator.LESS_THAN_OR_EQUALS;}
+	|	EQUALS {$comp = Comparator.EQUALS;}
+	|	NOTEQUALS {$comp = Comparator.NOT_EQUALS;}
+	|	REGEX {$comp = Comparator.REGEX_MATCH;}
+	|	CONTAINS {$comp = Comparator.STRING_CONTAINS;}
 	;
 
 binary_logic_operator	returns [LogicOperator value]
-	:	'&&' {$value = LogicOperator.AND;}
-	|	'||' {$value = LogicOperator.OR;}
+	:	AND {$value = LogicOperator.AND;}
+	|	OR {$value = LogicOperator.OR;}
 	;
 
 unary_logic_operator	returns [LogicOperator value]
-	:	'!' {$value = LogicOperator.NOT;}
+	:	NOT {$value = LogicOperator.NOT;}
 	;
 
 math_operator	returns [MathOperator value]
-	:	'+' {$value = MathOperator.PLUS;}
-	|	'-' {$value = MathOperator.MINUS;}
-	|	'*' {$value = MathOperator.TIMES;}
-	|	'/' {$value = MathOperator.DIVIDE;}
+	:	PLUS {$value = MathOperator.PLUS;}
+	|	MINUS {$value = MathOperator.MINUS;}
+	|	MULT {$value = MathOperator.TIMES;}
+	|	DIV {$value = MathOperator.DIVIDE;}
 	;
+
+history_mode returns [HistoryReductionMode mode]
+	:	NONE {$mode = HistoryReductionMode.NONE;}
+	|	MAX {$mode = HistoryReductionMode.MAX;}
+	|	MIN {$mode = HistoryReductionMode.MIN;}
+	|	MEAN {$mode = HistoryReductionMode.MEAN;}
+	|	MEDIAN {$mode = HistoryReductionMode.MEDIAN;}
+	;
+
 
 // Paser rules
 
@@ -104,25 +115,17 @@ typed_value	returns [TypedValue val]
 	|	left_context=context_typed_value  WS op=math_operator WS right=typed_value {$val = new CombinedTypedValue(left_context, $op.value, right);}
 	;
 
-history_mode returns [HistoryReductionMode mode]
-	:	'NONE' {$mode = HistoryReductionMode.NONE;}
-	|	'MAX' {$mode = HistoryReductionMode.MAX;}
-	|	'MIN' {$mode = HistoryReductionMode.MIN;}
-	|	'MEAN' {$mode = HistoryReductionMode.MEAN;}
-	|	'MEDIAN' {$mode = HistoryReductionMode.MEDIAN;}
-	;
-
 context_typed_value returns [ContextTypedValue val]
 	:	entity=ID '/' path=value_path {$val = new ContextTypedValue(entity.getText(), path);}
 	|	entity=ID '/' path=value_path '?' config=configuration_options {$val = new ContextTypedValue(entity.getText(), path, config);}
-	|	entity=ID '/' path=value_path WS '{' WS mode=history_mode WS ',' WS time=INT WS '}' {$val = new ContextTypedValue(entity.getText(), path, mode, Long.parseLong(time.getText()));}
-	|	entity=ID '/' path=value_path '?' config=configuration_options '{' WS mode=history_mode WS ',' WS time=INT WS '}' {$val = new ContextTypedValue(entity.getText(), path, config, mode, Long.parseLong(time.getText()));}
-
+	|	entity=ID '/' path=value_path WS '{' WS* mode=history_mode WS* ',' WS* time=INT WS* '}' {$val = new ContextTypedValue(entity.getText(), path, mode, Long.parseLong(time.getText()));}
+	|	entity=ID '/' path=value_path '?' config=configuration_options WS '{' WS* mode=history_mode WS* ',' WS* time=INT WS* '}' {$val = new ContextTypedValue(entity.getText(), path, config, mode, Long.parseLong(time.getText()));}
 	;
 
-
 constant_typed_value returns [ConstantTypedValue val]
-	:	raw=RAW_VALUE {$val = new ConstantTypedValue(raw);}
+	:	i=INT {$val = new ConstantTypedValue(Long.parseLong($i.getText()));}
+	|	f=FLOAT {$val = new ConstantTypedValue(Double.parseDouble($f.getText()));}
+	| 	raw=STRING {$val = new ConstantTypedValue(raw);}
 	;
 
 expression returns [Expression e]
@@ -136,35 +139,73 @@ context_expression returns [Expression e]
 	;
 
 // Lexar rules
+// Binary
+OR    :     '||' | 'or';
+AND   :     '&&' | 'and';
+// Unary
+NOT   :    '!' | 'not';
 
-fragment
-RAW_VALUE returns [Object val]
-	:	i=INT {$val = Long.parseLong($i.getText());}
-	|	f=FLOAT {$val = Double.parseDouble($i.getText());}
-	|	s=STRING {$val = String.valueOf($s.getText());}
-	;
+// Config
+CONFIG_IS
+	:	'=';
+CONFIG_AND
+	:	'&';
+
+// Comparators
+EQUALS
+      :    '==';
+NOTEQUALS
+      :    '!=';
+LT    :    '<';
+LTEQ  :    '<=';
+GT    :    '>';
+GTEQ  :    '>=';
+PLUS  :    '+';
+MINUS :    '-';
+MULT  :    '*';
+DIV   :    '/';
+MOD   :    '%';
+REGEX :
+		'regex' | 'REGEX';
+CONTAINS
+	:	 'contains' | 'CONTAINS';
+
+// Strategies
+ALL 	:	('ALL'|'all');
+ANY	:	('ANY'|'any');
+
+// History Reduction
+NONE 	:	('NONE'|'none');
+MAX	:	('MAX'|'max');
+MIN	:	('MIN'|'min');
+MEAN	: 	('MEAN'|'mean');
+MEDIAN 	:	('MEDIAN'|'median');
 
 ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
-INT :	'0'..'9'+
+INT :	('-')? '0'..'9'+
     ;
 
 FLOAT
-    :   ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
-    |   '.' ('0'..'9')+ EXPONENT?
-    |   ('0'..'9')+ EXPONENT
+    :   ('-')? ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+    |   ('-')? '.' ('0'..'9')+ EXPONENT?
+    |   ('-')? ('0'..'9')+ EXPONENT
     ;
 
 WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'
-        ) {$channel=HIDDEN;}
+        )
     ;
 
 STRING
-    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
+    :  ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
+    ;
+
+CONFIG_VAL
+    :	'=' ~('&'|WS)*
     ;
 
 fragment

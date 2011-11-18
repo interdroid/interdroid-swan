@@ -9,15 +9,15 @@ package interdroid.contextdroid.contextexpressions;
 public enum HistoryReductionMode
 implements ParseableEnum<HistoryReductionMode> {
 	/** No reduction is performed. */
-	NONE (0, "all"),
+	NONE (0, "NONE"),
 	/** Takes the maximum value. */
-	MAX (1, "max"),
+	MAX (1, "MAX"),
 	/** Takes the minimum value. */
-	MIN (2, "min"),
+	MIN (2, "MIN"),
 	/** Takes the mean value. */
-	MEAN (3, "mean"),
+	MEAN (3, "MEAN"),
 	/** Takes the median value. */
-	MEDIAN (4, "median");
+	MEDIAN (4, "MEDIAN");
 
 	/** The convert value. */
 	private final int mValue;
