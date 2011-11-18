@@ -15,7 +15,7 @@
 			</intent-filter>
 		</receiver>
 
-		<receiver android:name=".test.TestReceiver" android:label="CD-Test-receiver">
+		<receiver android:name=".interdroid.contextdroid.test.TestReceiver" android:label="CD-Test-receiver">
 			<intent-filter>
 				<action android:name="interdroid.contextdroid.EXPRESSIONTRUE" />
 				<action android:name="interdroid.contextdroid.EXPRESSIONFALSE" />
@@ -55,6 +55,9 @@
 		</activity>
 
 		<activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity">
+		</activity>
+
+				<activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity">
 		</activity>
 
 		<activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity">
@@ -173,6 +176,23 @@
 			android:name="interdroid.contextdroid.sensors.impl.BluetoothSensor$Provider"
 			android:authorities="interdroid.context.sensor.bluetooth" />
 
+		<service android:name=".sensors.impl.PolarHeartRate"
+			android:exported="true" android:process=":PolarHeartRate">
+			<meta-data android:name="entityId" android:value="polar_hrm" />
+			<!-- TODO: Make these come from a string array resource instead. -->
+			<meta-data android:name="valuePaths"
+				android:value="bpm,status,index,rri" />
+			<meta-data android:name="device_name" android:value="Polar iWL" />
+			<meta-data android:name="authority"
+				android:value="interdroid.context.sensor.polar_hrm" />
+			<intent-filter>
+				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+			</intent-filter>
+		</service>
+		<provider
+			android:name="interdroid.contextdroid.sensors.impl.PolarHeartRate$Provider"
+			android:authorities="interdroid.context.sensor.polar_hrm" />
+
 		<service android:name=".sensors.impl.SignalStrengthSensor"
 			android:exported="true" android:process=":signalsensor">
 			<meta-data android:name="entityId" android:value="signal" />
@@ -241,7 +261,7 @@
 				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
 			</intent-filter>
 		</service>
-		<provider android:name="interdroid.contextdroid.sensors.impl.WifiSensor$Provider"
+		<provider android:name=".sensors.impl.WifiSensor$Provider"
 			android:authorities="interdroid.context.sensor.wifi" />
 
 		<service android:name=".sensors.impl.ServerStatusSensor"

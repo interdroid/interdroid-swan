@@ -148,4 +148,11 @@
 		<item>scanresult</item>
 	</string-array>
 
+	<string-array name="hrm_valuepaths">
+			<item>bpm</item>
+			<item>status</item>
+			<item>index</item>
+			<item>rri</item>
+	</string-array>
+
 </resources>
