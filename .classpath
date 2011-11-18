@@ -16,6 +16,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/smartsockets"/>
 	<classpathentry kind="lib" path="/vdb/vdb.jar" sourcepath="/vdb/src"/>
 	<classpathentry kind="lib" path="external/scribe-1.2.0.jar"/>
-	<classpathentry kind="src" path="slf4android_src"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
