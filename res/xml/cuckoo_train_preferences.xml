@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Value Path" >
+
+        <ListPreference
+            android:entries="@array/train_valuepaths"
+            android:entryValues="@array/train_valuepaths"
+            android:key="valuepath"
+            android:summary="Select a Value Path"
+            android:title="Value Path" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Configuration" >
+
+        <EditTextPreference
+            android:dialogTitle="Enter Departure Railway Station"
+            android:key="from_station"
+            android:summary="Select a Railway Station"
+            android:title="Departure Station" />
+
+        <EditTextPreference
+            android:dialogTitle="Enter Destination Railway Station"
+            android:key="to_station"
+            android:summary="Select a Railway Station"
+            android:title="Destination Station" />
+
+        <interdroid.contextdroid.util.TimePreference
+            android:dialogTitle="Pick Departure Time"
+            android:key="departure_time"
+            android:persistent="false"
+            android:summary="Departure time of the train"
+            android:title="Departure Time" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
