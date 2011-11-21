@@ -21,24 +21,24 @@ import android.os.Bundle;
 
 /**
  * A sensor for available Wifi networks.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class WifiSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(WifiSensor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(WifiSensor.class);
 
 	/**
 	 * Configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -66,11 +66,6 @@ public class WifiSensor extends AbstractVdbSensor {
 	public static final String DISCOVERY_INTERVAL = "discovery_interval";
 
 	/**
-	 * The default expiration time.
-	 */
-	public static final long EXPIRE_TIME = 15 * 60 * 1000; // 15 minutes?
-
-	/**
 	 * The interval at which to run discovery.
 	 */
 	public static final long DEFAULT_DISCOVERY_INTERVAL = 15 * 60 * 1000;
@@ -92,9 +87,9 @@ public class WifiSensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -111,25 +106,14 @@ public class WifiSensor extends AbstractVdbSensor {
 	 * @return the schema for this sensor.
 	 */
 	private static String getSchema() {
-		String scheme =
-				"{'type': 'record', 'name': 'wifi', "
-						+ "'namespace': 'interdroid.context.sensor.wifi',"
-						+ "\n'fields': ["
-						+ SCHEMA_TIMESTAMP_FIELDS
-						+ "\n{'name': '"
-						+ SSID_FIELD
-						+ "', 'type': 'string'},"
-						+ "\n{'name': '"
-						+ BSSID_FIELD
-						+ "', 'type': 'string'},"
-						+ "\n{'name': '"
-						+ LEVEL_FIELD
-						+ "', 'type': 'int'}"
-						+ "\n]"
-						+ "}";
+		String scheme = "{'type': 'record', 'name': 'wifi', "
+				+ "'namespace': 'interdroid.context.sensor.wifi',"
+				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
+				+ SSID_FIELD + "', 'type': 'string'}," + "\n{'name': '"
+				+ BSSID_FIELD + "', 'type': 'string'}," + "\n{'name': '"
+				+ LEVEL_FIELD + "', 'type': 'int'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
-
 
 	/**
 	 * The receiver we use to get wifi notifications.
@@ -139,7 +123,6 @@ public class WifiSensor extends AbstractVdbSensor {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			long now = System.currentTimeMillis();
-			long expire = now + EXPIRE_TIME;
 
 			List<ScanResult> results = wifiManager.getScanResults();
 			for (ScanResult scanResult : results) {
@@ -150,7 +133,7 @@ public class WifiSensor extends AbstractVdbSensor {
 				values.put(SSID_FIELD, scanResult.SSID);
 				values.put(BSSID_FIELD, scanResult.BSSID);
 				values.put(LEVEL_FIELD, scanResult.level);
-				putValues(values, now, expire);
+				putValues(values, now);
 			}
 		}
 
@@ -184,7 +167,7 @@ public class WifiSensor extends AbstractVdbSensor {
 
 	@Override
 	public final String[] getValuePaths() {
-		return new String[] { SSID_FIELD, BSSID_FIELD, LEVEL_FIELD};
+		return new String[] { SSID_FIELD, BSSID_FIELD, LEVEL_FIELD };
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package interdroid.contextdroid.sensors.impl;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.util.List;
 
@@ -21,11 +20,12 @@ public class MovementSensor extends AbstractMemorySensor {
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -57,16 +57,14 @@ public class MovementSensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				long expire = now + 100;
-				trimValues(HISTORY_SIZE);
 				for (int i = 0; i < 3; i++) {
-					putValue(VALUE_PATHS[i], now, expire, event.values[i]);
+					putValueTrimSize(VALUE_PATHS[i], null, now,
+							event.values[i], HISTORY_SIZE);
 				}
 				float len2 = (float) Math.sqrt(event.values[0]
 						* event.values[0] + event.values[1] * event.values[1]
-								+ event.values[2] * event.values[2]);
-				putValue(TOTAL_FIELD, now, expire, len2);
-
+						+ event.values[2] * event.values[2]);
+				putValueTrimSize(TOTAL_FIELD, null, now, len2, HISTORY_SIZE);
 			}
 		}
 	};

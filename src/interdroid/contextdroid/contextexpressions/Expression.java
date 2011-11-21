@@ -16,19 +16,17 @@ import android.os.Parcelable;
 
 /**
  * A class which represents an Expression in ContextDroid.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
-public abstract class Expression implements Parseable<Expression>,
-	Parcelable, Serializable,
-Comparable<Expression> {
+public abstract class Expression implements Parseable<Expression>, Parcelable,
+		Serializable, Comparable<Expression> {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(Expression.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Expression.class);
 
 	/**
 	 *
@@ -69,7 +67,9 @@ Comparable<Expression> {
 
 	/**
 	 * Constructs an expression from a parcel.
-	 * @param in the parcel to read from.
+	 * 
+	 * @param in
+	 *            the parcel to read from.
 	 */
 	protected Expression(final Parcel in) {
 		readFromParcel(in);
@@ -78,8 +78,7 @@ Comparable<Expression> {
 	/**
 	 * The CREATOR used to construct from a parcel.
 	 */
-	public static final Parcelable.Creator<Expression> CREATOR
-	= new Parcelable.Creator<Expression>() {
+	public static final Parcelable.Creator<Expression> CREATOR = new Parcelable.Creator<Expression>() {
 		@Override
 		public Expression createFromParcel(final Parcel in) {
 			Expression result;
@@ -116,7 +115,9 @@ Comparable<Expression> {
 
 	/**
 	 * Sets the ID for this expression.
-	 * @param id the id to set to
+	 * 
+	 * @param id
+	 *            the id to set to
 	 */
 	public final void setId(final String id) {
 		this.mId = id;
@@ -131,15 +132,18 @@ Comparable<Expression> {
 
 	/**
 	 * Sets the time at which this expression should be re-evaluated.
-	 * @param newDefer the time to re-evaluate at.
+	 * 
+	 * @param newDefer
+	 *            the time to re-evaluate at.
 	 */
-	private void setDeferUntil(final long newDefer) {
+	public void setDeferUntil(final long newDefer) {
 		mDeferUntil = newDefer;
 	}
 
 	/**
 	 * @return true if the result of the expression changed
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	public final boolean evaluate() throws ContextDroidException {
 		int previousResult = mResult;
@@ -149,8 +153,11 @@ Comparable<Expression> {
 
 	/**
 	 * Evaluates this expression given the requested time.
-	 * @param now the epoch time to evaluate the expression at in milliseconds
-	 * @throws ContextDroidException if something goes wrong.
+	 * 
+	 * @param now
+	 *            the epoch time to evaluate the expression at in milliseconds
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	protected final void evaluate(final long now) throws ContextDroidException {
 		if (now < mDeferUntil) {
@@ -167,7 +174,9 @@ Comparable<Expression> {
 
 	/**
 	 * Sets the result of the last evaluation.
-	 * @param newResult the result to set to.
+	 * 
+	 * @param newResult
+	 *            the result to set to.
 	 */
 	protected final void setResult(final int newResult) {
 		mResult = newResult;
@@ -185,7 +194,6 @@ Comparable<Expression> {
 		return 0;
 	}
 
-
 	@Override
 	public final void writeToParcel(final Parcel dest, final int flags) {
 		dest.writeInt(getSubtypeId());
@@ -202,7 +210,7 @@ Comparable<Expression> {
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
@@ -210,14 +218,6 @@ Comparable<Expression> {
 		mId = in.readString();
 		mResult = in.readInt();
 		mDeferUntil = in.readLong();
-	}
-
-	/**
-	 * Sets the next time this expression should be evaluated.
-	 * @param evaluateAt the time to evalue next at
-	 */
-	public final void setNextEvaluationTime(final long evaluateAt) {
-		mDeferUntil = evaluateAt;
 	}
 
 	/**
@@ -261,51 +261,66 @@ Comparable<Expression> {
 
 	/**
 	 * Initializes this expression tree with the sensor manager.
-	 * @param id the id of the expression
-	 * @param sensorManager the sensor manager to initialize with
+	 * 
+	 * @param id
+	 *            the id of the expression
+	 * @param sensorManager
+	 *            the sensor manager to initialize with
 	 * @throws SensorConfigurationException
-	 * 	if the sensor does not accept the configuration for the expression.
-	 * @throws SensorSetupFailedException if initializing fails.
+	 *             if the sensor does not accept the configuration for the
+	 *             expression.
+	 * @throws SensorSetupFailedException
+	 *             if initializing fails.
 	 */
 	public abstract void initialize(final String id,
 			final SensorManager sensorManager)
-			throws SensorConfigurationException,
-			SensorSetupFailedException;
+			throws SensorConfigurationException, SensorSetupFailedException;
 
 	/**
 	 * Destroys this expression with the sensor manager.
-	 * @param id the id for this expression.
-	 * @param sensorManager the sensor manager to destroy with
-	 * @throws ContextDroidException if something goes wrong.
+	 * 
+	 * @param id
+	 *            the id for this expression.
+	 * @param sensorManager
+	 *            the sensor manager to destroy with
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	public abstract void destroy(final String id,
-			final SensorManager sensorManager)
-					throws ContextDroidException;
+			final SensorManager sensorManager) throws ContextDroidException;
 
 	/**
 	 * Subclass toString implementation.
+	 * 
 	 * @return the subclass portion of the string
 	 */
 	protected abstract String toStringImpl();
 
 	/**
 	 * Subclass toParseString implementation.
+	 * 
 	 * @return the subclass portion of the parse string
 	 */
 	protected abstract String toParseStringImpl();
 
 	/**
 	 * The subclass implementation of evalute.
-	 * @param now the timestamp for the evaluation
-	 * @throws ContextDroidException if something goes wrong.
+	 * 
+	 * @param now
+	 *            the timestamp for the evaluation
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	protected abstract void evaluateImpl(final long now)
 			throws ContextDroidException;
 
 	/**
 	 * Subclass implementation of writeToParcel.
-	 * @param dest the parcel to write to
-	 * @param flags the flags for parceling
+	 * 
+	 * @param dest
+	 *            the parcel to write to
+	 * @param flags
+	 *            the flags for parceling
 	 */
 	protected abstract void writeToParcelImpl(Parcel dest, int flags);
 
@@ -316,12 +331,20 @@ Comparable<Expression> {
 
 	/**
 	 * Parses a string into an expression.
-	 * @param expression the string to parse
+	 * 
+	 * @param expression
+	 *            the string to parse
 	 * @return An expression version of the string
-	 * @throws ExpressionParseException if the expression has a problem
+	 * @throws ExpressionParseException
+	 *             if the expression has a problem
 	 */
 	public static final Expression parse(final String expression)
 			throws ExpressionParseException {
 		return ContextExpressionParser.parseExpression(expression);
 	}
+
+	public abstract void sleepAndBeReadyAt(long deferUntil);
+
+	public abstract long getTimespan();
+
 }

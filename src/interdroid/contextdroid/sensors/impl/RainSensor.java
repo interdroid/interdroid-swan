@@ -3,31 +3,28 @@ package interdroid.contextdroid.sensors.impl;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import android.os.Bundle;
 
 /**
  * Based on the original WeatherSensor written by Rick de Leeuw
- *
+ * 
  * @author rkemp
  */
 public class RainSensor extends AbstractMemorySensor {
 
 	public static final String TAG = "Rain";
 
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -51,7 +48,6 @@ public class RainSensor extends AbstractMemorySensor {
 	public static final int DEFAULT_THRESHOLD = 0; // 0mm
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	// Buienradar specific variables
 	private static final String BASE_URL = "http://gps.buienradar.nl/getrr.php?lat=%s&lon=%s";
@@ -210,15 +206,14 @@ public class RainSensor extends AbstractMemorySensor {
 
 	class RainPoller extends Thread {
 
-		private Bundle configuration;
-		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
 		private String id;
+		private Bundle configuration;
 		private String valuePath;
 
 		RainPoller(String id, String valuePath, Bundle configuration) {
+			this.id = id;
 			this.configuration = configuration;
 			this.valuePath = valuePath;
-			this.id = id;
 		}
 
 		public void run() {
@@ -230,28 +225,21 @@ public class RainSensor extends AbstractMemorySensor {
 					mDefaultConfiguration.getInt(THRESHOLD));
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
-				if (values.size() >= HISTORY_SIZE) {
-					values.remove(0);
-				}
 				if (START_TIME_FIELD.equals(valuePath)) {
 					Date date = sampleRain(url, window, threshold, true);
 					if (date != null) {
-						values.add(new TimestampedValue(date, start, start
-								+ EXPIRE_TIME));
-						notifyDataChangedForId(id);
+						putValueTrimSize(valuePath, id, start, date,
+								HISTORY_SIZE);
 					}
 				} else if (STOP_TIME_FIELD.equals(valuePath)) {
 					Date date = sampleRain(url, window, threshold, false);
 					if (date != null) {
-						values.add(new TimestampedValue(date, start, start
-								+ EXPIRE_TIME));
-						notifyDataChangedForId(id);
+						putValueTrimSize(valuePath, id, start, date,
+								HISTORY_SIZE);
 					}
 				} else if (EXPECTED_MM_FIELD.equals(valuePath)) {
 					float mm = sampleRain(url, window);
-					values.add(new TimestampedValue(mm, start, start
-							+ EXPIRE_TIME));
-					notifyDataChangedForId(id);
+					putValueTrimSize(valuePath, id, start, mm, HISTORY_SIZE);
 				}
 
 				try {
@@ -266,9 +254,6 @@ public class RainSensor extends AbstractMemorySensor {
 			}
 		}
 
-		public List<TimestampedValue> getValues() {
-			return values;
-		}
 	}
 
 	@Override

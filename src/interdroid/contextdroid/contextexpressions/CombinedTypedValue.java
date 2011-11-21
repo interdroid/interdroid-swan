@@ -8,13 +8,12 @@ import android.location.Location;
 import android.os.Parcel;
 
 /**
- * Represents a typed value which is combined with another via a
- * mathematical operation represented by an Operation using a
- * particular Strategy.
- *
+ * Represents a typed value which is combined with another via a mathematical
+ * operation represented by an Operation using a particular Strategy.
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class CombinedTypedValue extends TypedValue {
 	/**
@@ -35,9 +34,13 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Constructs a combined typed value with history reduction.
-	 * @param left the left side
-	 * @param operator the operator
-	 * @param right the right side.
+	 * 
+	 * @param left
+	 *            the left side
+	 * @param operator
+	 *            the operator
+	 * @param right
+	 *            the right side.
 	 */
 	public CombinedTypedValue(final TypedValue left,
 			final MathOperator operator, final TypedValue right) {
@@ -49,7 +52,9 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Constructs from a parcel.
-	 * @param source the parcel to read from.
+	 * 
+	 * @param source
+	 *            the parcel to read from.
 	 */
 	public CombinedTypedValue(final Parcel source) {
 		super(source);
@@ -63,9 +68,8 @@ public class CombinedTypedValue extends TypedValue {
 		TimestampedValue[] leftValues = mLeft.getValues(id + ".L", now);
 		TimestampedValue[] rightValues = mRight.getValues(id + ".R", now);
 		if (leftValues.length == 1 || rightValues.length == 1) {
-			TimestampedValue[] result =
-					new TimestampedValue[leftValues.length
-					                     * rightValues.length];
+			TimestampedValue[] result = new TimestampedValue[leftValues.length
+					* rightValues.length];
 			int index = 0;
 			for (int i = 0; i < leftValues.length; i++) {
 				for (int j = 0; j < rightValues.length; j++) {
@@ -74,46 +78,41 @@ public class CombinedTypedValue extends TypedValue {
 			}
 			return applyMode(result);
 		} else {
-			throw new ContextDroidException(
-					"Unable to combine two arrays, "
-							+ "only one of the operands can be an array: "
-							+ mOperator);
+			throw new ContextDroidException("Unable to combine two arrays, "
+					+ "only one of the operands can be an array: " + mOperator);
 		}
 	}
 
 	/**
 	 * Performs the operation on the requested values.
-	 * @param left the left side
-	 * @param right the right side
+	 * 
+	 * @param left
+	 *            the left side
+	 * @param right
+	 *            the right side
 	 * @return the timestamped values
-	 * @throws ContextDroidException if someting goes wrong
+	 * @throws ContextDroidException
+	 *             if someting goes wrong
 	 */
 	private TimestampedValue operate(final TimestampedValue left,
 			final TimestampedValue right) throws ContextDroidException {
 		if (left.getValue() instanceof Double
 				&& right.getValue() instanceof Double) {
-			return new TimestampedValue(operateDouble(
-					(Double) left.getValue(),
-					(Double) right.getValue()),
-					left.getTimestamp(), left.getExpireTime());
+			return new TimestampedValue(operateDouble((Double) left.getValue(),
+					(Double) right.getValue()), left.getTimestamp());
 		} else if (left.getValue() instanceof Long
 				&& right.getValue() instanceof Long) {
-			return new TimestampedValue(operateLong(
-					(Long) left.getValue(),
-					(Long) right.getValue()),
-					left.getTimestamp(), left.getExpireTime());
+			return new TimestampedValue(operateLong((Long) left.getValue(),
+					(Long) right.getValue()), left.getTimestamp());
 		} else if (left.getValue() instanceof String
 				&& right.getValue() instanceof String) {
-			return new TimestampedValue(operateString(
-					(String) left.getValue(),
-					(String) right.getValue()),
-					left.getTimestamp(), left.getExpireTime());
+			return new TimestampedValue(operateString((String) left.getValue(),
+					(String) right.getValue()), left.getTimestamp());
 		} else if (left.getValue() instanceof Location
 				&& right.getValue() instanceof Location) {
 			return new TimestampedValue(operateLocation(
-					(Location) left.getValue(),
-					(Location) right.getValue()),
-					left.getTimestamp(), left.getExpireTime());
+					(Location) left.getValue(), (Location) right.getValue()),
+					left.getTimestamp());
 		}
 
 		throw new ContextDroidException(
@@ -124,10 +123,14 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Operates on doubles.
-	 * @param left the left side value
-	 * @param right the right side value
+	 * 
+	 * @param left
+	 *            the left side value
+	 * @param right
+	 *            the right side value
 	 * @return the combined value
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	private Double operateDouble(final double left, final double right)
 			throws ContextDroidException {
@@ -154,10 +157,14 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Operates on longs.
-	 * @param left the left side value
-	 * @param right the right side value
+	 * 
+	 * @param left
+	 *            the left side value
+	 * @param right
+	 *            the right side value
 	 * @return the combined value
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	private Long operateLong(final long left, final long right)
 			throws ContextDroidException {
@@ -184,10 +191,14 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Operates on string.
-	 * @param left the left side value
-	 * @param right the right side value
+	 * 
+	 * @param left
+	 *            the left side value
+	 * @param right
+	 *            the right side value
 	 * @return the combined value
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	private String operateString(final String left, final String right)
 			throws ContextDroidException {
@@ -205,10 +216,14 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Operates on locations.
-	 * @param left the left side value
-	 * @param right the right side value
+	 * 
+	 * @param left
+	 *            the left side value
+	 * @param right
+	 *            the right side value
 	 * @return the combined value
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	private Float operateLocation(final Location left, final Location right)
 			throws ContextDroidException {
@@ -228,11 +243,6 @@ public class CombinedTypedValue extends TypedValue {
 	}
 
 	@Override
-	public final long getDeferUntil() {
-		return Math.min(mLeft.getDeferUntil(), mRight.getDeferUntil());
-	}
-
-	@Override
 	public final int describeContents() {
 		return 0;
 	}
@@ -247,7 +257,7 @@ public class CombinedTypedValue extends TypedValue {
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the Parcel to read from.
 	 */
@@ -258,8 +268,7 @@ public class CombinedTypedValue extends TypedValue {
 	}
 
 	/** The CREATOR. */
-	public static final CombinedTypedValue.Creator<CombinedTypedValue> CREATOR =
-			new CombinedTypedValue.Creator<CombinedTypedValue>() {
+	public static final CombinedTypedValue.Creator<CombinedTypedValue> CREATOR = new CombinedTypedValue.Creator<CombinedTypedValue>() {
 
 		@Override
 		public CombinedTypedValue createFromParcel(final Parcel source) {
@@ -276,16 +285,14 @@ public class CombinedTypedValue extends TypedValue {
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-					throws SensorConfigurationException,
-					SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		mLeft.initialize(id + ".L", sensorManager);
 		mRight.initialize(id + ".R", sensorManager);
 	}
 
 	@Override
-	public final void destroy(final String id,
-			final SensorManager sensorManager)
-					throws ContextDroidException {
+	public final void destroy(final String id, final SensorManager sensorManager)
+			throws ContextDroidException {
 		mLeft.destroy(id + ".L", sensorManager);
 		mRight.destroy(id + ".R", sensorManager);
 	}
@@ -297,8 +304,18 @@ public class CombinedTypedValue extends TypedValue {
 
 	@Override
 	public final String toParseString() {
-		return mLeft.toParseString() + " " + mOperator.toParseString()
-				+ " " + mRight.toParseString();
+		return mLeft.toParseString() + " " + mOperator.toParseString() + " "
+				+ mRight.toParseString();
+	}
+
+	@Override
+	public boolean isConstant() {
+		return mLeft.isConstant() && mRight.isConstant();
+	}
+
+	@Override
+	public long getTimespan() {
+		return Math.max(mLeft.getTimespan(), mRight.getTimespan());
 	}
 
 }

@@ -12,13 +12,13 @@ import android.os.Parcelable;
 
 /**
  * Represents a value of a particular type within an expression.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
-public abstract class TypedValue
-implements Serializable, Parcelable, Parseable<TypedValue> {
+public abstract class TypedValue implements Serializable, Parcelable,
+		Parseable<TypedValue> {
 
 	/**
 	 * Serial version id.
@@ -32,7 +32,9 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Constructs a typed value with the given reduction mode.
-	 * @param mode the reduction mode.
+	 * 
+	 * @param mode
+	 *            the reduction mode.
 	 */
 	public TypedValue(final HistoryReductionMode mode) {
 		mMode = mode;
@@ -40,7 +42,9 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Construct from a parcel.
-	 * @param source the parcel to get data from.
+	 * 
+	 * @param source
+	 *            the parcel to get data from.
 	 */
 	public TypedValue(final Parcel source) {
 		readFromParcel(source);
@@ -54,23 +58,22 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 	}
 
 	/**
-	 * @param id the id of the expression.
-	 * @param now the time to evaluate at
+	 * @param id
+	 *            the id of the expression.
+	 * @param now
+	 *            the time to evaluate at
 	 * @return the values for this typed value
-	 * @throws ContextDroidException if something goes wrong.
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
-	public abstract TimestampedValue[] getValues(final String id,
-			final long now)
+	public abstract TimestampedValue[] getValues(final String id, final long now)
 			throws ContextDroidException;
 
 	/**
-	 * @return the time until this should be evaluated again.
-	 */
-	public abstract long getDeferUntil();
-
-	/**
 	 * Applies the reduction mode to the values.
-	 * @param values the value to reduce
+	 * 
+	 * @param values
+	 *            the value to reduce
 	 * @return the reduced values.
 	 */
 	public final TimestampedValue[] applyMode(final TimestampedValue[] values) {
@@ -95,20 +98,28 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Initializes this value with the sensor manager.
-	 * @param id the id of the expression
-	 * @param sensorManager the sensor manager to init with
-	 * @throws SensorConfigurationException if the config is problematic
-	 * @throws SensorSetupFailedException if there is a problem.
+	 * 
+	 * @param id
+	 *            the id of the expression
+	 * @param sensorManager
+	 *            the sensor manager to init with
+	 * @throws SensorConfigurationException
+	 *             if the config is problematic
+	 * @throws SensorSetupFailedException
+	 *             if there is a problem.
 	 */
 	public abstract void initialize(String id, SensorManager sensorManager)
-			throws SensorConfigurationException,
-			SensorSetupFailedException;
+			throws SensorConfigurationException, SensorSetupFailedException;
 
 	/**
 	 * Destroys these values.
-	 * @param id the id of the expression
-	 * @param sensorManager the sensor manager to work with
-	 * @throws ContextDroidException if something goes wrong.
+	 * 
+	 * @param id
+	 *            the id of the expression
+	 * @param sensorManager
+	 *            the sensor manager to work with
+	 * @throws ContextDroidException
+	 *             if something goes wrong.
 	 */
 	public abstract void destroy(String id, SensorManager sensorManager)
 			throws ContextDroidException;
@@ -120,7 +131,9 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Sets values from a parcel.
-	 * @param source parcel to read from
+	 * 
+	 * @param source
+	 *            parcel to read from
 	 */
 	private void readFromParcel(final Parcel source) {
 		mMode = HistoryReductionMode.convert(source.readInt());
@@ -134,19 +147,35 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Interface for subclasses to get involved in parceling an instance.
-	 * @param dest the parcel to write to
-	 * @param flags the flags for writing
+	 * 
+	 * @param dest
+	 *            the parcel to write to
+	 * @param flags
+	 *            the flags for writing
 	 */
 	protected abstract void writeSubclassToParcel(Parcel dest, int flags);
 
 	/**
 	 * Parses a string version of a TypedValue.
-	 * @param value the string to parse
+	 * 
+	 * @param value
+	 *            the string to parse
 	 * @return the string version
-	 * @throws ExpressionParseException if the string is not recognized
+	 * @throws ExpressionParseException
+	 *             if the string is not recognized
 	 */
 	public static final TypedValue parse(final String value)
 			throws ExpressionParseException {
 		return ContextExpressionParser.parseTypedValue(value);
 	}
+
+	/**
+	 * @return true if this value never changes.
+	 */
+	public abstract boolean isConstant();
+
+	/**
+	 * @return the timespan of this typed value
+	 */
+	public abstract long getTimespan();
 }

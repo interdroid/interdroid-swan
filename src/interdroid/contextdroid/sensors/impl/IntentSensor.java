@@ -1,15 +1,12 @@
 package interdroid.contextdroid.sensors.impl;
 
-import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
-import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextTypedValueListener;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
-
-import java.util.List;
-
+import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
+import interdroid.contextdroid.sensors.AbstractMemorySensor;
 import android.os.Bundle;
 
 public class IntentSensor extends AbstractMemorySensor {
@@ -18,11 +15,12 @@ public class IntentSensor extends AbstractMemorySensor {
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +42,6 @@ public class IntentSensor extends AbstractMemorySensor {
 	public static final String STARTED_FIELD = "started";
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	private static final String MAGIC_RELAY = "MAGIC_RELAY";
 
@@ -85,19 +82,15 @@ public class IntentSensor extends AbstractMemorySensor {
 						public void onReading(String relayedId,
 								TimestampedValue[] newValues) {
 							// values is always of length 1
-							if (newValues[0].getValue().toString().contains(
-									"Starting: Intent {")) {
+							if (newValues[0].getValue().toString()
+									.contains("Starting: Intent {")) {
 								if (getValues().size() >= HISTORY_SIZE) {
 									getValues().remove(0);
 								}
-								getValues().get(valuePath)
-										.add(new TimestampedValue(
-												getIntentFrom(
-														newValues[0]
-																.getValue()),
-												newValues[0].getTimestamp(),
-												newValues[0].getExpireTime()));
-								notifyDataChangedForId(id);
+								putValueTrimSize(valuePath, id,
+										newValues[0].getTimestamp(),
+										getIntentFrom(newValues[0].getValue()),
+										HISTORY_SIZE);
 							}
 
 						}

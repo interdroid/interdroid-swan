@@ -1,357 +1,704 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="interdroid.contextdroid" android:versionCode="1"
-	android:versionName="1.0">
-	<application android:icon="@drawable/icon" android:label="@string/app_name"
-		android:debuggable="true">
+    package="interdroid.contextdroid"
+    android:versionCode="1"
+    android:versionName="1.0" >
 
-		<activity android:name=".LaunchService" android:label="Launch ContextDroid Service">
-		</activity>
+    <application
+        android:debuggable="true"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name" >
+        <activity
+            android:label="Launch ContextDroid Service"
+            android:name=".LaunchService" >
+        </activity>
 
-		<receiver android:name=".contextservice.ContextService$BootHandler">
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED" />
-				<category android:name="android.intent.category.DEFAULT" />
-			</intent-filter>
-		</receiver>
+        <receiver android:name=".contextservice.ContextService$BootHandler" >
+            <intent-filter >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
 
-		<receiver android:name=".test.TestReceiver" android:label="CD-Test-receiver">
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.EXPRESSIONTRUE" />
-				<action android:name="interdroid.contextdroid.EXPRESSIONFALSE" />
-				<action android:name="interdroid.contextdroid.EXPRESSIONUNDEFINED" />
-				<action android:name="interdroid.contextdroid.NEWREADING" />
-				<data android:scheme="contextexpression" />
-				<data android:scheme="contextvalues" android:host="myFirstValue" />
-			</intent-filter>
-		</receiver>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:label="CD-Test-receiver"
+            android:name=".test.TestReceiver" >
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.EXPRESSIONTRUE" />
+                <action android:name="interdroid.contextdroid.EXPRESSIONFALSE" />
+                <action android:name="interdroid.contextdroid.EXPRESSIONUNDEFINED" />
+                <action android:name="interdroid.contextdroid.NEWREADING" />
 
-		<activity android:name=".test.TestActivity" android:label="CD-Test"
-			android:screenOrientation="portrait">
-			<intent-filter>
-				<!-- <action android:name="android.intent.action.MAIN"></action> <category
-					android:name="android.intent.category.LAUNCHER" /> -->
-			</intent-filter>
-		</activity>
+                <data android:scheme="contextexpression" />
+                <data
+                    android:host="myFirstValue"
+                    android:scheme="contextvalues" />
+            </intent-filter>
+        </receiver>
 
-		<activity android:name=".ui.ExpressionBuilderActivity"
-			android:label="Expression Builder" android:screenOrientation="portrait">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN"></action>
+        <activity
+            android:label="CD-Test"
+            android:name=".test.TestActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:label="Expression Builder"
+            android:name=".ui.ExpressionBuilderActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter >
+
+                <!--
+                <action android:name="android.intent.action.MAIN"></action>
 				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
+                -->
+            </intent-filter>
+        </activity>
 
-		<!-- <activity android:label="ContextDroid Monitor" android:name=".servicemonitor.ServiceMonitor">
+        <!--
+             <activity android:label="ContextDroid Monitor" android:name=".servicemonitor.ServiceMonitor">
 			<intent-filter> <action android:name="android.intent.action.MAIN"></action>
 			<category android:name="android.intent.category.LAUNCHER" /> </intent-filter>
-			</activity> -->
-
-		<!-- <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
-			/> -->
+			</activity>
+        -->
 
 
-		<activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity">
-		</activity>
+        <!--
+             <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
+			/>
+        -->
 
-		<activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity">
-		</activity>
+        <activity android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.LightSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.MagnetometerSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.PressureSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.ProximitySensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.TemperatureSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.CallSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.RainSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity" >
+        </activity>
+        <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity" >
+        </activity>
 
-		<activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity">
-		</activity>
+        <service
+            android:exported="true"
+            android:name=".contextservice.ContextService"
+            android:process=":contextservice" >
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.intent.CONTEXTSERVICE" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.BatterySensor"
+            android:process=":batterysensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="battery" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="level,voltage,temperature" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.battery" />
 
-		<activity android:name=".sensors.impl.CallSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity">
-		</activity>
+        <provider
+            android:authorities="interdroid.context.sensor.battery"
+            android:name="interdroid.contextdroid.sensors.impl.BatterySensor$Provider" />
 
-		<activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity">
-		</activity>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.TimeSensor"
+            android:process=":timesensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="time" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="current" />
 
-		<activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.TemperatureSensor"
+            android:process=":temperaturesensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="temperature" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="temperature" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.ProximitySensor"
+            android:process=":proximitysensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="proximity" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="distance" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.PressureSensor"
+            android:process=":pressuresensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="pressure" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="pressure" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.RainSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.MagnetometerSensor"
+            android:process=":magnetometersensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="magnetometer" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="x,y,z,total" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.LightSensor"
+            android:process=":lightsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="light" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="lux" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.GyroscopeSensor"
+            android:process=":gyroscopesensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="gyroscope" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="x,y,z" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.MovementSensor"
+            android:process=":movementsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="movement" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="x,y,z,total" />
+            <meta-data
+                android:name="accuracy"
+                android:value="3" />
 
-		<activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.SoundSensor"
+            android:process=":soundsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="sound" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="dB" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="10000" />
+            <meta-data
+                android:name="sample_length"
+                android:value="1024" />
+            <meta-data
+                android:name="sample_rate"
+                android:value="8000" />
+            <meta-data
+                android:name="audio_source"
+                android:value="1" />
+            <meta-data
+                android:name="audio_format"
+                android:value="2" />
+            <meta-data
+                android:name="channel_config"
+                android:value="2" />
 
-		<activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.BluetoothSensor"
+            android:process=":bluetoothsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="bluetooth" />
+            <!-- TODO: Make these come from a string array resource instead. -->
+            <meta-data
+                android:name="valuePaths"
+                android:value="name,address,bond_state,class,major_class" />
+            <meta-data
+                android:name="discovery_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.bluetooth" />
 
-		<activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity">
-		</activity>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity">
-		</activity>
+        <provider
+            android:authorities="interdroid.context.sensor.bluetooth"
+            android:name="interdroid.contextdroid.sensors.impl.BluetoothSensor$Provider" />
 
-		<service android:name=".contextservice.ContextService"
-			android:exported="true" android:process=":contextservice">
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.intent.CONTEXTSERVICE" />
-			</intent-filter>
-		</service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.SignalStrengthSensor"
+            android:process=":signalsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="signal" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.signal" />
 
-		<service android:name=".sensors.impl.BatterySensor"
-			android:exported="true" android:process=":batterysensor">
-			<meta-data android:name="entityId" android:value="battery" />
-			<meta-data android:name="valuePaths" android:value="level,voltage,temperature" />
-			<meta-data android:name="authority" android:value="interdroid.context.sensor.battery" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider
-			android:name="interdroid.contextdroid.sensors.impl.BatterySensor$Provider"
-			android:authorities="interdroid.context.sensor.battery" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<service android:name=".sensors.impl.TimeSensor"
-			android:exported="true" android:process=":timesensor">
-			<meta-data android:name="entityId" android:value="time" />
-			<meta-data android:name="valuePaths" android:value="current" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+        <provider
+            android:authorities="interdroid.context.sensor.signal"
+            android:name="interdroid.contextdroid.sensors.impl.SignalStrengthSensor$Provider" />
 
-		<service android:name=".sensors.impl.MovementSensor"
-			android:exported="true" android:process=":movementsensor">
-			<meta-data android:name="entityId" android:value="movement" />
-			<meta-data android:name="valuePaths" android:value="x,y,z,total" />
-			<meta-data android:name="accuracy" android:value="3" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.ScreenSensor"
+            android:process=":screensensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="screen" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="is_screen_on" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.screen" />
 
-		<service android:name=".sensors.impl.SoundSensor"
-			android:exported="true" android:process=":soundsensor">
-			<meta-data android:name="entityId" android:value="sound" />
-			<meta-data android:name="valuePaths" android:value="dB" />
-			<meta-data android:name="sample_interval" android:value="10000" />
-			<meta-data android:name="sample_length" android:value="1024" />
-			<meta-data android:name="sample_rate" android:value="8000" />
-			<meta-data android:name="audio_source" android:value="1" />
-			<meta-data android:name="audio_format" android:value="2" />
-			<meta-data android:name="channel_config" android:value="2" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<service android:name=".sensors.impl.BluetoothSensor"
-			android:exported="true" android:process=":bluetoothsensor">
-			<meta-data android:name="entityId" android:value="bluetooth" />
-			<!-- TODO: Make these come from a string array resource instead. -->
-			<meta-data android:name="valuePaths"
-				android:value="name,address,bond_state,class,major_class" />
-			<meta-data android:name="discovery_interval" android:value="300000L" />
-			<meta-data android:name="authority"
-				android:value="interdroid.context.sensor.bluetooth" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider
-			android:name="interdroid.contextdroid.sensors.impl.BluetoothSensor$Provider"
-			android:authorities="interdroid.context.sensor.bluetooth" />
+        <provider
+            android:authorities="interdroid.context.sensor.screen"
+            android:name="interdroid.contextdroid.sensors.impl.ScreenSensor$Provider" />
 
-		<service android:name=".sensors.impl.SignalStrengthSensor"
-			android:exported="true" android:process=":signalsensor">
-			<meta-data android:name="entityId" android:value="signal" />
-			<meta-data android:name="valuePaths"
-				android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
-			<meta-data android:name="authority" android:value="interdroid.context.sensor.signal" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider
-			android:name="interdroid.contextdroid.sensors.impl.SignalStrengthSensor$Provider"
-			android:authorities="interdroid.context.sensor.signal" />
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.LocationSensor"
+            android:process=":locationsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="location" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="latitude,longitude,altitude,speed" />
+            <meta-data
+                android:name="min_distance"
+                android:value="0L" />
+            <meta-data
+                android:name="min_time"
+                android:value="0L" />
+            <meta-data
+                android:name="provider"
+                android:value="network" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.location" />
 
-		<service android:name=".sensors.impl.ScreenSensor"
-			android:exported="true" android:process=":screensensor">
-			<meta-data android:name="entityId" android:value="screen" />
-			<meta-data android:name="valuePaths" android:value="is_screen_on" />
-			<meta-data android:name="authority" android:value="interdroid.context.sensor.screen" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider android:name="interdroid.contextdroid.sensors.impl.ScreenSensor$Provider"
-			android:authorities="interdroid.context.sensor.screen" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<service android:name=".sensors.impl.LocationSensor"
-			android:exported="true" android:process=":locationsensor">
-			<meta-data android:name="entityId" android:value="location" />
-			<meta-data android:name="valuePaths" android:value="latitude,longitude,altitude,speed" />
-			<meta-data android:name="min_distance" android:value="0L" />
-			<meta-data android:name="min_time" android:value="0L" />
-			<meta-data android:name="provider" android:value="network" />
-			<meta-data android:name="authority"
-				android:value="interdroid.context.sensor.location" />
+        <provider
+            android:authorities="interdroid.context.sensor.location"
+            android:name="interdroid.contextdroid.sensors.impl.LocationSensor$Provider" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider
-			android:name="interdroid.contextdroid.sensors.impl.LocationSensor$Provider"
-			android:authorities="interdroid.context.sensor.location" />
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.CallSensor"
+            android:process=":callsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="call" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="call_state,phone_number" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.call" />
 
-		<service android:name=".sensors.impl.CallSensor"
-			android:exported="true" android:process=":callsensor">
-			<meta-data android:name="entityId" android:value="call" />
-			<meta-data android:name="valuePaths" android:value="call_state,phone_number" />
-			<meta-data android:name="authority" android:value="interdroid.context.sensor.call" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider android:name="interdroid.contextdroid.sensors.impl.CallSensor$Provider"
-			android:authorities="interdroid.context.sensor.call" />
+        <provider
+            android:authorities="interdroid.context.sensor.call"
+            android:name="interdroid.contextdroid.sensors.impl.CallSensor$Provider" />
 
-		<service android:name=".sensors.impl.WifiSensor"
-			android:exported="true" android:process=":wifisensor">
-			<meta-data android:name="entityId" android:value="wifi" />
-			<meta-data android:name="valuePaths" android:value="ssid,bssid,level" />
-			<meta-data android:name="discovery_interval" android:value="9000000L" />
-			<meta-data android:name="authority" android:value="interdroid.context.sensor.wifi" />
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.WifiSensor"
+            android:process=":wifisensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="wifi" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="ssid,bssid,level" />
+            <meta-data
+                android:name="discovery_interval"
+                android:value="9000000L" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.wifi" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-		<provider android:name="interdroid.contextdroid.sensors.impl.WifiSensor$Provider"
-			android:authorities="interdroid.context.sensor.wifi" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
 
-		<service android:name=".sensors.impl.ServerStatusSensor"
-			android:exported="true" android:process=":serverstatussensor">
-			<meta-data android:name="entityId" android:value="serverstatus" />
-			<meta-data android:name="valuePaths" android:value="status" />
-			<meta-data android:name="sample_interval" android:value="300000L" />
-			<meta-data android:name="connection_timeout" android:value="3000" />
-			<meta-data android:name="server_url" android:value="null" />
+        <provider
+            android:authorities="interdroid.context.sensor.wifi"
+            android:name="interdroid.contextdroid.sensors.impl.WifiSensor$Provider" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.ServerStatusSensor"
+            android:process=":serverstatussensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="serverstatus" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="status" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="connection_timeout"
+                android:value="3000" />
+            <meta-data
+                android:name="server_url"
+                android:value="null" />
 
-		<service android:name=".sensors.impl.TrainSensor"
-			android:exported="true" android:process=":trainsensor">
-			<meta-data android:name="entityId" android:value="train" />
-			<meta-data android:name="valuePaths" android:value="departure_time,arrival_time" />
-			<meta-data android:name="sample_interval" android:value="300000L" />
-			<meta-data android:name="from_station" android:value="null" />
-			<meta-data android:name="to_station" android:value="null" />
-			<meta-data android:name="departure_time" android:value="null" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.TrainSensor"
+            android:process=":trainsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="train" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="departure_time,arrival_time" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="from_station"
+                android:value="null" />
+            <meta-data
+                android:name="to_station"
+                android:value="null" />
+            <meta-data
+                android:name="departure_time"
+                android:value="null" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.CuckooTrainSensor"
+            android:process=":trainsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="cuckootrain" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="departure_time,arrival_time" />
+            <meta-data
+                android:name="from_station"
+                android:value="null" />
+            <meta-data
+                android:name="to_station"
+                android:value="null" />
+            <meta-data
+                android:name="departure_time"
+                android:value="null" />
 
-		<service android:name=".sensors.impl.RainSensor"
-			android:exported="true" android:process=":rainsensor">
-			<meta-data android:name="entityId" android:value="rain" />
-			<meta-data android:name="valuePaths" android:value="expected_mm,start_time,stop_time" />
-			<meta-data android:name="sample_interval" android:value="300000L" />
-			<meta-data android:name="latitude" android:value="null" />
-			<meta-data android:name="longitude" android:value="null" />
-			<meta-data android:name="window" android:value="7200000L" />
-			<meta-data android:name="threshold" android:value="0.0" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.RainSensor"
+            android:process=":rainsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="rain" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="expected_mm,start_time,stop_time" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="latitude"
+                android:value="null" />
+            <meta-data
+                android:name="longitude"
+                android:value="null" />
+            <meta-data
+                android:name="window"
+                android:value="7200000L" />
+            <meta-data
+                android:name="threshold"
+                android:value="0.0" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.TwitterSensor"
+            android:process=":twittersensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="twitter" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="mentions" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="access_token"
+                android:value="null" />
+            <meta-data
+                android:name="secret_access_token"
+                android:value="null" />
 
-		<service android:name=".sensors.impl.TwitterSensor"
-			android:exported="true" android:process=":twittersensor">
-			<meta-data android:name="entityId" android:value="twitter" />
-			<meta-data android:name="valuePaths" android:value="mentions" />
-			<meta-data android:name="sample_interval" android:value="300000L" />
-			<meta-data android:name="access_token" android:value="null" />
-			<meta-data android:name="secret_access_token"
-				android:value="null" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.CalendarSensor"
+            android:process=":calendarsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="calendar" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="start_time_next_event" />
+            <meta-data
+                android:name="sample_interval"
+                android:value="300000L" />
+            <meta-data
+                android:name="private_calendar_urL"
+                android:value="null" />
+            <meta-data
+                android:name="ignore_free_events"
+                android:value="true" />
+            <meta-data
+                android:name="ignore_allday_events"
+                android:value="true" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.LogCatSensor"
+            android:process=":logcatsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="logcat" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="log" />
+            <meta-data
+                android:name="logcat_parameters"
+                android:value="*:I" />
 
-		<service android:name=".sensors.impl.CalendarSensor"
-			android:exported="true" android:process=":calendarsensor">
-			<meta-data android:name="entityId" android:value="calendar" />
-			<meta-data android:name="valuePaths" android:value="start_time_next_event" />
-			<meta-data android:name="sample_interval" android:value="300000L" />
-			<meta-data android:name="private_calendar_urL"
-				android:value="null" />
-			<meta-data android:name="ignore_free_events" android:value="true" />
-			<meta-data android:name="ignore_allday_events"
-				android:value="true" />
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.IntentSensor"
+            android:process=":intentsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="intent" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="started" />
 
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+    </application>
 
-		<service android:name=".sensors.impl.LogCatSensor"
-			android:exported="true" android:process=":logcatsensor">
-			<meta-data android:name="entityId" android:value="logcat" />
-			<meta-data android:name="valuePaths" android:value="log" />
-			<meta-data android:name="logcat_parameters" android:value="*:I" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
+    <uses-sdk android:minSdkVersion="7" />
 
-		<service android:name=".sensors.impl.IntentSensor"
-			android:exported="true" android:process=":intentsensor">
-			<meta-data android:name="entityId" android:value="intent" />
-			<meta-data android:name="valuePaths" android:value="started" />
-			<intent-filter>
-				<action android:name="interdroid.contextdroid.sensor.DISCOVER" />
-			</intent-filter>
-		</service>
-
-
-	</application>
-
-	<uses-sdk android:minSdkVersion="7" />
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
-	<uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
-	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
-	<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
-	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"></uses-permission>
-	<uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"></uses-permission>
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
-	<uses-permission android:name="interdroid.vdb.permission.READ_DATABASE" />
-	<uses-permission android:name="interdroid.vdb.permission.WRITE_DATABASE" />
-	<uses-permission android:name="android.permission.READ_LOGS"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.BLUETOOTH" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.VIBRATE" >
+    </uses-permission>
+    <uses-permission android:name="interdroid.vdb.permission.READ_DATABASE" />
+    <uses-permission android:name="interdroid.vdb.permission.WRITE_DATABASE" />
+    <uses-permission android:name="android.permission.READ_LOGS" >
+    </uses-permission>
 
 </manifest>

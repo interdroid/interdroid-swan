@@ -3,13 +3,13 @@ package interdroid.contextdroid.contextservice;
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.ContextServiceConnector;
-import interdroid.contextdroid.ui.LaunchService;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.Parseable;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import interdroid.contextdroid.test.TestActivity;
+import interdroid.contextdroid.ui.LaunchService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,8 @@ public class ContextService extends Service {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(ContextService.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ContextService.class);
 
 	/** Identifier for the notification. */
 	private static final int SERVICE_NOTIFICATION_ID = 1;
@@ -51,28 +53,28 @@ public class ContextService extends Service {
 	/**
 	 * The name of our expression database.
 	 */
-	private static final String	DATABASE_NAME	= "expressions.db";
+	private static final String DATABASE_NAME = "expressions.db";
 
 	/**
 	 * The current version of the database.
 	 */
-	private static final int	DB_VERSION	= 3;
+	private static final int DB_VERSION = 3;
 
 	/**
 	 * The expression type. Used for table and column names.
 	 */
-	private static final String	EXPRESSION_TYPE = "expressions";
+	private static final String EXPRESSION_TYPE = "expressions";
 	/**
 	 * The value type. Used for table and column names.
 	 */
-	private static final String	VALUE_TYPE = "contextvalues";
+	private static final String VALUE_TYPE = "contextvalues";
 	/**
 	 * The table and column names for types we persist.
 	 */
-	private static final String[] DB_TYPES = {EXPRESSION_TYPE, VALUE_TYPE};
+	private static final String[] DB_TYPES = { EXPRESSION_TYPE, VALUE_TYPE };
 
 	/** Are we currently running as a "foreground" service? */
-	private boolean	mForeground;
+	private boolean mForeground;
 
 	/** The sensor manager. */
 	private SensorManager sensorManager;
@@ -84,12 +86,11 @@ public class ContextService extends Service {
 	private Notification notification;
 
 	/** The context expressions, mapped by id. */
-	private final HashMap<String, Expression> contextExpressions =
-			new HashMap<String, Expression>() {
+	private final HashMap<String, Expression> contextExpressions = new HashMap<String, Expression>() {
 		/**
 		 *
 		 */
-		private static final long	serialVersionUID	= -658408645837738007L;
+		private static final long serialVersionUID = -658408645837738007L;
 
 		@Override
 		public Expression remove(final Object key) {
@@ -105,12 +106,11 @@ public class ContextService extends Service {
 	};
 
 	/** The context entities, mapped by id. */
-	private final HashMap<String, ContextTypedValue> contextTypedValues =
-			new HashMap<String, ContextTypedValue>() {
+	private final HashMap<String, ContextTypedValue> contextTypedValues = new HashMap<String, ContextTypedValue>() {
 		/**
 		 *
 		 */
-		private static final long	serialVersionUID	= 1L;
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public ContextTypedValue remove(final Object key) {
@@ -125,39 +125,37 @@ public class ContextService extends Service {
 			return super.put(key, value);
 		}
 	};
+
 	/**
 	 * Handles boot notifications so we can reregister expressions.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class BootHandler extends BroadcastReceiver {
 
 		@Override
-		public final void onReceive(final Context context,
-				final Intent intent) {
+		public final void onReceive(final Context context, final Intent intent) {
 			LOG.debug("Got boot notification!");
-			context.startService(
-					new Intent(ContextServiceConnector.CONTEXT_SERVICE));
+			context.startService(new Intent(
+					ContextServiceConnector.CONTEXT_SERVICE));
 			LOG.debug("Finished handling boot.");
 		}
 
 	}
 
 	/** The evaluation queue. */
-	private final PriorityQueue<Expression> evaluationQueue =
-			new PriorityQueue<Expression>();
+	private final PriorityQueue<Expression> evaluationQueue = new PriorityQueue<Expression>();
 
 	/** The evaluation queue. */
-	private final PriorityQueue<ContextTypedValue> contextTypedValueQueue =
-			new PriorityQueue<ContextTypedValue>();
+	private final Queue<ContextTypedValue> contextTypedValueQueue = new LinkedBlockingQueue<ContextTypedValue>();
 
 	/**
 	 * The waiting map consists of expressions that resulted in UNDEFINED, they
 	 * will remain in this map until the dataset of the sensor causing the
 	 * UNDEFINED has a changed data set.
 	 */
-	private final Map<String, Expression> waitingMap =
-			new HashMap<String, Expression>();
+	private final Map<String, Expression> waitingMap = new HashMap<String, Expression>();
 
 	/**
 	 * True if our threads should stop.
@@ -183,7 +181,7 @@ public class ContextService extends Service {
 						try {
 							evaluationQueue.wait();
 						} catch (InterruptedException e) {
-							LOG.debug("Interrupted while waitng on queue.");
+							LOG.debug("Interrupted while waiting on queue.");
 							interrupted();
 							continue;
 						}
@@ -195,7 +193,7 @@ public class ContextService extends Service {
 								- System.currentTimeMillis();
 						if (waitingTime > 0) {
 							try {
-								LOG.debug("Interrupted while waitng on queue.");
+								LOG.debug("Interrupted while waiting on queue.");
 								evaluationQueue.wait(waitingTime);
 							} catch (InterruptedException e) {
 								interrupted();
@@ -229,8 +227,8 @@ public class ContextService extends Service {
 					continue;
 				}
 				if (changed) {
-					LOG.info("{} has new value: {}",
-							expression, expression.getResult());
+					LOG.info("{} has new value: {}", expression,
+							expression.getResult());
 					// send new value to the listener (using broadcast)
 					sendExpressionChangeBroadcastIntent(expression);
 				}
@@ -241,8 +239,7 @@ public class ContextService extends Service {
 					}
 				} else {
 					synchronized (evaluationQueue) {
-						if (contextExpressions.containsKey(
-								expression.getId())) {
+						if (contextExpressions.containsKey(expression.getId())) {
 							evaluationQueue.add(evaluationQueue.remove());
 						}
 					}
@@ -260,7 +257,7 @@ public class ContextService extends Service {
 		public void run() {
 			TimestampedValue[] values;
 			while (!shouldStop) {
-				ContextTypedValue value = contextTypedValueQueue.peek();
+				ContextTypedValue value = contextTypedValueQueue.poll();
 				if (value == null) {
 					synchronized (contextTypedValueQueue) {
 						try {
@@ -270,55 +267,22 @@ public class ContextService extends Service {
 							continue;
 						}
 					}
-				} else {
-					synchronized (contextTypedValueQueue) {
-						long waitingTime = value.getDeferUntil()
-								- System.currentTimeMillis();
-						if (waitingTime > 0) {
-							try {
-								contextTypedValueQueue.wait(waitingTime);
-							} catch (InterruptedException e) {
-								interrupted();
-								continue;
-							}
-						}
-					}
 				}
 				try {
 					LOG.debug("Getting values for: {}", value);
 					values = value.getValues(value.getId(),
 							System.currentTimeMillis());
 				} catch (ContextDroidException e) {
-					// something went wrong
-					// remove this entry from our list of context expressions
-					try {
-						contextTypedValueQueue.remove();
-					} catch (NoSuchElementException e2) {
-						LOG.debug("Queue item already removed.");
-						// ignore, it's already out of the queue
-					}
+					LOG.info("{} unexpected exception ", value, e);
 					// TODO: should we send an exception?
 					continue;
 				} catch (NullPointerException e) {
 					// can happen, it means the expression got deleted halfway
 					// the evaluation. continue
-					try {
-						contextTypedValueQueue.remove();
-					} catch (NoSuchElementException e2) {
-						LOG.debug("Queue item already removed.");
-						// ignore, it's already out of the queue
-					}
-					e.printStackTrace();
-					LOG.info("{} got deleted", value);
+					LOG.info("{} unexpected exception d", value, e);
 					continue;
 				}
 				sendValuesBroadcastIntent(value.getId(), values);
-				synchronized (contextTypedValueQueue) {
-					if (contextTypedValues.containsKey(value.getId())) {
-						contextTypedValueQueue.add(contextTypedValueQueue
-								.remove());
-					}
-				}
 			}
 		}
 	};
@@ -332,7 +296,7 @@ public class ContextService extends Service {
 	// =-=-=-=- Expression Database -=-=-=-=
 
 	/**
-	 *
+	 * 
 	 * @return all typed values saved in the database.
 	 */
 	private ContextTypedValue[] getSavedValues() {
@@ -340,21 +304,18 @@ public class ContextService extends Service {
 		ContextTypedValue[] result = null;
 
 		try {
-			Cursor c = db.query(VALUE_TYPE,
-					new String[] {"key", VALUE_TYPE},
+			Cursor c = db.query(VALUE_TYPE, new String[] { "key", VALUE_TYPE },
 					null, null, null, null, null);
-			ArrayList<ContextTypedValue> values =
-					new ArrayList<ContextTypedValue>();
+			ArrayList<ContextTypedValue> values = new ArrayList<ContextTypedValue>();
 			if (c != null) {
 				try {
 					if (c.getCount() > 0) {
 						while (c.moveToNext()) {
 							try {
-								LOG.debug("Parsing: {} {}",
-										c.getString(0), c.getString(1));
-								ContextTypedValue value =
-										(ContextTypedValue)
-										ContextTypedValue.parse(c.getString(1));
+								LOG.debug("Parsing: {} {}", c.getString(0),
+										c.getString(1));
+								ContextTypedValue value = (ContextTypedValue) ContextTypedValue
+										.parse(c.getString(1));
 								value.setId(c.getString(0));
 								values.add(value);
 							} catch (Exception e) {
@@ -386,17 +347,16 @@ public class ContextService extends Service {
 		Expression[] result = null;
 
 		try {
-			Cursor c = db.query(EXPRESSION_TYPE,
-					new String[] {"key", EXPRESSION_TYPE},
-					null, null, null, null, null);
+			Cursor c = db.query(EXPRESSION_TYPE, new String[] { "key",
+					EXPRESSION_TYPE }, null, null, null, null, null);
 			ArrayList<Expression> expressions = new ArrayList<Expression>();
 			if (c != null) {
 				try {
 					if (c.getCount() > 0) {
 						while (c.moveToNext()) {
 							try {
-								Expression expression =
-										Expression.parse(c.getString(1));
+								Expression expression = Expression.parse(c
+										.getString(1));
 								expression.setId(c.getString(0));
 								expressions.add(expression);
 							} catch (Exception e) {
@@ -423,14 +383,17 @@ public class ContextService extends Service {
 
 	/**
 	 * Delete's an expression from the database.
-	 * @param key The id for the expression.
-	 * @param type The type being removed.
+	 * 
+	 * @param key
+	 *            The id for the expression.
+	 * @param type
+	 *            The type being removed.
 	 */
 	private void removeFromDb(final String key, final String type) {
 		SQLiteDatabase db = openDb();
 		try {
 			db.execSQL("DELETE FROM " + type + " WHERE key = ?",
-					new String[] {key});
+					new String[] { key });
 		} finally {
 			closeDb(db);
 		}
@@ -451,8 +414,8 @@ public class ContextService extends Service {
 	private synchronized SQLiteDatabase openDb() {
 		File dbDir = getDir("databases", Context.MODE_PRIVATE);
 		LOG.debug("Created db dir: {}", dbDir);
-		SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(
-				new File(dbDir, DATABASE_NAME), null);
+		SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(new File(dbDir,
+				DATABASE_NAME), null);
 		LOG.debug("Got database: {}", db.getVersion());
 		if (db.getVersion() < DB_VERSION) {
 			for (String type : DB_TYPES) {
@@ -460,8 +423,7 @@ public class ContextService extends Service {
 				db.execSQL("DROP TABLE IF EXISTS " + type);
 				db.execSQL("CREATE TABLE " + type + " ("
 						+ "_id integer primary key autoincrement,"
-						+ "key string,"
-						+ type + " string)");
+						+ "key string," + type + " string)");
 			}
 			db.setVersion(DB_VERSION);
 		}
@@ -470,16 +432,20 @@ public class ContextService extends Service {
 
 	/**
 	 * Stores an expression to the database.
-	 * @param key the key for the expression
-	 * @param value the expression
-	 * @param type the type being stored
+	 * 
+	 * @param key
+	 *            the key for the expression
+	 * @param value
+	 *            the expression
+	 * @param type
+	 *            the type being stored
 	 */
 	private void storeToDb(final String key, final Parseable<?> value,
 			final String type) {
 		SQLiteDatabase db = openDb();
 		try {
 			// Make sure it doesn't exist first in case we are reloading it.
-			db.delete(type, "key=?", new String[] {key});
+			db.delete(type, "key=?", new String[] { key });
 			ContentValues values = new ContentValues();
 			values.put("key", key);
 			values.put(type, value.toParseString());
@@ -549,7 +515,7 @@ public class ContextService extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see android.app.Service#onCreate()
 	 */
 	@Override
@@ -567,8 +533,7 @@ public class ContextService extends Service {
 	 * Inits the notification.
 	 */
 	private void initNotification() {
-		mNotificationManager =
-				(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		notification = new Notification(R.drawable.context_statusbar_icon,
 				"ContextDroid active", System.currentTimeMillis());
 		notification.flags |= Notification.FLAG_ONGOING_EVENT;
@@ -594,14 +559,12 @@ public class ContextService extends Service {
 	 * Manage the foreground state of the service.
 	 */
 	private void manageForegroundState() {
-		if (contextExpressions.size() == 0
-				&& contextTypedValues.size() == 0
+		if (contextExpressions.size() == 0 && contextTypedValues.size() == 0
 				&& mForeground) {
 			LOG.debug("Setting foreground.");
 			this.stopForeground(false);
 			mForeground = false;
-		} else if ((contextExpressions.size() > 0
-				|| contextTypedValues.size() > 0)
+		} else if ((contextExpressions.size() > 0 || contextTypedValues.size() > 0)
 				&& !mForeground) {
 			LOG.debug("Setting background.");
 			this.startForeground(SERVICE_NOTIFICATION_ID, notification);
@@ -626,7 +589,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
+	 * 
 	 * @param expression
 	 *            the expression
 	 */
@@ -641,7 +604,7 @@ public class ContextService extends Service {
 			break;
 		case ContextManager.UNDEFINED:
 			broadcastIntent
-			.setAction(ContextManager.ACTION_EXPRESSIONUNDEFINED);
+					.setAction(ContextManager.ACTION_EXPRESSIONUNDEFINED);
 			break;
 		default:
 			broadcastIntent.setAction(ContextManager.ACTION_EXPRESSIONFALSE);
@@ -651,9 +614,11 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
-	 * @param id the id of the expression
-	 * @param values the values for the expression
+	 * 
+	 * @param id
+	 *            the id of the expression
+	 * @param values
+	 *            the values for the expression
 	 */
 	protected final void sendValuesBroadcastIntent(final String id,
 			final TimestampedValue[] values) {
@@ -666,15 +631,14 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
+	 * 
 	 * @param expression
 	 *            the expression
 	 * @param exception
 	 *            the exception to send
 	 */
 	protected final void sendExpressionExceptionBroadcastIntent(
-			final Expression expression,
-			final ContextDroidException exception) {
+			final Expression expression, final ContextDroidException exception) {
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setData(Uri.parse("contextexpression://"
 				+ expression.getId()));
@@ -689,9 +653,9 @@ public class ContextService extends Service {
 		@Override
 		public ContextDroidServiceException addContextExpression(
 				final String expressionId, final Expression expression)
-						throws RemoteException {
-			LOG.debug("Adding context expression: {}. {}",
-					expressionId, expression);
+				throws RemoteException {
+			LOG.debug("Adding context expression: {}. {}", expressionId,
+					expression);
 			// check whether there already exists an expression with the given
 			// identifier, handle appropriately
 
@@ -714,7 +678,7 @@ public class ContextService extends Service {
 			contextExpressions.put(expressionId, expression);
 			// put the expression at the front of the priorityQueue
 			synchronized (evaluationQueue) {
-				expression.setNextEvaluationTime(System.currentTimeMillis());
+				expression.setDeferUntil(System.currentTimeMillis());
 				evaluationQueue.add(expression);
 				evaluationQueue.notifyAll();
 			}
@@ -777,28 +741,28 @@ public class ContextService extends Service {
 				if (expression == null) {
 					continue;
 				}
-				expression.setNextEvaluationTime(System.currentTimeMillis());
+				expression.setDeferUntil(System.currentTimeMillis());
 				synchronized (evaluationQueue) {
 					evaluationQueue.add(expression);
 					evaluationQueue.notifyAll();
 				}
 			}
+			// TODO look at this below
 			for (String id : ids) {
 				if (contextTypedValues.containsKey(id)) {
-					contextTypedValues.get(id).setNextEvaluationTime(
-							System.currentTimeMillis());
+					synchronized (contextTypedValueQueue) {
+						contextTypedValueQueue.add(contextTypedValues.get(id));
+						contextTypedValueQueue.notifyAll();
+					}
 				}
-				synchronized (contextTypedValueQueue) {
-					contextTypedValueQueue.add(contextTypedValues.get(id));
-					contextTypedValueQueue.notifyAll();
-				}
+				
 			}
 		}
 
 		@Override
 		public ContextDroidServiceException registerContextTypedValue(
 				final String id, final ContextTypedValue contextTypedValue)
-						throws RemoteException {
+				throws RemoteException {
 			if (contextTypedValues.containsKey(id)) {
 				try {
 					contextTypedValues.get(id).destroy(id, sensorManager);

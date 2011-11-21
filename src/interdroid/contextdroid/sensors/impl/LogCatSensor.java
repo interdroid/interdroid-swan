@@ -3,14 +3,11 @@ package interdroid.contextdroid.sensors.impl;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -22,16 +19,17 @@ public class LogCatSensor extends AbstractMemorySensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(LogCatSensor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LogCatSensor.class);
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public int getPreferencesXML() {
@@ -47,7 +45,6 @@ public class LogCatSensor extends AbstractMemorySensor {
 	public static final String DEFAULT_LOGCAT_PARAMETERS = "*:I";
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	private Map<String, LogcatPoller> activeThreads = new HashMap<String, LogcatPoller>();
 
@@ -78,10 +75,10 @@ public class LogCatSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public final void register(String id, String valuePath,
-			Bundle configuration) {
+	public final void register(String id, String valuePath, Bundle configuration) {
 		LOG.debug("Logcat got registration for: {}", id);
-		LogcatPoller logcatPoller = new LogcatPoller(id, configuration);
+		LogcatPoller logcatPoller = new LogcatPoller(id, valuePath,
+				configuration);
 		activeThreads.put(id, logcatPoller);
 		logcatPoller.start();
 	}
@@ -93,14 +90,15 @@ public class LogCatSensor extends AbstractMemorySensor {
 
 	class LogcatPoller extends Thread {
 
-		private Bundle configuration;
-		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
 		private String id;
+		private Bundle configuration;
+		private String valuePath;
 		private Process process;
 
-		LogcatPoller(String id, Bundle configuration) {
-			this.configuration = configuration;
+		LogcatPoller(String id, String valuePath, Bundle configuration) {
 			this.id = id;
+			this.configuration = configuration;
+			this.valuePath = valuePath;
 		}
 
 		public void terminate() {
@@ -124,12 +122,8 @@ public class LogCatSensor extends AbstractMemorySensor {
 						String line = null;
 						while ((line = reader.readLine()) != null) {
 							long now = System.currentTimeMillis();
-							if (values.size() >= HISTORY_SIZE) {
-								values.remove(0);
-							}
-							values.add(new TimestampedValue(line, now, now
-									+ EXPIRE_TIME));
-							notifyDataChangedForId(id);
+							putValueTrimSize(valuePath, id, now, line,
+									HISTORY_SIZE);
 						}
 						reader.close();
 					} catch (IOException e) {
@@ -140,15 +134,12 @@ public class LogCatSensor extends AbstractMemorySensor {
 
 		}
 
-		public List<TimestampedValue> getValues() {
-			return values;
-		}
 	}
 
 	@Override
 	public void onDestroySensor() {
 		for (LogcatPoller logcatPoller : activeThreads.values()) {
-			logcatPoller.interrupt();
+			logcatPoller.terminate();
 		}
 	};
 

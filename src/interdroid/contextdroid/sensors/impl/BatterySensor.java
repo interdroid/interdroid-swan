@@ -4,7 +4,6 @@ import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -48,11 +47,6 @@ public class BatterySensor extends AbstractVdbSensor {
 	 * The temperature field.
 	 */
 	public static final String TEMPERATURE_FIELD = "temperature";
-
-	/**
-	 * The default expiration time for readings.
-	 */
-	public static final long EXPIRE_TIME = 5 * 60 * 1000; // 30 minutes?
 
 	/**
 	 * The schema for this sensor.
@@ -108,7 +102,6 @@ public class BatterySensor extends AbstractVdbSensor {
 		public void onReceive(final Context context, final Intent intent) {
 			if (intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)) {
 				long now = System.currentTimeMillis();
-				long expire = now + EXPIRE_TIME;
 
 				ContentValues values = new ContentValues();
 				values.put(LEVEL_FIELD, intent.getIntExtra(
@@ -117,7 +110,7 @@ public class BatterySensor extends AbstractVdbSensor {
 						BatteryManager.EXTRA_TEMPERATURE, 0));
 				values.put(VOLTAGE_FIELD, intent.getIntExtra(
 						BatteryManager.EXTRA_VOLTAGE, 0));
-				putValues(values, now, expire);
+				putValues(values, now);
 			}
 		}
 

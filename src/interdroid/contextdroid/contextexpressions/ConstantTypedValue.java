@@ -8,10 +8,10 @@ import android.os.Parcel;
 
 /**
  * Represents a typed expression which is a constant.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class ConstantTypedValue extends TypedValue {
 
@@ -27,7 +27,9 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Constructs a constant with the given value.
-	 * @param constantValue the value of the constant.
+	 * 
+	 * @param constantValue
+	 *            the value of the constant.
 	 */
 	public ConstantTypedValue(final Object constantValue) {
 		super(HistoryReductionMode.NONE);
@@ -36,7 +38,9 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Construct via Parcelable interface.
-	 * @param saved the saved values to read from.
+	 * 
+	 * @param saved
+	 *            the saved values to read from.
 	 */
 	private ConstantTypedValue(final Parcel saved) {
 		super(saved);
@@ -46,11 +50,6 @@ public class ConstantTypedValue extends TypedValue {
 	@Override
 	public final TimestampedValue[] getValues(final String id, final long now) {
 		return values;
-	}
-
-	@Override
-	public final long getDeferUntil() {
-		return Long.MAX_VALUE;
 	}
 
 	@Override
@@ -66,7 +65,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
@@ -76,8 +75,7 @@ public class ConstantTypedValue extends TypedValue {
 	}
 
 	/** The CREATOR. */
-	public static final ConstantTypedValue.Creator<ConstantTypedValue> CREATOR =
-			new ConstantTypedValue.Creator<ConstantTypedValue>() {
+	public static final ConstantTypedValue.Creator<ConstantTypedValue> CREATOR = new ConstantTypedValue.Creator<ConstantTypedValue>() {
 
 		@Override
 		public ConstantTypedValue createFromParcel(final Parcel source) {
@@ -93,8 +91,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	@Override
 	public void initialize(final String id, final SensorManager sensorManager)
-			throws SensorConfigurationException,
-			SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		// nothing to do here
 	}
 
@@ -127,6 +124,16 @@ public class ConstantTypedValue extends TypedValue {
 			result.append(value);
 		}
 		return result.toString();
+	}
+
+	@Override
+	public boolean isConstant() {
+		return true;
+	}
+
+	@Override
+	public long getTimespan() {
+		return 0;
 	}
 
 }

@@ -39,11 +39,12 @@ public class CalendarSensor extends AbstractSensorBase {
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -69,7 +70,6 @@ public class CalendarSensor extends AbstractSensorBase {
 	public static final boolean DEFAULT_IGNORE_ALLDAY_EVENTS = true;
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	// Google Calendar specific variables
 
@@ -200,8 +200,7 @@ public class CalendarSensor extends AbstractSensorBase {
 	}
 
 	@Override
-	public List<TimestampedValue> getValues(String id, long now,
-			long timespan) {
+	public List<TimestampedValue> getValues(String id, long now, long timespan) {
 		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
 				timespan);
 	}
@@ -236,8 +235,7 @@ public class CalendarSensor extends AbstractSensorBase {
 				Date date = sampleCalendar(privateCalendarURL,
 						ignoreAlldayEvents, ignoreFreeEvents);
 				if (date != null) {
-					values.add(new TimestampedValue(date, start, start
-							+ EXPIRE_TIME));
+					values.add(new TimestampedValue(date, start));
 					notifyDataChangedForId(id);
 				}
 				try {

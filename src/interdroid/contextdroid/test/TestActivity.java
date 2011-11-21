@@ -15,9 +15,8 @@ public class TestActivity extends Activity {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(TestActivity.class);
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(TestActivity.class);
 
 	private ContextManager contextManager;
 
@@ -50,7 +49,7 @@ public class TestActivity extends Activity {
 		setContentView(R.layout.test);
 
 		final ContextTypedValue left = new ContextTypedValue(
-				"logcat/log?logcat_parameters=Calendar:I *:S");
+				"cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=16:58");
 		final String valueName = "myFirstValue";
 		contextManager = new ContextManager(TestActivity.this);
 

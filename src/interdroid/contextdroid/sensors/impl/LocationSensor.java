@@ -21,24 +21,25 @@ import android.os.Looper;
 
 /**
  * A sensor for location.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class LocationSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(LocationSensor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LocationSensor.class);
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -46,7 +47,6 @@ public class LocationSensor extends AbstractVdbSensor {
 		}
 
 	}
-
 
 	/**
 	 * Latitude field name.
@@ -85,9 +85,9 @@ public class LocationSensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -104,32 +104,15 @@ public class LocationSensor extends AbstractVdbSensor {
 	 * @return the schema for this sensor.
 	 */
 	private static String getSchema() {
-		String scheme =
-				"{'type': 'record', 'name': 'location', "
-						+ "'namespace': 'interdroid.context.sensor.location',"
-						+ "\n'fields': ["
-						+ SCHEMA_TIMESTAMP_FIELDS
-						+ "\n{'name': '"
-						+ LATITUDE_FIELD
-						+ "', 'type': 'double'},"
-						+ "\n{'name': '"
-						+ LONGITUDE_FIELD
-						+ "', 'type': 'double'},"
-						+ "\n{'name': '"
-						+ ALTITUDE_FIELD
-						+ "', 'type': 'double'},"
-						+ "\n{'name': '"
-						+ SPEED_FIELD
-						+ "', 'type': 'float'}"
-						+ "\n]"
-						+ "}";
+		String scheme = "{'type': 'record', 'name': 'location', "
+				+ "'namespace': 'interdroid.context.sensor.location',"
+				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
+				+ LATITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
+				+ LONGITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
+				+ ALTITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
+				+ SPEED_FIELD + "', 'type': 'float'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
-
-	/**
-	 * Default expiration time.
-	 */
-	public static final long EXPIRE_TIME = 1000;
 
 	/**
 	 * The current provider we are using.
@@ -149,7 +132,6 @@ public class LocationSensor extends AbstractVdbSensor {
 		public void onLocationChanged(final Location location) {
 			long now = System.currentTimeMillis();
 
-			long expire = now + EXPIRE_TIME;
 			ContentValues values = new ContentValues();
 			LOG.debug("Location: {} {}", location.getLatitude(),
 					location.getLongitude());
@@ -158,15 +140,14 @@ public class LocationSensor extends AbstractVdbSensor {
 			values.put(ALTITUDE_FIELD, location.getAltitude());
 			values.put(SPEED_FIELD, location.getSpeed());
 
-			putValues(values, now, expire);
+			putValues(values, now);
 		}
 
 		public void onProviderDisabled(final String provider) {
-			LOG.debug("provider disabled: {}. I am using: {}",
-					provider, currentProvider);
+			LOG.debug("provider disabled: {}. I am using: {}", provider,
+					currentProvider);
 			if (provider.equals(currentProvider)) {
-				LOG.warn(
-						"location sensor disabled due to lack of provider");
+				LOG.warn("location sensor disabled due to lack of provider");
 			}
 		}
 
@@ -178,8 +159,7 @@ public class LocationSensor extends AbstractVdbSensor {
 				final Bundle extras) {
 			if (provider.equals(currentProvider)
 					&& status != LocationProvider.AVAILABLE) {
-				LOG.warn(
-						"location sensor disabled because sensor unavailable");
+				LOG.warn("location sensor disabled because sensor unavailable");
 			}
 
 		}
@@ -188,15 +168,14 @@ public class LocationSensor extends AbstractVdbSensor {
 	@Override
 	public final String[] getValuePaths() {
 		return new String[] { LATITUDE_FIELD, LONGITUDE_FIELD, ALTITUDE_FIELD,
-				SPEED_FIELD};
+				SPEED_FIELD };
 	}
 
 	@Override
 	public final void initDefaultConfiguration(final Bundle defaults) {
 		defaults.putLong(MIN_TIME, 0);
 		defaults.putLong(MIN_DISTANCE, 0);
-		defaults.putString(PROVIDER,
-				LocationManager.NETWORK_PROVIDER);
+		defaults.putString(PROVIDER, LocationManager.NETWORK_PROVIDER);
 	}
 
 	@Override
@@ -206,8 +185,7 @@ public class LocationSensor extends AbstractVdbSensor {
 
 	@Override
 	public final void onConnected() {
-		locationManager =
-				(LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	@Override
@@ -245,8 +223,7 @@ public class LocationSensor extends AbstractVdbSensor {
 						configuration.getLong(MIN_DISTANCE));
 			}
 			if (configuration.containsKey(PROVIDER)) {
-				if (mostAccurateProvider
-						.equals(passiveProvider)) {
+				if (mostAccurateProvider.equals(passiveProvider)) {
 					// if current is passive, anything is better
 					mostAccurateProvider = configuration.getString(PROVIDER);
 				} else if (LocationManager.NETWORK_PROVIDER

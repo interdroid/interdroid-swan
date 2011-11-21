@@ -3,12 +3,9 @@ package interdroid.contextdroid.sensors.impl;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
@@ -26,16 +23,17 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(ServerStatusSensor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ServerStatusSensor.class);
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class ConfigurationActivity extends
-	AbstractConfigurationActivity {
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -43,7 +41,6 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 		}
 
 	}
-
 
 	public static final String STATUS_FIELD = "status";
 
@@ -55,7 +52,6 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 	public static final int DEFAULT_CONNECTION_TIMEOUT = 3000; // ms
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	private Map<String, ServerPoller> activeThreads = new HashMap<String, ServerPoller>();
 
@@ -103,7 +99,8 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 
 	@Override
 	public final void register(String id, String valuePath, Bundle configuration) {
-		ServerPoller serverPoller = new ServerPoller(id, configuration);
+		ServerPoller serverPoller = new ServerPoller(id, valuePath,
+				configuration);
 		activeThreads.put(id, serverPoller);
 		serverPoller.start();
 	}
@@ -115,13 +112,14 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 
 	class ServerPoller extends Thread {
 
-		private Bundle configuration;
-		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
 		private String id;
+		private Bundle configuration;
+		private String valuePath;
 
-		ServerPoller(String id, Bundle configuration) {
-			this.configuration = configuration;
+		ServerPoller(String id, String valuePath, Bundle configuration) {
 			this.id = id;
+			this.configuration = configuration;
+			this.valuePath = valuePath;
 		}
 
 		public void run() {
@@ -130,13 +128,8 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 			String serverURL = configuration.getString(SERVER_URL);
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
-				if (values.size() >= HISTORY_SIZE) {
-					values.remove(0);
-				}
-				values.add(new TimestampedValue(
-						sampleStatus(serverURL, timeout), start, start
-								+ EXPIRE_TIME));
-				notifyDataChangedForId(id);
+				putValueTrimSize(valuePath, id, start,
+						sampleStatus(serverURL, timeout), HISTORY_SIZE);
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
 							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
@@ -146,9 +139,6 @@ public class ServerStatusSensor extends AbstractMemorySensor {
 			}
 		}
 
-		public List<TimestampedValue> getValues() {
-			return values;
-		}
 	}
 
 	@Override

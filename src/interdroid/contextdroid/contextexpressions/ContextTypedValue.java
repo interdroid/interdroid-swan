@@ -2,9 +2,8 @@ package interdroid.contextdroid.contextexpressions;
 
 import interdroid.contextdroid.ContextDroidException;
 import interdroid.contextdroid.contextservice.SensorConfigurationException;
-import
-interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.contextservice.SensorManager;
+import interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.sensors.IAsynchronousContextSensor;
 
 import java.util.List;
@@ -23,18 +22,17 @@ import android.os.RemoteException;
 
 /**
  * This represents a TypedValue where the values come from context.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
-public class ContextTypedValue extends TypedValue implements
-		Comparable<ContextTypedValue> {
+public class ContextTypedValue extends TypedValue {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(ContextTypedValue.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ContextTypedValue.class);
 
 	/**
 	 * Serial Version ID.
@@ -72,11 +70,6 @@ public class ContextTypedValue extends TypedValue implements
 	private long mTimespan;
 
 	/**
-	 * The time at which to next evaluate the result.
-	 */
-	private long mDeferUntil;
-
-	/**
 	 * Did we fail to register with the sensor?
 	 */
 	private boolean mRegistrationFailed;
@@ -93,7 +86,9 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from a string.
-	 * @param unparsedContextInfo the string to parse
+	 * 
+	 * @param unparsedContextInfo
+	 *            the string to parse
 	 */
 	public ContextTypedValue(final String unparsedContextInfo) {
 		this(unparsedContextInfo, HistoryReductionMode.NONE, 0);
@@ -101,8 +96,11 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from an entity and path.
-	 * @param entity the entity id
-	 * @param path the value path
+	 * 
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
 	 */
 	public ContextTypedValue(final String entity, final String path) {
 		this(entity, path, null, HistoryReductionMode.NONE, 0);
@@ -110,9 +108,13 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from an entity and path and config map.
-	 * @param entity the entity id
-	 * @param path the value path
-	 * @param config the map with configuration data
+	 * 
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
+	 * @param config
+	 *            the map with configuration data
 	 */
 	public ContextTypedValue(final String entity, final String path,
 			final Map<String, String> config) {
@@ -121,10 +123,15 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from an entity and path and config map with mode and timespan.
-	 * @param entity the entity id
-	 * @param path the value path
-	 * @param mode the history reduction mode
-	 * @param timespan the timespan to limit to
+	 * 
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
+	 * @param mode
+	 *            the history reduction mode
+	 * @param timespan
+	 *            the timespan to limit to
 	 */
 	public ContextTypedValue(final String entity, final String path,
 			final HistoryReductionMode mode, final long timespan) {
@@ -133,11 +140,17 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from an entity and path and config map.
-	 * @param entity the entity id
-	 * @param path the value path
-	 * @param config the map with configuration data
-	 * @param mode the history reduction mode
-	 * @param timespan the timespan to limit to
+	 * 
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
+	 * @param config
+	 *            the map with configuration data
+	 * @param mode
+	 *            the history reduction mode
+	 * @param timespan
+	 *            the timespan to limit to
 	 */
 	public ContextTypedValue(final String entity, final String path,
 			final Map<String, String> config, final HistoryReductionMode mode,
@@ -155,9 +168,13 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct with a specific history mode and timespan.
-	 * @param unparsedContextInfo the string to parse
-	 * @param mode the mode to run with
-	 * @param timespan the timespan to consider
+	 * 
+	 * @param unparsedContextInfo
+	 *            the string to parse
+	 * @param mode
+	 *            the mode to run with
+	 * @param timespan
+	 *            the timespan to consider
 	 */
 	public ContextTypedValue(final String unparsedContextInfo,
 			final HistoryReductionMode mode, final long timespan) {
@@ -190,7 +207,9 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Construct from a Parcel.
-	 * @param source the Parcel to read from
+	 * 
+	 * @param source
+	 *            the Parcel to read from
 	 */
 	public ContextTypedValue(final Parcel source) {
 		super(source);
@@ -255,7 +274,6 @@ public class ContextTypedValue extends TypedValue implements
 		// to evaluate, so the expression's value is undefined.
 		if (values.size() == 0) {
 			LOG.debug("No readings so returning null.");
-			mDeferUntil = Long.MIN_VALUE;
 			throw new NoValuesInIntervalException("No values in interval for "
 					+ this);
 		}
@@ -263,14 +281,7 @@ public class ContextTypedValue extends TypedValue implements
 		// apply modes on the values
 		TimestampedValue[] result = applyMode(values
 				.toArray(new TimestampedValue[values.size()]));
-		// set the defer time
-		mDeferUntil = result[result.length - 1].getExpireTime();
 		return result;
-	}
-
-	@Override
-	public final long getDeferUntil() {
-		return mDeferUntil;
 	}
 
 	@Override
@@ -284,13 +295,12 @@ public class ContextTypedValue extends TypedValue implements
 		dest.writeString(mEntity);
 		dest.writeString(mValuePath);
 		dest.writeLong(mTimespan);
-		dest.writeLong(mDeferUntil);
 		dest.writeBundle(mConfiguration);
 	}
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
@@ -298,13 +308,11 @@ public class ContextTypedValue extends TypedValue implements
 		mEntity = in.readString();
 		mValuePath = in.readString();
 		mTimespan = in.readLong();
-		mDeferUntil = in.readLong();
 		mConfiguration = in.readBundle();
 	}
 
 	/** The CREATOR. */
-	public static final ContextTypedValue.Creator<ContextTypedValue> CREATOR =
-			new ContextTypedValue.Creator<ContextTypedValue>() {
+	public static final ContextTypedValue.Creator<ContextTypedValue> CREATOR = new ContextTypedValue.Creator<ContextTypedValue>() {
 
 		@Override
 		public ContextTypedValue createFromParcel(final Parcel source) {
@@ -321,8 +329,7 @@ public class ContextTypedValue extends TypedValue implements
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-			throws SensorConfigurationException,
-			SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		this.mId = id;
 		mServiceConnection = new ServiceConnection() {
 
@@ -334,8 +341,8 @@ public class ContextTypedValue extends TypedValue implements
 			@Override
 			public void onServiceConnected(final ComponentName name,
 					final IBinder service) {
-				IAsynchronousContextSensor sensor =
-						IAsynchronousContextSensor.Stub.asInterface(service);
+				IAsynchronousContextSensor sensor = IAsynchronousContextSensor.Stub
+						.asInterface(service);
 				try {
 					sensor.register(id, mValuePath, mConfiguration);
 					mRegistrationFailed = false;
@@ -351,8 +358,7 @@ public class ContextTypedValue extends TypedValue implements
 	}
 
 	@Override
-	public final void destroy(final String id,
-			final SensorManager sensorManager)
+	public final void destroy(final String id, final SensorManager sensorManager)
 			throws ContextDroidException {
 		try {
 			mSensor.unregister(id);
@@ -374,26 +380,6 @@ public class ContextTypedValue extends TypedValue implements
 		return mEntity + "/" + mValuePath; // + ": " + configuration;
 	}
 
-	/**
-	 * Sets the next time this value should be evaluated.
-	 * @param nextEvaluationTime the next time to evaluate at.
-	 */
-	public final void setNextEvaluationTime(final long nextEvaluationTime) {
-		mDeferUntil = nextEvaluationTime;
-	}
-
-	@Override
-	public final int compareTo(final ContextTypedValue another) {
-		long difference = mDeferUntil - another.mDeferUntil;
-		if (difference == 0) {
-			return 0;
-		} else if (difference < 0) {
-			return -1;
-		} else {
-			return 1;
-		}
-	}
-
 	@Override
 	public final String toParseString() {
 		return mEntity + "/" + mValuePath + getParseConfig() + getModeString();
@@ -404,8 +390,7 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	private String getModeString() {
 		String ret;
-		if (!(getHistoryReductionMode().equals(HistoryReductionMode.NONE)
-				&& mTimespan == 0)) {
+		if (!(getHistoryReductionMode().equals(HistoryReductionMode.NONE) && mTimespan == 0)) {
 			ret = " {" + getHistoryReductionMode().toParseString() + ","
 					+ mTimespan + "}";
 		} else {
@@ -415,7 +400,7 @@ public class ContextTypedValue extends TypedValue implements
 	}
 
 	/**
-	 *
+	 * 
 	 * @return a string with the configuration for this value.
 	 */
 	private String getParseConfig() {
@@ -441,9 +426,20 @@ public class ContextTypedValue extends TypedValue implements
 
 	/**
 	 * Sets the id for this TypedValue.
-	 * @param id the id to set to
+	 * 
+	 * @param id
+	 *            the id to set to
 	 */
 	public final void setId(final String id) {
 		mId = id;
+	}
+
+	public long getTimespan() {
+		return mTimespan;
+	}
+
+	@Override
+	public boolean isConstant() {
+		return false;
 	}
 }

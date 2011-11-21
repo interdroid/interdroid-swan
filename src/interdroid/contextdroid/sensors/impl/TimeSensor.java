@@ -65,7 +65,7 @@ public class TimeSensor extends AbstractSensorBase {
 	public List<TimestampedValue> getValues(String id, long now,
 			long timespan) {
 		List<TimestampedValue> result = new ArrayList<TimestampedValue>();
-		result.add(new TimestampedValue(now, now, 0));
+		result.add(new TimestampedValue(now, now));
 		return result;
 	}
 

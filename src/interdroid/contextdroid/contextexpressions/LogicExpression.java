@@ -10,15 +10,15 @@ import interdroid.contextdroid.contextservice.SensorSetupFailedException;
 
 /**
  * An expression which combines two sub-expressions with an operator.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class LogicExpression extends Expression {
 	/**
 	 *
 	 */
-	private static final long	serialVersionUID	= 6206620564361837288L;
+	private static final long serialVersionUID = 6206620564361837288L;
 	/**
 	 * The left expression.
 	 */
@@ -35,12 +35,17 @@ public class LogicExpression extends Expression {
 
 	/**
 	 * Constructs am operator expression.
-	 * @param left the left expression.
-	 * @param operator the joining operator.
-	 * @param right the right expression.
+	 * 
+	 * @param left
+	 *            the left expression.
+	 * @param operator
+	 *            the joining operator.
+	 * @param right
+	 *            the right expression.
 	 */
 	public LogicExpression(final Expression left, final LogicOperator operator,
 			final Expression right) {
+		// TODO: Verify operator matches arguments properly
 		this.mLeftExpression = left;
 		this.mRightExpression = right;
 		this.mOperator = operator;
@@ -48,8 +53,11 @@ public class LogicExpression extends Expression {
 
 	/**
 	 * Constructs an operator expression with no right expression.
-	 * @param operator the operator.
-	 * @param expression the left expression.
+	 * 
+	 * @param operator
+	 *            the operator.
+	 * @param expression
+	 *            the left expression.
 	 */
 	public LogicExpression(final LogicOperator operator,
 			final Expression expression) {
@@ -58,7 +66,9 @@ public class LogicExpression extends Expression {
 
 	/**
 	 * Construct from a parcel.
-	 * @param in the parcel to read values from.
+	 * 
+	 * @param in
+	 *            the parcel to read values from.
 	 */
 	protected LogicExpression(final Parcel in) {
 		super(in);
@@ -71,8 +81,7 @@ public class LogicExpression extends Expression {
 	/**
 	 * The CREATOR used to construct from a parcel.
 	 */
-	public static final Parcelable.Creator<LogicExpression> CREATOR
-	= new Parcelable.Creator<LogicExpression>() {
+	public static final Parcelable.Creator<LogicExpression> CREATOR = new Parcelable.Creator<LogicExpression>() {
 		@Override
 		public LogicExpression createFromParcel(final Parcel in) {
 			return new LogicExpression(in);
@@ -87,8 +96,7 @@ public class LogicExpression extends Expression {
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-					throws SensorConfigurationException,
-					SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		setId(id);
 		mLeftExpression.initialize(id + ".L", sensorManager);
 		if (mRightExpression != null) {
@@ -97,61 +105,93 @@ public class LogicExpression extends Expression {
 	}
 
 	@Override
-	public final void destroy(final String id,
-			final SensorManager sensorManager)
-					throws ContextDroidException {
+	public final void destroy(final String id, final SensorManager sensorManager)
+			throws ContextDroidException {
 		mLeftExpression.destroy(id + ".L", sensorManager);
 		if (mRightExpression != null) {
 			mRightExpression.destroy(id + ".R", sensorManager);
 		}
 	}
 
+	private boolean leftFirst() {
+		// if we can defer one of the expressions for a longer time than we need
+		// to keep history for the other, we might be able to turn off a sensor
+		// for a while (e.g. one.deferUntil - other.history) iff we're able to
+		// short circuit the expression. That depends one the operator and the
+		// value of the first expression
+		long leftDeferUntil = mLeftExpression.getDeferUntil();
+		long leftHistory = mLeftExpression.getTimespan();
+		long rightDeferUntil = mRightExpression.getDeferUntil();
+		long rightHistory = mRightExpression.getTimespan();
+		return (leftDeferUntil - rightHistory > rightDeferUntil - leftHistory);
+	}
+
 	@Override
 	protected final void evaluateImpl(final long now)
 			throws ContextDroidException {
-		// We always evaluate the left side.
-		mLeftExpression.evaluate(now);
-		int leftResult = mLeftExpression.getResult();
 
-		// Can we short circuit the rest?
-		if (leftResult == ContextManager.TRUE
+		boolean leftFirst = leftFirst();
+
+		Expression firstExpression = leftFirst ? mLeftExpression
+				: mRightExpression;
+		Expression lastExpression = leftFirst ? mRightExpression
+				: mLeftExpression;
+
+		firstExpression.evaluate(now);
+		int firstResult = firstExpression.getResult();
+
+		// Can we short circuit and don't evaluate the last expression?
+		// FALSE && ?? -> FALSE
+		// TRUE || ?? -> TRUE
+
+		if (firstResult == ContextManager.FALSE
 				&& mOperator.equals(LogicOperator.AND)) {
-			setResult(leftResult);
+			setResult(ContextManager.FALSE);
+			// we can now turn off the last expression for a while
+			lastExpression.sleepAndBeReadyAt(firstExpression.getDeferUntil());
+			return;
+		} else if ((firstResult == ContextManager.TRUE)
+				&& mOperator.equals(LogicOperator.OR)) {
+			setResult(ContextManager.TRUE);
+			// we can now turn off the last expression for a while
+			lastExpression.sleepAndBeReadyAt(firstExpression.getDeferUntil());
+			return;
 		}
 
-		// We might evaluate the right side.
-		int rightResult = ContextManager.UNDEFINED;
-		if (mRightExpression != null) {
-			mRightExpression.evaluate(now);
-			rightResult = mRightExpression.getResult();
+		// We might evaluate the right side. Test for null in case we deal with
+		// a unary logic expresson
+		int lastResult = ContextManager.UNDEFINED;
+		if (lastExpression != null) {
+			lastExpression.evaluate(now);
+			lastResult = lastExpression.getResult();
 		}
 		switch (mOperator) {
 		case NOT:
-			if (leftResult == ContextManager.UNDEFINED) {
+			if (firstResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
-			} else if (leftResult == ContextManager.TRUE) {
+			} else if (firstResult == ContextManager.TRUE) {
 				setResult(ContextManager.FALSE);
-			} else if (leftResult == ContextManager.FALSE) {
+			} else if (firstResult == ContextManager.FALSE) {
 				setResult(ContextManager.TRUE);
 			}
 			break;
 		case AND:
-			if (leftResult == ContextManager.UNDEFINED
-			|| rightResult == ContextManager.UNDEFINED) {
+			if (firstResult == ContextManager.UNDEFINED
+					|| lastResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
-			} else if (leftResult == ContextManager.TRUE
-					&& rightResult == ContextManager.TRUE) {
+			} else if (firstResult == ContextManager.TRUE
+					&& lastResult == ContextManager.TRUE) {
 				setResult(ContextManager.TRUE);
 			} else {
 				setResult(ContextManager.FALSE);
 			}
 			break;
 		case OR:
-			if (leftResult == ContextManager.UNDEFINED
-			&& rightResult == ContextManager.UNDEFINED) {
+			if (firstResult == ContextManager.UNDEFINED
+					&& lastResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED);
-			} else if (leftResult == ContextManager.TRUE
-					|| rightResult == ContextManager.TRUE) {
+			} else if (firstResult == ContextManager.TRUE
+					|| lastResult == ContextManager.TRUE) {
 				setResult(ContextManager.TRUE);
 			} else {
 				setResult(ContextManager.FALSE);
@@ -167,8 +207,36 @@ public class LogicExpression extends Expression {
 	protected final long getDeferUntilImpl() {
 		long mDeferUntil;
 		if (mRightExpression != null) {
-			mDeferUntil = Math.min(mLeftExpression.getDeferUntil(),
-					mRightExpression.getDeferUntil());
+			// Smart energy optimization
+			// A | B | && | ||
+			// -------------------
+			// T | T | min | max
+			// T | F | min | A
+			// F | T | min | B
+			// F | F | max | min
+
+			// TODO: ContextManager.FALSE should be in a custom enum
+
+			if (mOperator.equals(LogicOperator.AND)
+					&& mLeftExpression.getResult() == ContextManager.FALSE
+					&& mRightExpression.getResult() == ContextManager.FALSE) {
+				mDeferUntil = Math.max(mLeftExpression.getDeferUntil(),
+						mRightExpression.getDeferUntil());
+			} else if (mOperator.equals(LogicOperator.OR)
+					&& mLeftExpression.getResult() == ContextManager.TRUE
+					&& mRightExpression.getResult() == ContextManager.TRUE) {
+				mDeferUntil = Math.max(mLeftExpression.getDeferUntil(),
+						mRightExpression.getDeferUntil());
+			} else if (mOperator.equals(LogicOperator.OR)
+					&& mLeftExpression.getResult() == ContextManager.TRUE) {
+				mDeferUntil = mLeftExpression.getDeferUntil();
+			} else if (mOperator.equals(LogicOperator.OR)
+					&& mRightExpression.getResult() == ContextManager.TRUE) {
+				mDeferUntil = mRightExpression.getDeferUntil();
+			} else {
+				mDeferUntil = Math.min(mLeftExpression.getDeferUntil(),
+						mRightExpression.getDeferUntil());
+			}
 		} else {
 			mDeferUntil = mLeftExpression.getDeferUntil();
 		}
@@ -202,10 +270,21 @@ public class LogicExpression extends Expression {
 		if (mRightExpression == null) {
 			return mOperator.toString() + " " + mLeftExpression.toParseString();
 		} else {
-			return mLeftExpression.toParseString()
-					+ " " + mOperator + " "
+			return mLeftExpression.toParseString() + " " + mOperator + " "
 					+ mLeftExpression.toParseString();
 		}
+	}
+
+	@Override
+	public void sleepAndBeReadyAt(long readyTime) {
+		mLeftExpression.sleepAndBeReadyAt(readyTime);
+		mRightExpression.sleepAndBeReadyAt(readyTime);
+	}
+
+	@Override
+	public long getTimespan() {
+		return Math.max(mLeftExpression.getTimespan(),
+				mRightExpression.getTimespan());
 	}
 
 }

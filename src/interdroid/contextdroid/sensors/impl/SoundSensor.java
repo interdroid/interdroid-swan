@@ -3,11 +3,8 @@ package interdroid.contextdroid.sensors.impl;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.sensors.AbstractConfigurationActivity;
 import interdroid.contextdroid.sensors.AbstractMemorySensor;
-import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import android.media.AudioFormat;
@@ -21,11 +18,12 @@ public class SoundSensor extends AbstractMemorySensor {
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class SoundConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class SoundConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -33,7 +31,6 @@ public class SoundSensor extends AbstractMemorySensor {
 		}
 
 	}
-
 
 	public static final String DB_FIELD = "dB";
 
@@ -52,13 +49,12 @@ public class SoundSensor extends AbstractMemorySensor {
 	public static final int DEFAULT_AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 10 * 1000;
 
 	private Map<String, SoundPoller> activeThreads = new HashMap<String, SoundPoller>();
 
 	/**
 	 * Sample rms.
-	 *
+	 * 
 	 * @return the RMS of the sample in dB
 	 */
 	private double sampleRms(AudioRecord audioRecord, int sampleLength) {
@@ -119,7 +115,7 @@ public class SoundSensor extends AbstractMemorySensor {
 
 	@Override
 	public final void register(String id, String valuePath, Bundle configuration) {
-		SoundPoller soundPoller = new SoundPoller(id, configuration);
+		SoundPoller soundPoller = new SoundPoller(id, valuePath, configuration);
 		activeThreads.put(id, soundPoller);
 		soundPoller.start();
 	}
@@ -131,15 +127,16 @@ public class SoundSensor extends AbstractMemorySensor {
 
 	class SoundPoller extends Thread {
 
+		private String id;
 		private Bundle configuration;
-		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
 		private AudioRecord audioRecord;
 		private int sampleLength;
-		private String id;
+		private String valuePath;
 
-		SoundPoller(String id, Bundle configuration) {
-			this.configuration = configuration;
+		SoundPoller(String id, String valuePath, Bundle configuration) {
 			this.id = id;
+			this.configuration = configuration;
+			this.valuePath = valuePath;
 			int buffersize = 8 * AudioRecord.getMinBufferSize(
 					configuration.getInt(SAMPLE_RATE,
 							mDefaultConfiguration.getInt(SAMPLE_RATE)),
@@ -164,12 +161,8 @@ public class SoundSensor extends AbstractMemorySensor {
 		public void run() {
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
-				if (values.size() >= HISTORY_SIZE) {
-					values.remove(0);
-				}
-				values.add(new TimestampedValue(sampleRms(audioRecord,
-						sampleLength), start, start + EXPIRE_TIME));
-				notifyDataChangedForId(id);
+				putValueTrimSize(valuePath, id, start,
+						sampleRms(audioRecord, sampleLength), HISTORY_SIZE);
 				try {
 					Thread.sleep(configuration.getLong(SAMPLE_INTERVAL,
 							mDefaultConfiguration.getLong(SAMPLE_INTERVAL))
@@ -179,9 +172,6 @@ public class SoundSensor extends AbstractMemorySensor {
 			}
 		}
 
-		public List<TimestampedValue> getValues() {
-			return values;
-		}
 	}
 
 	@Override

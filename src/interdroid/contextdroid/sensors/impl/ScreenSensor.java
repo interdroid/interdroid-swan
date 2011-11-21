@@ -18,24 +18,25 @@ import android.os.Bundle;
 
 /**
  * A sensor for if the screen is on or off.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class ScreenSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(ScreenSensor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ScreenSensor.class);
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -60,20 +61,15 @@ public class ScreenSensor extends AbstractVdbSensor {
 	public static final String IS_SCREEN_ON_FIELD = "is_screen_on";
 
 	/**
-	 * Default expire time.
-	 */
-	public static final long EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes?
-
-	/**
 	 * The schema for this sensor.
 	 */
 	public static final String SCHEME = getSchema();
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -90,16 +86,10 @@ public class ScreenSensor extends AbstractVdbSensor {
 	 * @return the schema for this sensor.
 	 */
 	private static String getSchema() {
-		String scheme =
-				"{'type': 'record', 'name': 'screen', "
-						+ "'namespace': 'interdroid.context.sensor.screen',"
-						+ "\n'fields': ["
-						+ SCHEMA_TIMESTAMP_FIELDS
-						+ "\n{'name': '"
-						+ IS_SCREEN_ON_FIELD
-						+ "', 'type': 'boolean'}"
-						+ "\n]"
-						+ "}";
+		String scheme = "{'type': 'record', 'name': 'screen', "
+				+ "'namespace': 'interdroid.context.sensor.screen',"
+				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
+				+ IS_SCREEN_ON_FIELD + "', 'type': 'boolean'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -111,7 +101,6 @@ public class ScreenSensor extends AbstractVdbSensor {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 			long now = System.currentTimeMillis();
-			long expire = now + EXPIRE_TIME;
 			ContentValues values = new ContentValues();
 
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
@@ -119,7 +108,7 @@ public class ScreenSensor extends AbstractVdbSensor {
 			} else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
 				values.put(IS_SCREEN_ON_FIELD, true);
 			}
-			putValues(values, now, expire);
+			putValues(values, now);
 		}
 
 	};

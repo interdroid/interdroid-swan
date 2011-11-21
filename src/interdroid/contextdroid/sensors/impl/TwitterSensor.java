@@ -26,7 +26,7 @@ import android.os.Bundle;
 
 /**
  * Based on the original TwitterSensor written by Rick de Leeuw
- *
+ * 
  * @author rkemp
  */
 public class TwitterSensor extends AbstractMemorySensor {
@@ -34,7 +34,7 @@ public class TwitterSensor extends AbstractMemorySensor {
 	public static final String TAG = "Twitter";
 
 	public static class ConfigurationActivity extends
-	AbstractConfigurationActivity {
+			AbstractConfigurationActivity {
 
 		@Override
 		public int getPreferencesXML() {
@@ -52,7 +52,6 @@ public class TwitterSensor extends AbstractMemorySensor {
 	public static final long DEFAULT_SAMPLE_INTERVAL = 5 * 60 * 1000;
 
 	protected static final int HISTORY_SIZE = 10;
-	public static final long EXPIRE_TIME = 5 * 60 * 1000;
 
 	// Buienradar specific variables
 	private static final String API_KEY = "uKfdGc8DLZ7FBnZAePGg";
@@ -124,12 +123,13 @@ public class TwitterSensor extends AbstractMemorySensor {
 	class TwitterPoller extends Thread {
 
 		private Bundle configuration;
-		private List<TimestampedValue> values = new ArrayList<TimestampedValue>();
+		private String valuePath;
 		private String id;
 
 		TwitterPoller(String id, String valuePath, Bundle configuration) {
-			this.configuration = configuration;
 			this.id = id;
+			this.configuration = configuration;
+			this.valuePath = valuePath;
 		}
 
 		public void run() {
@@ -137,14 +137,10 @@ public class TwitterSensor extends AbstractMemorySensor {
 					configuration.getString(SECRET_ACCESS_TOKEN));
 			while (!isInterrupted()) {
 				long start = System.currentTimeMillis();
-				if (values.size() >= HISTORY_SIZE) {
-					values.remove(0);
-				}
 				int mentions = sampleTwitter(token);
 				if (mentions >= 0) {
-					values.add(new TimestampedValue(mentions, start, start
-							+ EXPIRE_TIME));
-					notifyDataChangedForId(id);
+					putValueTrimSize(valuePath, id, start, mentions,
+							HISTORY_SIZE);
 				}
 
 				try {
@@ -159,9 +155,6 @@ public class TwitterSensor extends AbstractMemorySensor {
 			}
 		}
 
-		public List<TimestampedValue> getValues() {
-			return values;
-		}
 	}
 
 	@Override

@@ -18,16 +18,17 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(SignalStrengthSensor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SignalStrengthSensor.class);
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +94,9 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -112,37 +113,34 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	 * @return the schema for this sensor.
 	 */
 	private static String getSchema() {
-		String scheme =
-				"{'type': 'record', 'name': 'signal', "
-						+ "'namespace': 'interdroid.context.sensor.signal',"
-						+ "\n'fields': ["
-						+ SCHEMA_TIMESTAMP_FIELDS
-						+ "\n{'name': '"
-						+ IS_GSM_FIELD
-						+ "', 'type': 'boolean'},"
-						+ "\n{'name': '"
-						+ GSM_SIGNAL_STRENGTH_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ GSM_BIT_ERROR_RATE_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ CDMA_DBM_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ CDMA_ECIO_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ EVDO_DBM_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ EVDO_ECIO_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ EVDO_SNR_FIELD
-						+ "', 'type': 'int'}"
-						+ "\n]"
-						+ "}";
+		String scheme = "{'type': 'record', 'name': 'signal', "
+				+ "'namespace': 'interdroid.context.sensor.signal',"
+				+ "\n'fields': ["
+				+ SCHEMA_TIMESTAMP_FIELDS
+				+ "\n{'name': '"
+				+ IS_GSM_FIELD
+				+ "', 'type': 'boolean'},"
+				+ "\n{'name': '"
+				+ GSM_SIGNAL_STRENGTH_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ GSM_BIT_ERROR_RATE_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ CDMA_DBM_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ CDMA_ECIO_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ EVDO_DBM_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ EVDO_ECIO_FIELD
+				+ "', 'type': 'int'},"
+				+ "\n{'name': '"
+				+ EVDO_SNR_FIELD
+				+ "', 'type': 'int'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -173,24 +171,25 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 			}
 
 			values.put(IS_GSM_FIELD, signalStrength.isGsm());
-			values.put(GSM_SIGNAL_STRENGTH_FIELD, signalStrength.getGsmSignalStrength());
-			values.put(GSM_BIT_ERROR_RATE_FIELD, signalStrength.getGsmBitErrorRate());
+			values.put(GSM_SIGNAL_STRENGTH_FIELD,
+					signalStrength.getGsmSignalStrength());
+			values.put(GSM_BIT_ERROR_RATE_FIELD,
+					signalStrength.getGsmBitErrorRate());
 			values.put(CDMA_DBM_FIELD, signalStrength.getCdmaDbm());
 			values.put(CDMA_ECIO_FIELD, signalStrength.getCdmaEcio());
 			values.put(EVDO_DBM_FIELD, signalStrength.getEvdoDbm());
 			values.put(EVDO_ECIO_FIELD, signalStrength.getEvdoEcio());
 			values.put(EVDO_SNR_FIELD, signalStrength.getEvdoSnr());
 
-			putValues(values, now, now);
+			putValues(values, now);
 		}
 	};
 
 	@Override
 	public final String[] getValuePaths() {
 		return new String[] { IS_GSM_FIELD, GSM_SIGNAL_STRENGTH_FIELD,
-				GSM_BIT_ERROR_RATE_FIELD, CDMA_DBM_FIELD,
-				CDMA_ECIO_FIELD, EVDO_DBM_FIELD, EVDO_ECIO_FIELD,
-				EVDO_SNR_FIELD};
+				GSM_BIT_ERROR_RATE_FIELD, CDMA_DBM_FIELD, CDMA_ECIO_FIELD,
+				EVDO_DBM_FIELD, EVDO_ECIO_FIELD, EVDO_SNR_FIELD };
 	}
 
 	@Override
@@ -210,8 +209,7 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
-			telephonyManager =
-					(TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+			telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 			telephonyManager.listen(phoneStateListener,
 					PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
 		}
