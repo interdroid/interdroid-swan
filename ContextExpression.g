@@ -355,7 +355,7 @@ STRING
     ;
 
 CONFIG_VAL
-    :	'=' ~('&')*
+    :	'=' ~('&'|'{')*
     ;
 
 fragment
