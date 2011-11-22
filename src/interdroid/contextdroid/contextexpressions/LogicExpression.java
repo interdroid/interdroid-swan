@@ -48,12 +48,16 @@ public class LogicExpression extends Expression {
 
 	/**
 	 * Constructs an operator expression with no right expression.
-	 * @param operator the operator.
+	 * @param operator the operator. Must be LogicOperator.NOT.
 	 * @param expression the left expression.
 	 */
 	public LogicExpression(final LogicOperator operator,
 			final Expression expression) {
 		this(expression, operator, null);
+
+		if (operator != LogicOperator.NOT) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	/**
@@ -231,6 +235,13 @@ public class LogicExpression extends Expression {
 	 */
 	public Expression getRightExpression() {
 		return mRightExpression;
+	}
+
+	/**
+	 * @return the operator for this expression.
+	 */
+	public LogicOperator getOperator() {
+		return mOperator;
 	}
 
 }

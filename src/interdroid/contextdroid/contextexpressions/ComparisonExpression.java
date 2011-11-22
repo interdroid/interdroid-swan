@@ -58,7 +58,11 @@ public class ComparisonExpression extends Expression {
 		this.mLeftValue = left;
 		this.mRightValue = right;
 		this.mComparator = comparator;
-		this.mStrategy = strategy;
+		if (strategy == null) {
+			this.mStrategy = Strategy.ANY;
+		} else {
+			this.mStrategy = strategy;
+		}
 	}
 
 	/**
@@ -122,14 +126,14 @@ public class ComparisonExpression extends Expression {
 	/**
 	 * @return the comparison for this expression.
 	 */
-	protected final Comparator getComparator() {
+	public final Comparator getComparator() {
 		return mComparator;
 	}
 
 	/**
 	 * @return the strategy for this expression.
 	 */
-	protected final Strategy getStrategy() {
+	public final Strategy getStrategy() {
 		return mStrategy;
 	}
 

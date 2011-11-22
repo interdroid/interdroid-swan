@@ -9,6 +9,7 @@ package interdroid.contextdroid.contextexpressions;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Stack;
 }
 
 @lexer::header {
@@ -57,8 +58,8 @@ configuration_options returns [Map<String, String> configuration]
 	:	
 	(id=ID val=CONFIG_VAL) 
 		{config.put($id.getText(), $val.getText().substring(1));}
-	(CONFIG_AND id=ID val=CONFIG_VAL 
-		{config.put($id.getText(), $val.getText().substring(1));}
+	(CONFIG_AND more_id=ID more_val=CONFIG_VAL 
+		{config.put($more_id.getText(), $more_val.getText().substring(1));}
 	)*
 		{$configuration = config;}
 	;
@@ -70,8 +71,8 @@ value_path	returns [String value_path]
 	:
 	id=ID 
 		{buf.append($id.getText());}
-	('.' id=ID 
-		{buf.append('.'); buf.append($id.getText());} 
+	('.' more_id=ID 
+		{buf.append('.'); buf.append($more_id.getText());} 
 	)*
 		{$value_path = buf.toString();}
 	;
@@ -139,24 +140,29 @@ history_mode returns [HistoryReductionMode history_mode]
 // Paser rules
 context_typed_value returns [ContextTypedValue typed_value]
 	:	entity=ID ':' path=value_path
-{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
+			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
 	|	entity=ID ':' path=value_path '?' config=configuration_options
-{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, config /*.configuration */);}
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, config /*.configuration */);}
 	|	entity=ID ':' path=value_path '{' mode=history_mode ',' time=INT '}'
-{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, Long.parseLong(time.getText()));}
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, Long.parseLong(time.getText()));}
 	|	entity=ID ':' path=value_path '?' config=configuration_options '{' mode=history_mode ',' time=INT '}'
-{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , Long.parseLong(time.getText()));}
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , Long.parseLong(time.getText()));}
 	;
 
 constant_typed_value returns [ConstantTypedValue typed_value]
-	:	i=INT {$typed_value = new ConstantTypedValue(Long.parseLong($i.getText()));}
-	|	f=FLOAT {$typed_value = new ConstantTypedValue(Double.parseDouble($f.getText()));}
-	| 	raw=STRING {$typed_value = new ConstantTypedValue($raw.getText());}
+	:	i=INT 
+			{$typed_value = new ConstantTypedValue(Long.parseLong($i.getText()));}
+	|	f=FLOAT 
+			{$typed_value = new ConstantTypedValue(Double.parseDouble($f.getText()));}
+	| 	raw=STRING 
+			{$typed_value = new ConstantTypedValue($raw.getText());}
 	;
 
 typed_value	returns [TypedValue typed_value]
-	:	constant=constant_typed_value {$typed_value = constant /*.typed_value */ ;}
-	| 	context=context_typed_value {$typed_value = context /*.typed_value */ ;}
+	:	constant=constant_typed_value 
+			{$typed_value = constant /*.typed_value */ ;}
+	| 	context=context_typed_value 
+			{$typed_value = context /*.typed_value */ ;}
 	;
 
 parentheticalExpression returns [Expression expression]
@@ -172,10 +178,10 @@ comparativeExpression returns [Expression expression]
 	Stack<Strategy> strategyStack = new Stack<Strategy>();
 	Stack<Comparator> compareStack = new Stack<Comparator>();
 }
-	: left=parentheticalExpression
-	(WS* s=strategy WS* c=comparator WS* right=parentheticalExpression 
+	: left=additiveExpression
+	((WS* s=strategy)? WS* c=comparator WS* right=additiveExpression 
 		{strategyStack.push(s /* .strategy */ ); compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
-	)*
+	)?
 {
 	while(rightStack.size() > 1) {
 		Expression temp = rightStack.pop();
@@ -194,8 +200,8 @@ multiplicativeExpression returns [Expression expression]
 	Stack<Expression> rightStack = new Stack<Expression>();
 	Stack<MathOperator> opStack = new Stack<MathOperator>();
 }
-	: left=comparativeExpression
-	(WS* op=multiplicative_math_operator WS* right=comparativeExpression 
+	: left=parentheticalExpression
+	(WS* op=multiplicative_math_operator WS* right=parentheticalExpression 
 		{opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
 	)*
 {
@@ -234,9 +240,9 @@ additiveExpression returns [Expression expression]
 	;
 
 unaryExpression returns [Expression expression]
-	: op=unary_logic_operator exp=additiveExpression 
+	: op=unary_logic_operator exp=comparativeExpression 
 		{$expression = new LogicExpression(op /* .logic_operator */ , exp /* .expression */ );}
-	| exp=additiveExpression 
+	| exp=comparativeExpression 
 		{$expression = exp /* .expression */ ;}
 	;
 
@@ -290,10 +296,10 @@ expression returns [Expression expression]
 
 // Lexar rules
 // Binary
-OR    :     '||' | 'or';
-AND   :     '&&' | 'and';
+OR    :     '||' | 'or' | 'OR';
+AND   :     '&&' | 'and' | 'AND';
 // Unary
-NOT   :    '!' | 'not';
+NOT   :    '!' | 'not' | 'NOT';
 
 // Config
 CONFIG_IS
@@ -350,12 +356,41 @@ WS  :   ( ' '
         ) {$channel=HIDDEN;}
     ;
 
-STRING
-    :  '\'' ( ESC_SEQ | ~('\\'|'\'') )* '\''
+STRING          
+@init{StringBuilder lBuf = new StringBuilder();}
+    :
+    '\'' 
+	( ESC_SEQ
+		{lBuf.append(getText());} 
+	| normal=~('\''|'\\')
+		{lBuf.appendCodePoint(normal);} )* 
+	'\''     
+		{setText(lBuf.toString());}
+    ;
+
+fragment
+ESC_SEQ
+    :   '\\'
+        (       'n'    {setText("\n");}
+        |       'r'    {setText("\r");}
+        |       't'    {setText("\t");}
+        |       'b'    {setText("\b");}
+        |       'f'    {setText("\f");}
+        |       '"'    {setText("\"");}
+        |       '\''   {setText("\'");}
+        |       '/'    {setText("/");}
+        |       '\\'   {setText("\\");}
+        |       ('u')+ i=HEX_DIGIT j=HEX_DIGIT k=HEX_DIGIT l=HEX_DIGIT   {setText(String.valueOf((char) Integer.parseInt(i.getText() + j.getText() + k.getText() + l.getText(), 16)));}
+        )
     ;
 
 CONFIG_VAL
-    :	'=' ~('&'|'{')*
+    :	'=' (STRING 
+    		{
+    		/* String uses setText which drops the '='. Put it back so it is the same as the other branch. */ 
+    		setText("=" + getText());
+    		}
+    	| ('a'..'z'|'A'..'Z'|'0'..'9'|'.')*)
     ;
 
 fragment
@@ -363,22 +398,3 @@ EXPONENT : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
 fragment
 HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
-
-fragment
-ESC_SEQ
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    |   UNICODE_ESC
-    |   OCTAL_ESC
-    ;
-
-fragment
-OCTAL_ESC
-    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7')
-    ;
-
-fragment
-UNICODE_ESC
-    :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
-    ;
