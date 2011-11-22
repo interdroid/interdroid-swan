@@ -8,8 +8,6 @@ import interdroid.contextdroid.R;
 import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
-import java.util.List;
-
 import android.os.Bundle;
 
 public class IntentSensor extends AbstractMemorySensor {
@@ -59,7 +57,8 @@ public class IntentSensor extends AbstractMemorySensor {
 
 	@Override
 	public String getScheme() {
-		return "{'type': 'record', 'name': 'train', 'namespace': 'context.sensor',"
+		return "{'type': 'record', 'name': 'intent', " +
+				"'namespace': 'context.sensor.intent',"
 				+ " 'fields': ["
 				+ "            {'name': '"
 				+ STARTED_FIELD
@@ -78,7 +77,8 @@ public class IntentSensor extends AbstractMemorySensor {
 		try {
 			contextServiceConnector.registerContextTypedValue(id + "."
 					+ MAGIC_RELAY, new ContextTypedValue(
-					"logcat/log?logcat_parameters=ActivityManager:I *:S"),
+					"logcat" + ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
+					+ "log?logcat_parameters=ActivityManager:I *:S"),
 					new ContextTypedValueListener() {
 
 						@Override
