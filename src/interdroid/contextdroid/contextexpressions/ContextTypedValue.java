@@ -42,6 +42,16 @@ public class ContextTypedValue extends TypedValue implements
 	private static final long serialVersionUID = 7571963465497645229L;
 
 	/**
+	 * The separator used between an entity and a value path
+	 */
+	public static final String	ENTITY_VALUE_PATH_SEPARATOR	= ":";
+
+	/**
+	 * The separator used inside a value path
+	 */
+	public static final String VALUE_PATH_SEPARATOR = ".";
+
+	/**
 	 * Timeout for connection to the sensor.
 	 */
 	private static final int CONNECTION_TIMEOUT = 1000;
@@ -371,7 +381,7 @@ public class ContextTypedValue extends TypedValue implements
 
 	@Override
 	public final String toString() {
-		return mEntity + "/" + mValuePath; // + ": " + configuration;
+		return mEntity + ":" + mValuePath; // + ": " + configuration;
 	}
 
 	/**
@@ -396,7 +406,7 @@ public class ContextTypedValue extends TypedValue implements
 
 	@Override
 	public final String toParseString() {
-		return mEntity + "/" + mValuePath + getParseConfig() + getModeString();
+		return mEntity + ":" + mValuePath + getParseConfig() + getModeString();
 	}
 
 	/**
@@ -445,5 +455,12 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	public final void setId(final String id) {
 		mId = id;
+	}
+
+	/**
+	 * @return the timespan for the history.
+	 */
+	public long getHistoryLength() {
+		return mTimespan;
 	}
 }

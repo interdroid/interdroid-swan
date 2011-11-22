@@ -116,7 +116,7 @@ public class LogicExpression extends Expression {
 		// Can we short circuit the rest?
 		if (leftResult == ContextManager.TRUE
 				&& mOperator.equals(LogicOperator.AND)) {
-			setResult(leftResult);
+			setResult(leftResult, now);
 		}
 
 		// We might evaluate the right side.
@@ -128,33 +128,33 @@ public class LogicExpression extends Expression {
 		switch (mOperator) {
 		case NOT:
 			if (leftResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (leftResult == ContextManager.TRUE) {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			} else if (leftResult == ContextManager.FALSE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			}
 			break;
 		case AND:
 			if (leftResult == ContextManager.UNDEFINED
 			|| rightResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (leftResult == ContextManager.TRUE
 					&& rightResult == ContextManager.TRUE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			} else {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			}
 			break;
 		case OR:
 			if (leftResult == ContextManager.UNDEFINED
 			&& rightResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (leftResult == ContextManager.TRUE
 					|| rightResult == ContextManager.TRUE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			} else {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			}
 			break;
 		default:
@@ -202,10 +202,35 @@ public class LogicExpression extends Expression {
 		if (mRightExpression == null) {
 			return mOperator.toString() + " " + mLeftExpression.toParseString();
 		} else {
-			return mLeftExpression.toParseString()
+			return "(" + mLeftExpression.toParseString()
 					+ " " + mOperator + " "
-					+ mLeftExpression.toParseString();
+					+ mLeftExpression.toParseString() +")";
 		}
+	}
+
+	@Override
+	protected boolean hasCurrentTime() {
+		return false;
+	}
+
+	@Override
+	public TimestampedValue[] getValues(String string, long now) {
+		return new TimestampedValue[] {new TimestampedValue(getResult(),
+				getLastEvaluationTime())};
+	}
+
+	/**
+	 * @return the left side of this expression.
+	 */
+	public Expression getLeftExpression() {
+		return mLeftExpression;
+	}
+
+	/**
+	 * @return the right side of this expression.
+	 */
+	public Expression getRightExpression() {
+		return mRightExpression;
 	}
 
 }

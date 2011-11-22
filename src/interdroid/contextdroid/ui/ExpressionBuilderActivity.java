@@ -11,7 +11,7 @@ import interdroid.contextdroid.contextexpressions.LogicExpression;
 import interdroid.contextdroid.contextexpressions.LogicOperator;
 import interdroid.contextdroid.contextexpressions.Strategy;
 import interdroid.contextdroid.contextexpressions.TypedValue;
-import interdroid.contextdroid.contextexpressions.ValueExpression;
+import interdroid.contextdroid.contextexpressions.ComparisonExpression;
 import interdroid.contextdroid.contextservice.SensorManager;
 
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ public class ExpressionBuilderActivity extends Activity {
 					public void onClick(View v) {
 						String comparator = ((Button) findViewById(R.id.typedvalue_comparator))
 								.getText().toString();
-						Expression expression = new ValueExpression(leftValue,
+						Expression expression = new ComparisonExpression(leftValue,
 								Comparator.parse(comparator), Strategy.ALL, rightValue);
 						if (not) {
 							expressions.add(new LogicExpression(LogicOperator.NOT, expression));
@@ -455,7 +455,8 @@ public class ExpressionBuilderActivity extends Activity {
 			switch (requestCode) {
 			case REQUEST_CODE_CONFIGURE_SENSOR_LEFT:
 				leftValue = new ContextTypedValue(
-						data.getStringExtra("entityId") + "/"
+						data.getStringExtra("entityId") +
+						ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
 								+ data.getStringExtra("configuration"));
 				((Button) findViewById(R.id.typedvalue_left)).setText(leftValue
 						.toString());
@@ -463,7 +464,8 @@ public class ExpressionBuilderActivity extends Activity {
 				break;
 			case REQUEST_CODE_CONFIGURE_SENSOR_RIGHT:
 				rightValue = new ContextTypedValue(
-						data.getStringExtra("entityId") + "/"
+						data.getStringExtra("entityId") +
+						ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
 								+ data.getStringExtra("configuration"));
 				((Button) findViewById(R.id.typedvalue_right))
 						.setText(rightValue.toString());

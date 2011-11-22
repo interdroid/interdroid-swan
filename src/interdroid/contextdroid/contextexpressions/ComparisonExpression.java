@@ -14,7 +14,7 @@ import interdroid.contextdroid.contextservice.SensorSetupFailedException;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
-public class ValueExpression extends Expression {
+public class ComparisonExpression extends Expression {
 	/**
 	 *
 	 */
@@ -33,12 +33,12 @@ public class ValueExpression extends Expression {
 	/**
 	 * The left value.
 	 */
-	private final TypedValue mLeftValue;
+	private final Expression mLeftValue;
 
 	/**
 	 * The right value.
 	 */
-	private final TypedValue mRightValue;
+	private final Expression mRightValue;
 
 	/**
 	 * The time until this value expression needs to be evaluated again.
@@ -46,15 +46,15 @@ public class ValueExpression extends Expression {
 	private long mDeferUntil = -1;
 
 	/**
-	 * Constructs a value expression.
-	 * @param left the left value
+	 * Constructs a comparison expression.
+	 * @param left the left expression
 	 * @param comparator the comparator
 	 * @param strategy the strategy used when comparing.
-	 * @param right the right value
+	 * @param right the right expression
 	 */
-	public ValueExpression(final TypedValue left,
+	public ComparisonExpression(final Expression left,
 			final Comparator comparator, final Strategy strategy,
-			final TypedValue right) {
+			final Expression right) {
 		this.mLeftValue = left;
 		this.mRightValue = right;
 		this.mComparator = comparator;
@@ -65,27 +65,45 @@ public class ValueExpression extends Expression {
 	 * Construct from a parcel.
 	 * @param in the parcel to read values from.
 	 */
-	protected ValueExpression(final Parcel in) {
+	protected ComparisonExpression(final Parcel in) {
 		super(in);
-		mLeftValue = in.readParcelable(ValueExpression.class.getClassLoader());
+		mLeftValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
 		mComparator = Comparator.convert(in.readInt());
 		mStrategy = Strategy.convert(in.readInt());
-		mRightValue = in.readParcelable(ValueExpression.class.getClassLoader());
+		mRightValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
+	}
+
+	/**
+	 * Constructs a comparison expression.
+	 * This is a convenience which wraps the TypedValues in
+	 * TypedValueExpressions until we refactor TypedValue to be
+	 * an expression directly.
+	 * @param left the left expression
+	 * @param comparator the comparator
+	 * @param strategy the strategy used when comparing.
+	 * @param right the right expression
+	 */
+	public ComparisonExpression(TypedValue leftValue, Comparator comparator,
+			Strategy strategy, TypedValue rightValue) {
+		mLeftValue = new TypedValueExpression(leftValue);
+		mRightValue = new TypedValueExpression(rightValue);
+		mStrategy = strategy;
+		mComparator = comparator;
 	}
 
 	/**
 	 * The CREATOR used to construct from a parcel.
 	 */
-	public static final Parcelable.Creator<ValueExpression> CREATOR
-	= new Parcelable.Creator<ValueExpression>() {
+	public static final Parcelable.Creator<ComparisonExpression> CREATOR
+	= new Parcelable.Creator<ComparisonExpression>() {
 		@Override
-		public ValueExpression createFromParcel(final Parcel in) {
-			return new ValueExpression(in);
+		public ComparisonExpression createFromParcel(final Parcel in) {
+			return new ComparisonExpression(in);
 		}
 
 		@Override
-		public ValueExpression[] newArray(final int size) {
-			return new ValueExpression[size];
+		public ComparisonExpression[] newArray(final int size) {
+			return new ComparisonExpression[size];
 		}
 	};
 
@@ -93,7 +111,7 @@ public class ValueExpression extends Expression {
 	 * @param left true if the side desired is the left side
 	 * @return the typedValue side requested or null
 	 */
-	protected final TypedValue getTypedValue(final boolean left) {
+	protected final Expression getExpression(final boolean left) {
 		if (left) {
 			return mLeftValue;
 		} else {
@@ -122,10 +140,7 @@ public class ValueExpression extends Expression {
 					SensorSetupFailedException {
 		setId(id);
 		mLeftValue.initialize(id + ".L", sensorManager);
-		if (mRightValue != null) {
-			mRightValue.initialize(id + ".R", sensorManager);
-		}
-
+		mRightValue.initialize(id + ".R", sensorManager);
 	}
 
 	@Override
@@ -133,11 +148,8 @@ public class ValueExpression extends Expression {
 			final SensorManager sensorManager)
 					throws ContextDroidException {
 		mLeftValue.destroy(id + ".L", sensorManager);
-		if (mRightValue != null) {
-			mRightValue.destroy(id + ".R", sensorManager);
-		}
+		mRightValue.destroy(id + ".R", sensorManager);
 	}
-
 
 	/**
 	 * Evaluates this value expression.
@@ -181,7 +193,7 @@ public class ValueExpression extends Expression {
 
 			}
 		}
-		setResult(endResult);
+		setResult(endResult, now);
 
 		// We can shortcut values of time.current if we know the values
 		// so we pre-calculate and cache the result.
@@ -367,6 +379,31 @@ public class ValueExpression extends Expression {
 	@Override
 	protected final int getSubtypeId() {
 		return VALUE_EXPRESSION_TYPE;
+	}
+
+	@Override
+	protected boolean hasCurrentTime() {
+		return false;
+	}
+
+	@Override
+	public TimestampedValue[] getValues(String string, long now) {
+		return new TimestampedValue[] {new TimestampedValue(getResult(),
+				getLastEvaluationTime())};
+	}
+
+	/**
+	 * @return the left side of this expression.
+	 */
+	public Expression getLeftExpression() {
+		return mLeftValue;
+	}
+
+	/**
+	 * @return the right side of this expression.
+	 */
+	public Expression getRightExpression() {
+		return mRightValue;
 	}
 
 }

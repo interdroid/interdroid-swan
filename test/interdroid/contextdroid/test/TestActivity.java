@@ -50,7 +50,7 @@ public class TestActivity extends Activity {
 		setContentView(R.layout.test);
 
 		final ContextTypedValue left = new ContextTypedValue(
-				"logcat/log?logcat_parameters=Calendar:I *:S");
+				"logcat:log?logcat_parameters=Calendar:I *:S");
 		final String valueName = "myFirstValue";
 		contextManager = new ContextManager(TestActivity.this);
 
