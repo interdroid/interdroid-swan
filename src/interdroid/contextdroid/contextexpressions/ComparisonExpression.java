@@ -26,11 +26,6 @@ public class ComparisonExpression extends Expression {
 	private final Comparator mComparator;
 
 	/**
-	 * The strategy used when comparing the values.
-	 */
-	private final Strategy mStrategy;
-
-	/**
 	 * The left value.
 	 */
 	private final Expression mLeftValue;
@@ -49,20 +44,13 @@ public class ComparisonExpression extends Expression {
 	 * Constructs a comparison expression.
 	 * @param left the left expression
 	 * @param comparator the comparator
-	 * @param strategy the strategy used when comparing.
 	 * @param right the right expression
 	 */
 	public ComparisonExpression(final Expression left,
-			final Comparator comparator, final Strategy strategy,
-			final Expression right) {
+			final Comparator comparator, final Expression right) {
 		this.mLeftValue = left;
 		this.mRightValue = right;
 		this.mComparator = comparator;
-		if (strategy == null) {
-			this.mStrategy = Strategy.ANY;
-		} else {
-			this.mStrategy = strategy;
-		}
 	}
 
 	/**
@@ -73,7 +61,6 @@ public class ComparisonExpression extends Expression {
 		super(in);
 		mLeftValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
 		mComparator = Comparator.convert(in.readInt());
-		mStrategy = Strategy.convert(in.readInt());
 		mRightValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
 	}
 
@@ -88,10 +75,9 @@ public class ComparisonExpression extends Expression {
 	 * @param right the right expression
 	 */
 	public ComparisonExpression(TypedValue leftValue, Comparator comparator,
-			Strategy strategy, TypedValue rightValue) {
+			TypedValue rightValue) {
 		mLeftValue = new TypedValueExpression(leftValue);
 		mRightValue = new TypedValueExpression(rightValue);
-		mStrategy = strategy;
 		mComparator = comparator;
 	}
 
@@ -130,13 +116,6 @@ public class ComparisonExpression extends Expression {
 		return mComparator;
 	}
 
-	/**
-	 * @return the strategy for this expression.
-	 */
-	public final Strategy getStrategy() {
-		return mStrategy;
-	}
-
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
@@ -168,7 +147,7 @@ public class ComparisonExpression extends Expression {
 		TimestampedValue[] right = mRightValue.getValues(getId() + ".R", now);
 
 		int endResult;
-		if (mStrategy.equals(Strategy.ALL)) {
+		if (getHistoryReductionMode().equals(HistoryReductionMode.ALL)) {
 			endResult = ContextManager.TRUE;
 		} else {
 			endResult = ContextManager.FALSE;
@@ -178,8 +157,8 @@ public class ComparisonExpression extends Expression {
 			for (TimestampedValue rightItem : right) {
 				int tempResult = evaluateLeafItem(leftItem.getValue(),
 						rightItem.getValue());
-				if (mStrategy
-						.equals(Strategy.ALL)) {
+				if (getHistoryReductionMode().equals(
+						HistoryReductionMode.ALL)) {
 					if (tempResult == ContextManager.FALSE) {
 						endResult = ContextManager.FALSE;
 						break;
@@ -408,6 +387,11 @@ public class ComparisonExpression extends Expression {
 	 */
 	public Expression getRightExpression() {
 		return mRightValue;
+	}
+
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
 	}
 
 }

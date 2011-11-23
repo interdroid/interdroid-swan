@@ -319,4 +319,9 @@ public class MathExpression extends Expression {
 		return mRight;
 	}
 
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
+	}
+
 }

@@ -90,4 +90,9 @@ public class TypedValueExpression extends Expression {
 		return mValue.getValues(string, now);
 	}
 
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return mValue.getHistoryReductionMode();
+	}
+
 }

@@ -32,10 +32,15 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 
 	/**
 	 * Constructs a typed value with the given reduction mode.
+	 * If mode is null mode is set to HistoryReductionMode.DEFAULT_MODE.
 	 * @param mode the reduction mode.
 	 */
 	public TypedValue(final HistoryReductionMode mode) {
-		mMode = mode;
+		if (mode == null) {
+			mMode = HistoryReductionMode.DEFAULT_MODE;
+		} else {
+			mMode = mode;
+		}
 	}
 
 	/**
@@ -87,7 +92,8 @@ implements Serializable, Parcelable, Parseable<TypedValue> {
 		case MEDIAN:
 			return new TimestampedValue[] { TimestampedValue
 					.calculateMedian(values) };
-		case NONE:
+		case ALL:
+		case ANY:
 		default:
 			return values;
 		}

@@ -9,7 +9,6 @@ import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.LogicExpression;
 import interdroid.contextdroid.contextexpressions.LogicOperator;
-import interdroid.contextdroid.contextexpressions.Strategy;
 import interdroid.contextdroid.contextexpressions.TypedValue;
 import interdroid.contextdroid.contextexpressions.ComparisonExpression;
 import interdroid.contextdroid.contextservice.SensorManager;
@@ -161,7 +160,7 @@ public class ExpressionBuilderActivity extends Activity {
 						String comparator = ((Button) findViewById(R.id.typedvalue_comparator))
 								.getText().toString();
 						Expression expression = new ComparisonExpression(leftValue,
-								Comparator.parse(comparator), Strategy.ALL, rightValue);
+								Comparator.parse(comparator), rightValue);
 						if (not) {
 							expressions.add(new LogicExpression(LogicOperator.NOT, expression));
 						} else {

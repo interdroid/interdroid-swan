@@ -77,13 +77,6 @@ value_path	returns [String value_path]
 		{$value_path = buf.toString();}
 	;
 
-// Various enumeration values
-
-strategy	returns [Strategy strategy]
-	:	ALL {$strategy = Strategy.ALL;}
-	|	ANY {$strategy = Strategy.ANY;}
-	;
-
 comparator	returns [Comparator comparator]
 	:	GT {$comparator = Comparator.GREATER_THAN;}
 	|	LT {$comparator = Comparator.LESS_THAN;}
@@ -129,11 +122,12 @@ multiplicative_math_operator returns [MathOperator math_operator]
 	;
 
 history_mode returns [HistoryReductionMode history_mode]
-	:	NONE {$history_mode = HistoryReductionMode.NONE;}
+	:	ALL {$history_mode = HistoryReductionMode.ALL;}
 	|	MAX {$history_mode = HistoryReductionMode.MAX;}
 	|	MIN {$history_mode = HistoryReductionMode.MIN;}
 	|	MEAN {$history_mode = HistoryReductionMode.MEAN;}
 	|	MEDIAN {$history_mode = HistoryReductionMode.MEDIAN;}
+	|	ANY {$history_mode = HistoryReductionMode.ANY;}
 	;
 
 
@@ -143,10 +137,10 @@ context_typed_value returns [ContextTypedValue typed_value]
 			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
 	|	entity=ID ':' path=value_path '?' config=configuration_options
 			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, config /*.configuration */);}
-	|	entity=ID ':' path=value_path '{' mode=history_mode ',' time=INT '}'
-			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, Long.parseLong(time.getText()));}
-	|	entity=ID ':' path=value_path '?' config=configuration_options '{' mode=history_mode ',' time=INT '}'
-			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , Long.parseLong(time.getText()));}
+	|	entity=ID ':' path=value_path '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, time == null ? 0 : Long.parseLong(time.getText()));}
+	|	entity=ID ':' path=value_path '?' config=configuration_options '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , time == null ? 0 : Long.parseLong(time.getText()));}
 	;
 
 constant_typed_value returns [ConstantTypedValue typed_value]
@@ -175,20 +169,19 @@ parentheticalExpression returns [Expression expression]
 comparativeExpression returns [Expression expression]
 @init {
 	Stack<Expression> rightStack = new Stack<Expression>();
-	Stack<Strategy> strategyStack = new Stack<Strategy>();
 	Stack<Comparator> compareStack = new Stack<Comparator>();
 }
 	: left=additiveExpression
-	((WS* s=strategy)? WS* c=comparator WS* right=additiveExpression 
-		{strategyStack.push(s /* .strategy */ ); compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
+	(WS* c=comparator WS* right=additiveExpression 
+		{compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
 	)?
 {
 	while(rightStack.size() > 1) {
 		Expression temp = rightStack.pop();
-		rightStack.push(new ComparisonExpression(rightStack.pop(), compareStack.pop(), strategyStack.pop(), temp));
+		rightStack.push(new ComparisonExpression(rightStack.pop(), compareStack.pop(), temp));
 	}
 	if (rightStack.size() > 0) {
-		$expression = new ComparisonExpression(left /* .expression */ , compareStack.pop(), strategyStack.pop(), rightStack.pop());
+		$expression = new ComparisonExpression(left /* .expression */ , compareStack.pop(), rightStack.pop());
 	} else {
 		$expression = left /* .expression */ ;
 	}
@@ -358,19 +351,20 @@ WS  :   ( ' '
 
 STRING          
 @init{StringBuilder lBuf = new StringBuilder();}
-    :
-    '\'' 
+	:
+	'\'' 
 	( ESC_SEQ
 		{lBuf.append(getText());} 
 	| normal=~('\''|'\\')
-		{lBuf.appendCodePoint(normal);} )* 
+		{lBuf.appendCodePoint(normal);}
+	)* 
 	'\''     
 		{setText(lBuf.toString());}
-    ;
+	;
 
 fragment
 ESC_SEQ
-    :   '\\'
+	:   '\\'
         (       'n'    {setText("\n");}
         |       'r'    {setText("\r");}
         |       't'    {setText("\t");}
@@ -382,7 +376,7 @@ ESC_SEQ
         |       '\\'   {setText("\\");}
         |       ('u')+ i=HEX_DIGIT j=HEX_DIGIT k=HEX_DIGIT l=HEX_DIGIT   {setText(String.valueOf((char) Integer.parseInt(i.getText() + j.getText() + k.getText() + l.getText(), 16)));}
         )
-    ;
+        ;
 
 CONFIG_VAL
     :	'=' (STRING 

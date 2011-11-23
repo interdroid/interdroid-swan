@@ -356,6 +356,12 @@ Comparable<Expression> {
 
 	protected abstract boolean hasCurrentTime();
 
+	/**
+	 * @param string the id for the expression
+	 * @param now the current timestamp
+	 * @return the values for this expression
+	 * @throws ContextDroidException if fetching values fails.
+	 */
 	public abstract TimestampedValue[] getValues(String string, long now)
 			throws ContextDroidException;
 
@@ -369,5 +375,10 @@ Comparable<Expression> {
 			throws ExpressionParseException {
 		return ContextExpressionParser.parseExpression(expression);
 	}
+
+	/**
+	 * @return the reduction mode this expression is using for the values.
+	 */
+	public abstract HistoryReductionMode getHistoryReductionMode();
 
 }

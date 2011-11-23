@@ -56,6 +56,9 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	private static final int CONNECTION_TIMEOUT = 1000;
 
+	/** The default history length to keep. 1 second. */
+	public static final int	DEFAULT_HISTORY_LENGTH	= 1000;
+
 	/**
 	 * ID within the expression.
 	 */
@@ -106,7 +109,8 @@ public class ContextTypedValue extends TypedValue implements
 	 * @param unparsedContextInfo the string to parse
 	 */
 	public ContextTypedValue(final String unparsedContextInfo) {
-		this(unparsedContextInfo, HistoryReductionMode.NONE, 0);
+		this(unparsedContextInfo, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -115,7 +119,8 @@ public class ContextTypedValue extends TypedValue implements
 	 * @param path the value path
 	 */
 	public ContextTypedValue(final String entity, final String path) {
-		this(entity, path, null, HistoryReductionMode.NONE, 0);
+		this(entity, path, null, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -126,7 +131,8 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	public ContextTypedValue(final String entity, final String path,
 			final Map<String, String> config) {
-		this(entity, path, config, HistoryReductionMode.NONE, 0);
+		this(entity, path, config, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -155,11 +161,24 @@ public class ContextTypedValue extends TypedValue implements
 		super(mode);
 		mEntity = entity;
 		mValuePath = path;
-		mTimespan = timespan;
+		setHistoryTimespan(timespan);
 		if (config != null) {
 			for (Entry<String, String> entry : config.entrySet()) {
 				mConfiguration.putString(entry.getKey(), entry.getValue());
 			}
+		}
+	}
+
+	/**
+	 * Sets the timespan of history to keep.
+	 * This sets to DEFAULT_HISTORY_LENGTH if timespan <= 0
+	 * @param timespan the timespan to set to.
+	 */
+	private void setHistoryTimespan(final long timespan) {
+		if (timespan > 0) {
+			mTimespan = timespan;
+		} else {
+			mTimespan = DEFAULT_HISTORY_LENGTH;
 		}
 	}
 
@@ -195,7 +214,7 @@ public class ContextTypedValue extends TypedValue implements
 			}
 		}
 
-		this.mTimespan = timespan;
+		setHistoryTimespan(timespan);
 	}
 
 	/**
@@ -414,7 +433,7 @@ public class ContextTypedValue extends TypedValue implements
 	 */
 	private String getModeString() {
 		String ret;
-		if (!(getHistoryReductionMode().equals(HistoryReductionMode.NONE)
+		if (!(getHistoryReductionMode().equals(HistoryReductionMode.DEFAULT_MODE)
 				&& mTimespan == 0)) {
 			ret = " {" + getHistoryReductionMode().toParseString() + ","
 					+ mTimespan + "}";

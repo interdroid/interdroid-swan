@@ -244,4 +244,9 @@ public class LogicExpression extends Expression {
 		return mOperator;
 	}
 
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
+	}
+
 }
