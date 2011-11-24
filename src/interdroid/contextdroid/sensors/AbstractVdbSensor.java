@@ -42,6 +42,13 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	protected static final String SCHEMA_TIMESTAMP_FIELDS;
 
+	/**
+	 * The schema for the timestamp fields required on all rows.
+	 */
+	protected static final String SCHEMA_ID_FIELDS;
+
+	private static final String EXPRESSION_ID = "_expression_id";
+
 	// Initialize the timestamp fields.
 	static {
 		// Bug in compiler. Set is called before .replace() !?!?
@@ -50,6 +57,13 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 				+ "'ui.widget':'timestamp', " + "'type':'long'},";
 
 		SCHEMA_TIMESTAMP_FIELDS = temp.replace('\'', '"');
+
+		// Bug in compiler. Set is called before .replace() !?!?
+		temp = "\n{'name':'" + EXPRESSION_ID + "', "
+				+ "'ui.label':'expression id', " + "'ui.list':'false', "
+				+ "'type':'string'},";
+
+		SCHEMA_ID_FIELDS = temp.replace('\'', '"');
 	}
 
 	/**
@@ -88,6 +102,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	public final void putValues(final String id, final ContentValues values, final long now) {
 		notifyDataChangedForId(id);
+		values.put(EXPRESSION_ID, id);
 		putValues(getContentResolver(), uri, values, now);
 	}
 
@@ -140,8 +155,14 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 			final long now, final long timespan) {
 		String fieldName = registeredValuePaths.get(id);
 		Type fieldType = getType(fieldName);
-		Cursor values = getValuesCursor(this, uri, new String[] { fieldName },
-				now, timespan);
+		Cursor values;
+		if (schema.getField(EXPRESSION_ID) != null) {
+			values = getValuesCursor(this, uri, new String[] { fieldName },
+					now, timespan, id);
+		} else {
+			values = getValuesCursor(this, uri, new String[] { fieldName },
+					now, timespan, null);
+		}
 		List<TimestampedValue> ret = null;
 		if (values != null && values.moveToFirst()) {
 			ret = new ArrayList<TimestampedValue>(values.getCount());
@@ -205,10 +226,11 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 *            the time
 	 * @param timespan
 	 *            the timespan
+	 * @param id
 	 * @return a cursor with the value data
 	 */
-	public static Cursor getValuesCursor(final Context context, final Uri uri,
-			final String[] values, final long now, final long timespan) {
+	private static Cursor getValuesCursor(final Context context, final Uri uri,
+			final String[] values, final long now, final long timespan, String id) {
 		LOG.debug("timespan: {} end: {}", timespan, now);
 
 		String[] projection = new String[values.length + 1];
@@ -217,18 +239,35 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
 		LOG.debug("Projection: {}", projection);
 
+		String where = null;
+		String[] whereArgs = null;
+
+		// Build where args
+		if (id != null) {
+			where = EXPRESSION_ID + "=?";
+
+			if (timespan <= 0) {
+				whereArgs = new String[] {id};
+			} else {
+				whereArgs = new String[] {id, String.valueOf(now - timespan)};
+			}
+		} else {
+			whereArgs = new String[] { String.valueOf(now - timespan) };
+		}
+
+
 		Cursor c = null;
 		if (timespan <= 0) {
 
-			c = context.getContentResolver().query(uri, projection, null, null,
+			c = context.getContentResolver().query(uri, projection, where, whereArgs,
 			// If timespan is zero we just pull the last one in time
 					TIMESTAMP_FIELD + " DESC");
 
 		} else {
 
 			c = context.getContentResolver().query(uri, projection,
-					TIMESTAMP_FIELD + " >= ? ",
-					new String[] { String.valueOf(now - timespan) },
+					(where == null ? "" : where + " AND ") + " TIMESTAMP_FIELD >= ? ",
+					whereArgs,
 					// If timespan is zero we just pull the last one in time
 					TIMESTAMP_FIELD + " ASC");
 
