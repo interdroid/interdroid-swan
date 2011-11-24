@@ -2,6 +2,7 @@ package interdroid.contextdroid.sensors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 import interdroid.vdb.content.EntityUriBuilder;
@@ -19,9 +20,9 @@ import android.net.Uri;
 
 /**
  * Base class for sensors which store their data into a VDB database.
- * 
+ *
  * @author nick &lt;palmer@cs.vu.nl&gt;
- * 
+ *
  */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
@@ -77,20 +78,39 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 * 
+	 *
+	 * @param id
+	 *            the id
+	 * @param values
+	 *            the values to store
+	 * @param now
+	 *            the timestamp
+	 */
+	public final void putValues(final String id, final ContentValues values, final long now) {
+		notifyDataChangedForId(id);
+		putValues(getContentResolver(), uri, values, now);
+	}
+
+	/**
+	 * Stores the values to the content provider using this service as the
+	 * context. Fills in the timestamp and expiration before storing.
+	 *
 	 * @param values
 	 *            the values to store
 	 * @param now
 	 *            the timestamp
 	 */
 	public final void putValues(final ContentValues values, final long now) {
+		for (Entry<String, Object> key : values.valueSet()) {
+			notifyDataChanged(key.getKey());
+		}
 		putValues(getContentResolver(), uri, values, now);
 	}
 
 	/**
 	 * Stores the values to the content provider using this given content
 	 * resolver. Fills in the timestamp and expiration before storing.
-	 * 
+	 *
 	 * @param resolver
 	 *            the resolver to store with
 	 * @param values
@@ -100,7 +120,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param uri
 	 *            the uri to store into
 	 */
-	public static final void putValues(final ContentResolver resolver,
+	private static final void putValues(final ContentResolver resolver,
 			final Uri uri, final ContentValues values, final long now) {
 		values.put(TIMESTAMP_FIELD, now);
 		resolver.insert(uri, values);
