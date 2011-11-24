@@ -49,7 +49,7 @@ public class TestActivity extends Activity {
 		setContentView(R.layout.test);
 
 		final ContextTypedValue left = new ContextTypedValue(
-				"cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=16:58");
+				"cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
 		final String valueName = "myFirstValue";
 		contextManager = new ContextManager(TestActivity.this);
 

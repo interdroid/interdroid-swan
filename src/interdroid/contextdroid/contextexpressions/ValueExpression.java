@@ -536,8 +536,9 @@ public class ValueExpression extends Expression {
 	}
 
 	@Override
-	public void sleepAndBeReadyAt(long readyTime) {
-		if (readyTime - System.currentTimeMillis() > SLEEP_THRESHOLD) {
+	public void sleepAndBeReadyAt(final long readyTime) {
+		final long wakeupTime = readyTime - getTimespan();
+		if (wakeupTime - System.currentTimeMillis() > SLEEP_THRESHOLD) {
 			try {
 				mLeftValue.destroy(getId() + ".L", mSensorManager);
 				mRightValue.destroy(getId() + ".R", mSensorManager);
@@ -551,6 +552,13 @@ public class ValueExpression extends Expression {
 			// restart Thread
 			new Thread() {
 				public void run() {
+					try {
+						sleep(wakeupTime - System.currentTimeMillis());
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 					try {
 						initialize(ValueExpression.this.getId(), mSensorManager);
 					} catch (SensorConfigurationException e) {
