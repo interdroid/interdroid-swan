@@ -1,6 +1,7 @@
 package interdroid.contextdroid.contextexpressions;
 
 import interdroid.contextdroid.ContextDroidException;
+import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.contextservice.SensorConfigurationException;
 import interdroid.contextdroid.contextservice.SensorSetupFailedException;
 import interdroid.contextdroid.contextservice.SensorManager;
@@ -15,7 +16,7 @@ import android.os.Parcel;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  * 
  */
-public class CombinedTypedValue extends TypedValue {
+public class MathExpression extends Expression {
 	/**
 	 * Serial version id.
 	 */
@@ -25,15 +26,15 @@ public class CombinedTypedValue extends TypedValue {
 	private static final int NUM_AXES = 3;
 
 	/** The left side of the combined value. */
-	private TypedValue mLeft;
+	private Expression mLeft;
 	/** The right side of the combined value. */
-	private TypedValue mRight;
+	private Expression mRight;
 
 	/** The combination operator for this expression. */
 	private MathOperator mOperator;
 
 	/**
-	 * Constructs a combined typed value with history reduction.
+	 * Constructs a math expression.
 	 * 
 	 * @param left
 	 *            the left side
@@ -42,9 +43,8 @@ public class CombinedTypedValue extends TypedValue {
 	 * @param right
 	 *            the right side.
 	 */
-	public CombinedTypedValue(final TypedValue left,
-			final MathOperator operator, final TypedValue right) {
-		super(HistoryReductionMode.NONE);
+	public MathExpression(final Expression left,
+			final MathOperator operator, final Expression right) {
 		this.mLeft = left;
 		this.mRight = right;
 		this.mOperator = operator;
@@ -56,7 +56,7 @@ public class CombinedTypedValue extends TypedValue {
 	 * @param source
 	 *            the parcel to read from.
 	 */
-	public CombinedTypedValue(final Parcel source) {
+	public MathExpression(final Parcel source) {
 		super(source);
 		readFromParcel(source);
 	}
@@ -76,7 +76,7 @@ public class CombinedTypedValue extends TypedValue {
 					result[index++] = operate(leftValues[i], rightValues[j]);
 				}
 			}
-			return applyMode(result);
+			return result;
 		} else {
 			throw new ContextDroidException("Unable to combine two arrays, "
 					+ "only one of the operands can be an array: " + mOperator);
@@ -148,6 +148,8 @@ public class CombinedTypedValue extends TypedValue {
 		case DIVIDE:
 			ret = left / right;
 			break;
+		case MOD:
+			ret = left % right;
 		default:
 			throw new ContextDroidException("Unknown operator: '" + mOperator
 					+ "' for type Double");
@@ -182,6 +184,8 @@ public class CombinedTypedValue extends TypedValue {
 		case DIVIDE:
 			ret = left / right;
 			break;
+		case MOD:
+			ret = left % right;
 		default:
 			throw new ContextDroidException("Unknown operator: '" + mOperator
 					+ "' for type Long");
@@ -242,19 +246,6 @@ public class CombinedTypedValue extends TypedValue {
 		return ret;
 	}
 
-	@Override
-	public final int describeContents() {
-		return 0;
-	}
-
-	@Override
-	protected final void writeSubclassToParcel(final Parcel dest,
-			final int flags) {
-		dest.writeParcelable(mLeft, 0);
-		dest.writeParcelable(mRight, 0);
-		dest.writeInt(mOperator.convert());
-	}
-
 	/**
 	 * Read from parcel.
 	 * 
@@ -266,21 +257,6 @@ public class CombinedTypedValue extends TypedValue {
 		mRight = in.readParcelable(this.getClass().getClassLoader());
 		mOperator = MathOperator.convert(in.readInt());
 	}
-
-	/** The CREATOR. */
-	public static final CombinedTypedValue.Creator<CombinedTypedValue> CREATOR = new CombinedTypedValue.Creator<CombinedTypedValue>() {
-
-		@Override
-		public CombinedTypedValue createFromParcel(final Parcel source) {
-			CombinedTypedValue v = new CombinedTypedValue(source);
-			return v;
-		}
-
-		@Override
-		public CombinedTypedValue[] newArray(final int size) {
-			return new CombinedTypedValue[size];
-		}
-	};
 
 	@Override
 	public final void initialize(final String id,
@@ -299,13 +275,61 @@ public class CombinedTypedValue extends TypedValue {
 
 	@Override
 	protected final boolean hasCurrentTime() {
-		return mLeft.hasCurrentTime() || mRight.hasCurrentTime();
+		return false;
 	}
 
 	@Override
-	public final String toParseString() {
-		return mLeft.toParseString() + " " + mOperator.toParseString() + " "
-				+ mRight.toParseString();
+	protected int getSubtypeId() {
+		return Expression.MATH_EXPRESSION_TYPE;
+	}
+
+	@Override
+	protected String toStringImpl() {
+		return toParseStringImpl();
+	}
+
+	@Override
+	protected String toParseStringImpl() {
+		return "(" + mLeft.toParseString() + " " + mOperator.toParseString() + " "
+				+ mRight.toParseString() + ")";
+	}
+
+	@Override
+	protected void evaluateImpl(long now) throws ContextDroidException {
+		setResult(ContextManager.UNDEFINED, now);
+	}
+
+	@Override
+	protected void writeToParcelImpl(Parcel dest, int flags) {
+		dest.writeParcelable(mLeft, flags);
+		dest.writeParcelable(mRight, flags);
+		dest.writeInt(mOperator.convert());
+	}
+
+	@Override
+	protected long getDeferUntilImpl() {
+		return Math.min(mLeft.getDeferUntil(), mRight.getDeferUntil());
+	}
+
+	/**
+	 * @return the operator for this expression
+	 */
+	public MathOperator getOperator() {
+		return mOperator;
+	}
+
+	/**
+	 * @return the left side of this expression.
+	 */
+	public Expression getLeftExpression() {
+		return mLeft;
+	}
+
+	/**
+	 * @return the right side of this expression.
+	 */
+	public Expression getRightExpression() {
+		return mRight;
 	}
 
 	@Override
@@ -314,8 +338,18 @@ public class CombinedTypedValue extends TypedValue {
 	}
 
 	@Override
-	public long getTimespan() {
-		return Math.max(mLeft.getTimespan(), mRight.getTimespan());
+	public long getHistoryLength() {
+		return Math.max(mLeft.getHistoryLength(), mRight.getHistoryLength());
+	}
+
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
+	}
+
+	@Override
+	public void sleepAndBeReadyAt(long readyTime) {
+		mLeft.sleepAndBeReadyAt(readyTime);
+		mRight.sleepAndBeReadyAt(readyTime);
 	}
 
 }

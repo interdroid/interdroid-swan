@@ -215,9 +215,9 @@ implements SensorInterface {
 					}
 					LOG.debug("Registering with implementation.");
 					mSensorInterface.register(id, valuePath, configuration);
-				} catch (RuntimeException e) {
+				} catch (Exception e) {
 					LOG.error("Caught exception while registering.", e);
-					throw e;
+					throw new RemoteException();
 				}
 			}
 		}

@@ -40,9 +40,22 @@ public class ContextTypedValue extends TypedValue {
 	private static final long serialVersionUID = 7571963465497645229L;
 
 	/**
+	 * The separator used between an entity and a value path
+	 */
+	public static final String	ENTITY_VALUE_PATH_SEPARATOR	= ":";
+
+	/**
+	 * The separator used inside a value path
+	 */
+	public static final String VALUE_PATH_SEPARATOR = ".";
+
+	/**
 	 * Timeout for connection to the sensor.
 	 */
 	private static final int CONNECTION_TIMEOUT = 1000;
+
+	/** The default history length to keep. 1 second. */
+	public static final int	DEFAULT_HISTORY_LENGTH	= 1000;
 
 	/**
 	 * ID within the expression.
@@ -91,7 +104,8 @@ public class ContextTypedValue extends TypedValue {
 	 *            the string to parse
 	 */
 	public ContextTypedValue(final String unparsedContextInfo) {
-		this(unparsedContextInfo, HistoryReductionMode.NONE, 0);
+		this(unparsedContextInfo, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -103,7 +117,8 @@ public class ContextTypedValue extends TypedValue {
 	 *            the value path
 	 */
 	public ContextTypedValue(final String entity, final String path) {
-		this(entity, path, null, HistoryReductionMode.NONE, 0);
+		this(entity, path, null, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -118,7 +133,8 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	public ContextTypedValue(final String entity, final String path,
 			final Map<String, String> config) {
-		this(entity, path, config, HistoryReductionMode.NONE, 0);
+		this(entity, path, config, HistoryReductionMode.DEFAULT_MODE,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -158,11 +174,24 @@ public class ContextTypedValue extends TypedValue {
 		super(mode);
 		mEntity = entity;
 		mValuePath = path;
-		mTimespan = timespan;
+		setHistoryTimespan(timespan);
 		if (config != null) {
 			for (Entry<String, String> entry : config.entrySet()) {
 				mConfiguration.putString(entry.getKey(), entry.getValue());
 			}
+		}
+	}
+
+	/**
+	 * Sets the timespan of history to keep.
+	 * This sets to DEFAULT_HISTORY_LENGTH if timespan <= 0
+	 * @param timespan the timespan to set to.
+	 */
+	private void setHistoryTimespan(final long timespan) {
+		if (timespan > 0) {
+			mTimespan = timespan;
+		} else {
+			mTimespan = DEFAULT_HISTORY_LENGTH;
 		}
 	}
 
@@ -202,7 +231,7 @@ public class ContextTypedValue extends TypedValue {
 			}
 		}
 
-		this.mTimespan = timespan;
+		setHistoryTimespan(timespan);
 	}
 
 	/**
@@ -377,12 +406,12 @@ public class ContextTypedValue extends TypedValue {
 
 	@Override
 	public final String toString() {
-		return mEntity + "/" + mValuePath; // + ": " + configuration;
+		return mEntity + ":" + mValuePath; // + ": " + configuration;
 	}
 
 	@Override
 	public final String toParseString() {
-		return mEntity + "/" + mValuePath + getParseConfig() + getModeString();
+		return mEntity + ":" + mValuePath + getParseConfig() + getModeString();
 	}
 
 	/**
@@ -390,7 +419,8 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	private String getModeString() {
 		String ret;
-		if (!(getHistoryReductionMode().equals(HistoryReductionMode.NONE) && mTimespan == 0)) {
+		if (!(getHistoryReductionMode().equals(HistoryReductionMode.DEFAULT_MODE)
+				&& mTimespan == 0)) {
 			ret = " {" + getHistoryReductionMode().toParseString() + ","
 					+ mTimespan + "}";
 		} else {
@@ -434,12 +464,16 @@ public class ContextTypedValue extends TypedValue {
 		mId = id;
 	}
 
-	public long getTimespan() {
-		return mTimespan;
-	}
-
 	@Override
 	public boolean isConstant() {
 		return false;
+	}
+
+	/**
+	 * @return the timespan for the history.
+	 */
+	public long getHistoryLength() {
+		// TODO: Rename to mHistoryLength
+		return mTimespan;
 	}
 }

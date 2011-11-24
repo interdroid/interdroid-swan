@@ -2,6 +2,7 @@ package interdroid.contextdroid.sensors;
 
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
 
+import java.io.IOException;
 import java.util.List;
 
 import android.os.Bundle;
@@ -20,9 +21,10 @@ public interface SensorInterface {
 	 * @param id the expression to register
 	 * @param valuePath the value path being registered
 	 * @param configuration the configuration for the expression
+	 * @throws IOException if there is a problem with the sensor
 	 */
 	void register(String id, String valuePath,
-			Bundle configuration);
+			Bundle configuration) throws IOException;
 
 	/**
 	 * Handle unregistering an expression.

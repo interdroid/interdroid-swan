@@ -44,6 +44,22 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	protected static final int LOGIC_EXPRESSION_TYPE = 1;
 
 	/**
+	 * Subtype ID for a Math Expression.
+	 */
+	protected static final int MATH_EXPRESSION_TYPE = 2;
+
+	/**
+	 * Subtype ID for a Comparison Expression.
+	 */
+	protected static final int COMPARISON_EXPRESSION_TYPE = 3;
+
+	/**
+	 * Subtype ID for a Typed Value Expression.
+	 */
+	protected static final int TYPED_VALUE_EXPRESSION_TYPE = 4;
+
+
+	/**
 	 * Time until we need to reevaluate this expression.
 	 */
 	private long mDeferUntil = -1;
@@ -52,6 +68,11 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 * The result of the expression.
 	 */
 	private int mResult = ContextManager.UNDEFINED;
+
+	/**
+	 * The time stamp for the current result.
+	 */
+	private long mResultTimestamp;
 
 	/**
 	 * The id for this expression.
@@ -89,10 +110,19 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 			int type = in.readInt();
 			switch (type) {
 			case VALUE_EXPRESSION_TYPE:
-				result = new ValueExpression(in);
+				result = new ComparisonExpression(in);
 				break;
 			case LOGIC_EXPRESSION_TYPE:
 				result = new LogicExpression(in);
+				break;
+			case MATH_EXPRESSION_TYPE:
+				result = new MathExpression(in);
+				break;
+			case COMPARISON_EXPRESSION_TYPE:
+				result = new ComparisonExpression(in);
+				break;
+			case TYPED_VALUE_EXPRESSION_TYPE:
+				result = new TypedValueExpression(in);
 				break;
 			default:
 				throw new RuntimeException("Unknown subtype: " + type);
@@ -167,7 +197,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 		try {
 			evaluateImpl(now);
 		} catch (NoValuesInIntervalException e) {
-			setResult(ContextManager.UNDEFINED);
+			setResult(ContextManager.UNDEFINED, now);
 		}
 		setDeferUntil(getDeferUntilImpl());
 	}
@@ -178,8 +208,9 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 * @param newResult
 	 *            the result to set to.
 	 */
-	protected final void setResult(final int newResult) {
+	protected final void setResult(final int newResult, final long timestamp) {
 		mResult = newResult;
+		mResultTimestamp = timestamp;
 	}
 
 	/**
@@ -187,6 +218,13 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 */
 	public final int getResult() {
 		return mResult;
+	}
+
+	/**
+	 * @return the timestamp for the result
+	 */
+	public final long getLastEvaluationTime() {
+		return mResultTimestamp;
 	}
 
 	@Override
@@ -199,6 +237,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 		dest.writeInt(getSubtypeId());
 		dest.writeString(mId);
 		dest.writeInt(mResult);
+		dest.writeLong(mResultTimestamp);
 		dest.writeLong(mDeferUntil);
 		writeToParcelImpl(dest, flags);
 	}
@@ -217,6 +256,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	private void readFromParcel(final Parcel in) {
 		mId = in.readString();
 		mResult = in.readInt();
+		mResultTimestamp = in.readLong();
 		mDeferUntil = in.readLong();
 	}
 
@@ -329,6 +369,17 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 */
 	protected abstract long getDeferUntilImpl();
 
+	protected abstract boolean hasCurrentTime();
+
+	/**
+	 * @param string the id for the expression
+	 * @param now the current timestamp
+	 * @return the values for this expression
+	 * @throws ContextDroidException if fetching values fails.
+	 */
+	public abstract TimestampedValue[] getValues(String string, long now)
+			throws ContextDroidException;
+
 	/**
 	 * Parses a string into an expression.
 	 * 
@@ -343,8 +394,15 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 		return ContextExpressionParser.parseExpression(expression);
 	}
 
-	public abstract void sleepAndBeReadyAt(long deferUntil);
+	public abstract void sleepAndBeReadyAt(long readyTime);
 
-	public abstract long getTimespan();
+	public abstract long getHistoryLength();
+	
+	public abstract boolean isConstant();
+
+	/**
+	 * @return the reduction mode this expression is using for the values.
+	 */
+	public abstract HistoryReductionMode getHistoryReductionMode();
 
 }

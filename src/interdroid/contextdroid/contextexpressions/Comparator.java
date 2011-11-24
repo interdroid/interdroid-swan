@@ -18,7 +18,7 @@ public enum Comparator implements ParseableEnum<Comparator> {
 	/** less than or equal to. */
 	LESS_THAN_OR_EQUALS (3, "<="),
 	/** equal to. */
-	EQUALS (4, "="),
+	EQUALS (4, "=="),
 	/** not equal to. */
 	NOT_EQUALS (5, "!="),
 	/** Regular Expression Match. */

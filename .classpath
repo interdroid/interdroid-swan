@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry excluding="interdroid/contextdroid/contextexpressions/package_info.java|interdroid/contextdroid/contextexpressions/package-info.java|interdroid/contextdroid/package-info.java|interdroid/contextdroid/contextservice/package-info.java|interdroid/contextdroid/sensors/package-info.java" kind="src" path="src"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="external/antlr-3.4-complete-no-antlrv2.jar"/>
+	<classpathentry kind="lib" path="external/cuckoo-client.jar"/>
+	<classpathentry kind="lib" path="external/cuckoo-shared.jar"/>
+	<classpathentry kind="lib" path="external/ibis-compile-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ibis-io-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ipl-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ipl-impl-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ipl-impl-smartsockets-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ipl-impl-tcp-2.2.jar"/>
+	<classpathentry kind="lib" path="external/ipl-support-2.2.jar"/>
+	<classpathentry kind="lib" path="external/jstun-0.6.1.jar"/>
+	<classpathentry kind="lib" path="external/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="external/sbbi-upnplib-1.0.2.jar"/>
+	<classpathentry kind="lib" path="external/scribe-1.2.0.jar"/>
+	<classpathentry kind="lib" path="external/smartsockets-1.52.jar"/>
+	<classpathentry kind="lib" path="external/trilead-ssh2-build213.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="/vdb/vdb.jar"/>
+	<classpathentry kind="lib" path="/slf4android/external/slf4j-1.6.2/slf4j-api-1.6.2.jar" sourcepath="/slf4android/external/slf4j-1.6.2"/>
 	<classpathentry kind="lib" path="/vdb/external/avro-1.6.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/ibis-util-2.2.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/jackson-core-asl-1.7.3.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/jackson-mapper-asl-1.7.3.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/jsch-0.1.44-1.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/paranamer-2.3.jar"/>
-	<classpathentry kind="lib" path="/slf4android/external/slf4j-1.6.2/slf4j-api-1.6.2.jar" sourcepath="/slf4android/external/slf4j-1.6.2"/>
-	<classpathentry kind="lib" path="external/antlr-3.4-complete-no-antlrv2.jar"/>
-	<classpathentry kind="lib" path="external/cuckoo-client.jar"/>
-	<classpathentry kind="lib" path="external/cuckoo-shared.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.jgit"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/smartsockets"/>
-	<classpathentry kind="lib" path="/vdb/vdb.jar" sourcepath="/vdb/src"/>
-	<classpathentry kind="lib" path="external/scribe-1.2.0.jar"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

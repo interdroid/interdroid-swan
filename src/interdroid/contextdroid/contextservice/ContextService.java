@@ -8,7 +8,6 @@ import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.Parseable;
 import interdroid.contextdroid.contextexpressions.TimestampedValue;
-import interdroid.contextdroid.test.TestActivity;
 import interdroid.contextdroid.ui.LaunchService;
 
 import java.io.File;
@@ -19,6 +18,8 @@ import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import interdroid.contextdroid.test.TestActivity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

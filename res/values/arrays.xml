@@ -182,5 +182,13 @@
         <item>level</item>
         <item>scanresult</item>
     </string-array>
+    
+    <!-- polar heart rate -->
+    <string-array name="hrm_valuepaths">
+        <item>bpm</item>
+        <item>status</item>
+        <item>index</item>
+        <item>rri</item>
+    </string-array>
 
 </resources>

@@ -32,7 +32,7 @@ public class ConstantTypedValue extends TypedValue {
 	 *            the value of the constant.
 	 */
 	public ConstantTypedValue(final Object constantValue) {
-		super(HistoryReductionMode.NONE);
+		super(HistoryReductionMode.DEFAULT_MODE);
 		values = new TimestampedValue[] { new TimestampedValue(constantValue) };
 	}
 
@@ -132,7 +132,7 @@ public class ConstantTypedValue extends TypedValue {
 	}
 
 	@Override
-	public long getTimespan() {
+	public long getHistoryLength() {
 		return 0;
 	}
 

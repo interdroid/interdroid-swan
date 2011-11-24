@@ -15,9 +15,10 @@ import interdroid.contextdroid.contextservice.SensorSetupFailedException;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  * 
  */
-public class ValueExpression extends Expression {
 
-	private static final String TAG = "ValueExpression";
+public class ComparisonExpression extends Expression {
+
+	private static final String TAG = "ComparisonExpression";
 
 	private static final long SLEEP_THRESHOLD = 10 * 1000; //
 
@@ -32,19 +33,14 @@ public class ValueExpression extends Expression {
 	private final Comparator mComparator;
 
 	/**
-	 * The strategy used when comparing the values.
-	 */
-	private final Strategy mStrategy;
-
-	/**
 	 * The left value.
 	 */
-	private final TypedValue mLeftValue;
+	private final Expression mLeftValue;
 
 	/**
 	 * The right value.
 	 */
-	private final TypedValue mRightValue;
+	private final Expression mRightValue;
 
 	/**
 	 * The time until this value expression needs to be evaluated again.
@@ -58,23 +54,16 @@ public class ValueExpression extends Expression {
 	private SensorManager mSensorManager;
 
 	/**
-	 * Constructs a value expression.
-	 * 
-	 * @param left
-	 *            the left value
-	 * @param comparator
-	 *            the comparator
-	 * @param strategy
-	 *            the strategy used when comparing.
-	 * @param right
-	 *            the right value
+	 * Constructs a comparison expression.
+	 * @param left the left expression
+	 * @param comparator the comparator
+	 * @param right the right expression
 	 */
-	public ValueExpression(final TypedValue left, final Comparator comparator,
-			final Strategy strategy, final TypedValue right) {
+	public ComparisonExpression(final Expression left,
+			final Comparator comparator, final Expression right) {
 		this.mLeftValue = left;
 		this.mRightValue = right;
 		this.mComparator = comparator;
-		this.mStrategy = strategy;
 	}
 
 	/**
@@ -83,26 +72,43 @@ public class ValueExpression extends Expression {
 	 * @param in
 	 *            the parcel to read values from.
 	 */
-	protected ValueExpression(final Parcel in) {
+	protected ComparisonExpression(final Parcel in) {
 		super(in);
-		mLeftValue = in.readParcelable(ValueExpression.class.getClassLoader());
+		mLeftValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
 		mComparator = Comparator.convert(in.readInt());
-		mStrategy = Strategy.convert(in.readInt());
-		mRightValue = in.readParcelable(ValueExpression.class.getClassLoader());
+		mRightValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
+	}
+
+	/**
+	 * Constructs a comparison expression.
+	 * This is a convenience which wraps the TypedValues in
+	 * TypedValueExpressions until we refactor TypedValue to be
+	 * an expression directly.
+	 * @param left the left expression
+	 * @param comparator the comparator
+	 * @param strategy the strategy used when comparing.
+	 * @param right the right expression
+	 */
+	public ComparisonExpression(TypedValue leftValue, Comparator comparator,
+			TypedValue rightValue) {
+		mLeftValue = new TypedValueExpression(leftValue);
+		mRightValue = new TypedValueExpression(rightValue);
+		mComparator = comparator;
 	}
 
 	/**
 	 * The CREATOR used to construct from a parcel.
 	 */
-	public static final Parcelable.Creator<ValueExpression> CREATOR = new Parcelable.Creator<ValueExpression>() {
+	public static final Parcelable.Creator<ComparisonExpression> CREATOR
+	= new Parcelable.Creator<ComparisonExpression>() {
 		@Override
-		public ValueExpression createFromParcel(final Parcel in) {
-			return new ValueExpression(in);
+		public ComparisonExpression createFromParcel(final Parcel in) {
+			return new ComparisonExpression(in);
 		}
 
 		@Override
-		public ValueExpression[] newArray(final int size) {
-			return new ValueExpression[size];
+		public ComparisonExpression[] newArray(final int size) {
+			return new ComparisonExpression[size];
 		}
 	};
 
@@ -111,7 +117,7 @@ public class ValueExpression extends Expression {
 	 *            true if the side desired is the left side
 	 * @return the typedValue side requested or null
 	 */
-	protected final TypedValue getTypedValue(final boolean left) {
+	protected final Expression getExpression(final boolean left) {
 		if (left) {
 			return mLeftValue;
 		} else {
@@ -122,37 +128,25 @@ public class ValueExpression extends Expression {
 	/**
 	 * @return the comparison for this expression.
 	 */
-	protected final Comparator getComparator() {
+	public final Comparator getComparator() {
 		return mComparator;
-	}
-
-	/**
-	 * @return the strategy for this expression.
-	 */
-	protected final Strategy getStrategy() {
-		return mStrategy;
 	}
 
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-			throws SensorConfigurationException, SensorSetupFailedException {
+					throws SensorConfigurationException, SensorSetupFailedException {
 		setId(id);
 		mSensorManager = sensorManager;
 		mLeftValue.initialize(id + ".L", sensorManager);
-		if (mRightValue != null) {
-			mRightValue.initialize(id + ".R", sensorManager);
-		}
-
+		mRightValue.initialize(id + ".R", sensorManager);
 	}
 
 	@Override
 	public final void destroy(final String id, final SensorManager sensorManager)
 			throws ContextDroidException {
 		mLeftValue.destroy(id + ".L", sensorManager);
-		if (mRightValue != null) {
-			mRightValue.destroy(id + ".R", sensorManager);
-		}
+		mRightValue.destroy(id + ".R", sensorManager);
 	}
 
 	/**
@@ -171,7 +165,7 @@ public class ValueExpression extends Expression {
 		TimestampedValue[] right = mRightValue.getValues(getId() + ".R", now);
 
 		int endResult;
-		if (mStrategy.equals(Strategy.ALL)) {
+		if (getHistoryReductionMode().equals(HistoryReductionMode.ALL)) {
 			endResult = ContextManager.TRUE;
 		} else {
 			endResult = ContextManager.FALSE;
@@ -186,7 +180,8 @@ public class ValueExpression extends Expression {
 			for (int rightItem = left.length - 1; rightItem >= 0; rightItem--) {
 				int tempResult = evaluateLeafItem(left[leftItem].getValue(),
 						right[rightItem].getValue());
-				if (mStrategy.equals(Strategy.ALL)) {
+				if (getHistoryReductionMode().equals(
+						HistoryReductionMode.ALL)) {
 					if (tempResult == ContextManager.FALSE) {
 						endResult = ContextManager.FALSE;
 						leftIndex = leftItem;
@@ -208,7 +203,7 @@ public class ValueExpression extends Expression {
 
 			}
 		}
-		setResult(endResult);
+		setResult(endResult, now);
 
 		// We can shortcut values of time.current if we know the values
 		// so we pre-calculate and cache the result.
@@ -276,7 +271,7 @@ public class ValueExpression extends Expression {
 	}
 
 	private static Mode[][][] mDeferStrategy = new Mode[2][2][Comparator
-			.values().length];
+	                                                          .values().length];
 	private static int LEFT_CONST = 0;
 	private static int RIGHT_CONST = 1;
 
@@ -290,46 +285,46 @@ public class ValueExpression extends Expression {
 			case GREATER_THAN:
 			case GREATER_THAN_OR_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.MAX_ANY;
+				                                                .convert()] = Mode.MAX_ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.MIN_ANY;
+				                                                 .convert()] = Mode.MIN_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.MIN_ANY;
+				                                                 .convert()] = Mode.MIN_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.MAX_ANY;
+				                                                  .convert()] = Mode.MAX_ANY;
 				break;
 			case LESS_THAN:
 			case LESS_THAN_OR_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.MIN_ANY;
+				                                                .convert()] = Mode.MIN_ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.MAX_ANY;
+				                                                 .convert()] = Mode.MAX_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.MAX_ANY;
+				                                                 .convert()] = Mode.MAX_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.MIN_ANY;
+				                                                  .convert()] = Mode.MIN_ANY;
 				break;
 			case EQUALS:
 			case REGEX_MATCH:
 			case STRING_CONTAINS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.ANY;
+				                                                .convert()] = Mode.ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.ALL;
+				                                                 .convert()] = Mode.ALL;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.ANY;
+				                                                 .convert()] = Mode.ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.ALL;
+				                                                  .convert()] = Mode.ALL;
 				break;
 			case NOT_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.ALL;
+				                                                .convert()] = Mode.ALL;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.ANY;
+				                                                 .convert()] = Mode.ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-						.convert()] = Mode.ALL;
+				                                                 .convert()] = Mode.ALL;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-						.convert()] = Mode.ANY;
+				                                                  .convert()] = Mode.ANY;
 				break;
 			default:
 				throw new RuntimeException("Unknown Comparator.");
@@ -361,18 +356,18 @@ public class ValueExpression extends Expression {
 			mDeferUntil = 0;
 		} else {
 			Mode mode;
-			TypedValue contextValue;
+			Expression contextValue;
 			TimestampedValue[] contextValues;
 			int index;
 			if (mLeftValue.isConstant()) {
 				mode = mDeferStrategy[LEFT_CONST][getResult()][mComparator
-						.convert()];
+				                                               .convert()];
 				contextValue = mRightValue;
 				contextValues = right;
 				index = rightIndex;
 			} else {
 				mode = mDeferStrategy[RIGHT_CONST][getResult()][mComparator
-						.convert()];
+				                                                .convert()];
 				contextValue = mLeftValue;
 				contextValues = left;
 				index = leftIndex;
@@ -382,11 +377,10 @@ public class ValueExpression extends Expression {
 			case MAX_ANY:
 				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.MAX) {
 					mDeferUntil = contextValues[0].getTimestamp()
-							+ contextValue.getTimespan();
-				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.NONE
-						&& mStrategy == Strategy.ANY) {
+							+ contextValue.getHistoryLength();
+				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ALL) {
 					mDeferUntil = contextValues[index].getTimestamp()
-							+ contextValue.getTimespan();
+							+ contextValue.getHistoryLength();
 				} else {
 					mDeferUntil = 0;
 				}
@@ -394,29 +388,26 @@ public class ValueExpression extends Expression {
 			case MIN_ANY:
 				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.MIN) {
 					mDeferUntil = contextValues[0].getTimestamp()
-							+ contextValue.getTimespan();
-				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.NONE
-						&& mStrategy == Strategy.ANY) {
+							+ contextValue.getHistoryLength();
+				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ANY) {
 					mDeferUntil = contextValues[index].getTimestamp()
-							+ contextValue.getTimespan();
+							+ contextValue.getHistoryLength();
 				} else {
 					mDeferUntil = 0;
 				}
 				break;
 			case ANY:
-				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.NONE
-						&& mStrategy == Strategy.ANY) {
+				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ANY) {
 					mDeferUntil = contextValues[index].getTimestamp()
-							+ contextValue.getTimespan();
+							+ contextValue.getHistoryLength();
 				} else {
 					mDeferUntil = 0;
 				}
 				break;
 			case ALL:
-				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.NONE
-						&& mStrategy == Strategy.ALL) {
+				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ALL) {
 					mDeferUntil = contextValues[index].getTimestamp()
-							+ contextValue.getTimespan();
+							+ contextValue.getHistoryLength();
 				} else {
 					mDeferUntil = 0;
 				}
@@ -537,7 +528,7 @@ public class ValueExpression extends Expression {
 
 	@Override
 	public void sleepAndBeReadyAt(final long readyTime) {
-		final long wakeupTime = readyTime - getTimespan();
+		final long wakeupTime = readyTime - getHistoryLength();
 		if (wakeupTime - System.currentTimeMillis() > SLEEP_THRESHOLD) {
 			try {
 				mLeftValue.destroy(getId() + ".L", mSensorManager);
@@ -560,7 +551,7 @@ public class ValueExpression extends Expression {
 					}
 
 					try {
-						initialize(ValueExpression.this.getId(), mSensorManager);
+						initialize(ComparisonExpression.this.getId(), mSensorManager);
 					} catch (SensorConfigurationException e) {
 						Log.e(TAG, "Failed to re-initialize sensor", e);
 					} catch (SensorSetupFailedException e) {
@@ -574,8 +565,42 @@ public class ValueExpression extends Expression {
 	}
 
 	@Override
-	public long getTimespan() {
-		return Math.max(mLeftValue.getTimespan(), mRightValue.getTimespan());
+	public long getHistoryLength() {
+		return Math.max(mLeftValue.getHistoryLength(), mRightValue.getHistoryLength());
+	}
+
+	protected boolean hasCurrentTime() {
+		return false;
+	}
+
+	@Override
+	public TimestampedValue[] getValues(String string, long now) {
+		return new TimestampedValue[] {new TimestampedValue(getResult(),
+				getLastEvaluationTime())};
+	}
+
+	/**
+	 * @return the left side of this expression.
+	 */
+	public Expression getLeftExpression() {
+		return mLeftValue;
+	}
+
+	/**
+	 * @return the right side of this expression.
+	 */
+	public Expression getRightExpression() {
+		return mRightValue;
+	}
+
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
+	}
+
+	@Override
+	public boolean isConstant() {
+		return mLeftValue.isConstant() && mRightValue.isConstant();
 	}
 
 }

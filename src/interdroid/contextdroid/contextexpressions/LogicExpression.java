@@ -55,13 +55,17 @@ public class LogicExpression extends Expression {
 	 * Constructs an operator expression with no right expression.
 	 * 
 	 * @param operator
-	 *            the operator.
+	 *            the operator. Must be LogicOperator.NOT.
 	 * @param expression
 	 *            the left expression.
 	 */
 	public LogicExpression(final LogicOperator operator,
 			final Expression expression) {
 		this(expression, operator, null);
+
+		if (operator != LogicOperator.NOT) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	/**
@@ -96,7 +100,7 @@ public class LogicExpression extends Expression {
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-			throws SensorConfigurationException, SensorSetupFailedException {
+					throws SensorConfigurationException, SensorSetupFailedException {
 		setId(id);
 		mLeftExpression.initialize(id + ".L", sensorManager);
 		if (mRightExpression != null) {
@@ -120,9 +124,9 @@ public class LogicExpression extends Expression {
 		// short circuit the expression. That depends one the operator and the
 		// value of the first expression
 		long leftDeferUntil = mLeftExpression.getDeferUntil();
-		long leftHistory = mLeftExpression.getTimespan();
+		long leftHistory = mLeftExpression.getHistoryLength();
 		long rightDeferUntil = mRightExpression.getDeferUntil();
-		long rightHistory = mRightExpression.getTimespan();
+		long rightHistory = mRightExpression.getHistoryLength();
 		return (leftDeferUntil - rightHistory > rightDeferUntil - leftHistory);
 	}
 
@@ -146,13 +150,13 @@ public class LogicExpression extends Expression {
 
 		if (firstResult == ContextManager.FALSE
 				&& mOperator.equals(LogicOperator.AND)) {
-			setResult(ContextManager.FALSE);
+			setResult(ContextManager.FALSE, now);
 			// we can now turn off the last expression for a while
 			lastExpression.sleepAndBeReadyAt(firstExpression.getDeferUntil());
 			return;
 		} else if ((firstResult == ContextManager.TRUE)
 				&& mOperator.equals(LogicOperator.OR)) {
-			setResult(ContextManager.TRUE);
+			setResult(ContextManager.TRUE, now);
 			// we can now turn off the last expression for a while
 			lastExpression.sleepAndBeReadyAt(firstExpression.getDeferUntil());
 			return;
@@ -168,33 +172,33 @@ public class LogicExpression extends Expression {
 		switch (mOperator) {
 		case NOT:
 			if (firstResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (firstResult == ContextManager.TRUE) {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			} else if (firstResult == ContextManager.FALSE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			}
 			break;
 		case AND:
 			if (firstResult == ContextManager.UNDEFINED
-					|| lastResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+			|| lastResult == ContextManager.UNDEFINED) {
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (firstResult == ContextManager.TRUE
 					&& lastResult == ContextManager.TRUE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			} else {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			}
 			break;
 		case OR:
 			if (firstResult == ContextManager.UNDEFINED
-					&& lastResult == ContextManager.UNDEFINED) {
-				setResult(ContextManager.UNDEFINED);
+			&& lastResult == ContextManager.UNDEFINED) {
+				setResult(ContextManager.UNDEFINED, now);
 			} else if (firstResult == ContextManager.TRUE
 					|| lastResult == ContextManager.TRUE) {
-				setResult(ContextManager.TRUE);
+				setResult(ContextManager.TRUE, now);
 			} else {
-				setResult(ContextManager.FALSE);
+				setResult(ContextManager.FALSE, now);
 			}
 			break;
 		default:
@@ -270,8 +274,9 @@ public class LogicExpression extends Expression {
 		if (mRightExpression == null) {
 			return mOperator.toString() + " " + mLeftExpression.toParseString();
 		} else {
-			return mLeftExpression.toParseString() + " " + mOperator + " "
-					+ mLeftExpression.toParseString();
+			return "(" + mLeftExpression.toParseString()
+					+ " " + mOperator + " "
+					+ mLeftExpression.toParseString() +")";
 		}
 	}
 
@@ -282,9 +287,51 @@ public class LogicExpression extends Expression {
 	}
 
 	@Override
-	public long getTimespan() {
-		return Math.max(mLeftExpression.getTimespan(),
-				mRightExpression.getTimespan());
+	public long getHistoryLength() {
+		return Math.max(mLeftExpression.getHistoryLength(),
+				mRightExpression.getHistoryLength());
+	}
+
+	protected boolean hasCurrentTime() {
+		return false;
+	}
+
+	@Override
+	public TimestampedValue[] getValues(String string, long now) {
+		return new TimestampedValue[] {new TimestampedValue(getResult(),
+				getLastEvaluationTime())};
+	}
+
+	/**
+	 * @return the left side of this expression.
+	 */
+	public Expression getLeftExpression() {
+		return mLeftExpression;
+	}
+
+	/**
+	 * @return the right side of this expression.
+	 */
+	public Expression getRightExpression() {
+		return mRightExpression;
+	}
+
+	/**
+	 * @return the operator for this expression.
+	 */
+	public LogicOperator getOperator() {
+		return mOperator;
+	}
+
+	@Override
+	public HistoryReductionMode getHistoryReductionMode() {
+		return HistoryReductionMode.DEFAULT_MODE;
+	}
+
+	@Override
+	public boolean isConstant() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

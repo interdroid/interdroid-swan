@@ -1,23 +1,30 @@
 package interdroid.contextdroid.contextexpressions;
 
 /**
- * Represents the way an expression reduces the history it examines.
+ * Represents the way an expression reduces the history it examines and
+ * performs matching.
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  *
  */
 public enum HistoryReductionMode
 implements ParseableEnum<HistoryReductionMode> {
-	/** No reduction is performed. */
-	NONE (0, "all"),
+	/** No reduction is performed, matching is against all values. */
+	ALL (0, "ALL"),
 	/** Takes the maximum value. */
-	MAX (1, "max"),
+	MAX (1, "MAX"),
 	/** Takes the minimum value. */
-	MIN (2, "min"),
+	MIN (2, "MIN"),
 	/** Takes the mean value. */
-	MEAN (3, "mean"),
+	MEAN (3, "MEAN"),
 	/** Takes the median value. */
-	MEDIAN (4, "median");
+	MEDIAN (4, "MEDIAN"),
+	/** No reduction is performed, matching is against any value. */
+	ANY (5, "ANY");
+
+	/** The default HistoryReductionMode for all expressions. */
+	public static final HistoryReductionMode DEFAULT_MODE =
+			HistoryReductionMode.ALL;
 
 	/** The convert value. */
 	private final int mValue;
@@ -73,7 +80,7 @@ implements ParseableEnum<HistoryReductionMode> {
 	 * @return the enum which matches the string.
 	 */
 	public static HistoryReductionMode parse(final String value) {
-		return NONE.parseString(value);
+		return ALL.parseString(value);
 	}
 
 	/**
@@ -82,7 +89,7 @@ implements ParseableEnum<HistoryReductionMode> {
 	 * @return the enumeration matching this value
 	 */
 	public static HistoryReductionMode convert(final int value) {
-		return NONE.convertInt(value);
+		return ALL.convertInt(value);
 	}
 
 	@Override

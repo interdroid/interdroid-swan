@@ -34,10 +34,15 @@ public abstract class TypedValue implements Serializable, Parcelable,
 	 * Constructs a typed value with the given reduction mode.
 	 * 
 	 * @param mode
-	 *            the reduction mode.
+	 *            the reduction mode. If mode is null mode is set to
+	 *            HistoryReductionMode.DEFAULT_MODE.
 	 */
 	public TypedValue(final HistoryReductionMode mode) {
-		mMode = mode;
+		if (mode == null) {
+			mMode = HistoryReductionMode.DEFAULT_MODE;
+		} else {
+			mMode = mode;
+		}
 	}
 
 	/**
@@ -90,7 +95,8 @@ public abstract class TypedValue implements Serializable, Parcelable,
 		case MEDIAN:
 			return new TimestampedValue[] { TimestampedValue
 					.calculateMedian(values) };
-		case NONE:
+		case ALL:
+		case ANY:
 		default:
 			return values;
 		}
@@ -177,5 +183,5 @@ public abstract class TypedValue implements Serializable, Parcelable,
 	/**
 	 * @return the timespan of this typed value
 	 */
-	public abstract long getTimespan();
+	public abstract long getHistoryLength();
 }

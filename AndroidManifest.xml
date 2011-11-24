@@ -123,6 +123,9 @@
         </activity>
         <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity" >
         </activity>
+        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity">
+		</activity>
+            
 
         <service
             android:exported="true"
@@ -224,6 +227,33 @@
                 <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
             </intent-filter>
         </service>
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.PolarHeartRate"
+            android:process=":PolarHeartRate" >
+            <meta-data
+                android:name="entityId"
+                android:value="polar_hrm" />
+            <!-- TODO: Make these come from a string array resource instead. -->
+            <meta-data
+                android:name="valuePaths"
+                android:value="bpm,status,index,rri" />
+            <meta-data
+                android:name="device_name"
+                android:value="Polar iWL" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.polar_hrm" />
+
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+
+        <provider
+            android:authorities="interdroid.context.sensor.polar_hrm"
+            android:name="interdroid.contextdroid.sensors.impl.PolarHeartRate$Provider" />
+
         <service
             android:exported="true"
             android:name=".sensors.impl.MagnetometerSensor"

@@ -9,6 +9,7 @@ package interdroid.contextdroid.contextexpressions;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Stack;
 }
 
 @lexer::header {
@@ -25,7 +26,7 @@ public static final Expression parseExpression(final String expression) throws E
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ContextExpressionParser parser = new ContextExpressionParser(tokenStream);
         try {
-            return parser.context_expression();
+            return parser.expression() /* .expression */ ;
         } catch (RecognitionException e) {
             throw new ExpressionParseException(e);
         }
@@ -40,7 +41,7 @@ public static final TypedValue parseTypedValue(final String expression) throws E
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ContextExpressionParser parser = new ContextExpressionParser(tokenStream);
         try {
-            return parser.typed_value();
+            return parser.typed_value() /* .typed_value */ ;
         } catch (RecognitionException e) {
         	throw new ExpressionParseException(e);
         }
@@ -50,110 +51,295 @@ public static final TypedValue parseTypedValue(final String expression) throws E
 
 // Simple rules
 
-configuration_options returns [Map<String, String> config]
-	:	{config = new HashMap<String, String>();}
-	(id=ID '=' val=RAW_VALUE) {config.put($id.getText(), $val.getText());}
-	('&' id=ID '=' val=RAW_VALUE {config.put($id.getText(), $val.getText());})*
+configuration_options returns [Map<String, String> configuration]
+@init {
+	HashMap<String, String> config = new HashMap<String, String>();
+}
+	:	
+	(id=ID val=CONFIG_VAL) 
+		{config.put($id.getText(), $val.getText().substring(1));}
+	(CONFIG_AND more_id=ID more_val=CONFIG_VAL 
+		{config.put($more_id.getText(), $more_val.getText().substring(1));}
+	)*
+		{$configuration = config;}
 	;
 
-value_path	returns [String path]
+value_path	returns [String value_path]
+@init {
+	StringBuffer buf = new StringBuffer();
+}
 	:
-		id=ID {StringBuffer buf = new StringBuffer($id.getText());}
-		('/' id=ID {buf.append('/'); buf.append($id.getText());} )*
-		{$path = buf.toString();}
+	id=ID 
+		{buf.append($id.getText());}
+	('.' more_id=ID 
+		{buf.append('.'); buf.append($more_id.getText());} 
+	)*
+		{$value_path = buf.toString();}
 	;
 
-strategy	returns [Strategy strategy]
-	:	'ALL' {$strategy = Strategy.ALL;}
-	|	'ANY' {$strategy = Strategy.ANY;}
+comparator	returns [Comparator comparator]
+	:	GT {$comparator = Comparator.GREATER_THAN;}
+	|	LT {$comparator = Comparator.LESS_THAN;}
+	|	GTEQ {$comparator = Comparator.GREATER_THAN_OR_EQUALS;}
+	|	LTEQ {$comparator = Comparator.LESS_THAN_OR_EQUALS;}
+	|	EQUALS {$comparator = Comparator.EQUALS;}
+	|	NOTEQUALS {$comparator = Comparator.NOT_EQUALS;}
+	|	REGEX {$comparator = Comparator.REGEX_MATCH;}
+	|	CONTAINS {$comparator = Comparator.STRING_CONTAINS;}
 	;
 
-comparator	returns [Comparator comp]
-	:	'>' {$comp = Comparator.GREATER_THAN;}
-	|	'<' {$comp = Comparator.LESS_THAN;}
-	|	'>=' {$comp = Comparator.GREATER_THAN_OR_EQUALS;}
-	|	'<=' {$comp = Comparator.LESS_THAN_OR_EQUALS;}
-	|	'==' {$comp = Comparator.EQUALS;}
-	|	'!=' {$comp = Comparator.NOT_EQUALS;}
-	|	'regex' {$comp = Comparator.REGEX_MATCH;}
-	|	'contains' {$comp = Comparator.STRING_CONTAINS;}
+logic_operator returns [LogicOperator logic_operator]
+	:	
+		binary=binary_logic_operator 
+			{$logic_operator = binary /* .logic_operator */ ;}
+	|	unary=unary_logic_operator 
+			{$logic_operator = unary /* .logic_operator */ ;}
 	;
 
-binary_logic_operator	returns [LogicOperator value]
-	:	'&&' {$value = LogicOperator.AND;}
-	|	'||' {$value = LogicOperator.OR;}
+binary_logic_operator	returns [LogicOperator logic_operator]
+	:	AND {$logic_operator = LogicOperator.AND;}
+	|	OR {$logic_operator = LogicOperator.OR;}
 	;
 
-unary_logic_operator	returns [LogicOperator value]
-	:	'!' {$value = LogicOperator.NOT;}
+unary_logic_operator	returns [LogicOperator logic_operator]
+	:	NOT {$logic_operator = LogicOperator.NOT;}
 	;
 
-math_operator	returns [MathOperator value]
-	:	'+' {$value = MathOperator.PLUS;}
-	|	'-' {$value = MathOperator.MINUS;}
-	|	'*' {$value = MathOperator.TIMES;}
-	|	'/' {$value = MathOperator.DIVIDE;}
+math_operator	returns [MathOperator math_operator]
+	: add=additive_math_operator {$math_operator=add /* .math_operator */ ;}
+	| mult=multiplicative_math_operator {$math_operator=mult /* .math_operator */ ;}
 	;
+
+additive_math_operator returns [MathOperator math_operator]
+	:	PLUS {$math_operator = MathOperator.PLUS;}
+	|	MINUS {$math_operator = MathOperator.MINUS;}
+	;
+	
+multiplicative_math_operator returns [MathOperator math_operator]
+	:	MULT {$math_operator = MathOperator.TIMES;}
+	|	DIV {$math_operator = MathOperator.DIVIDE;}
+	|	MOD {$math_operator = MathOperator.MOD;}
+	;
+
+history_mode returns [HistoryReductionMode history_mode]
+	:	ALL {$history_mode = HistoryReductionMode.ALL;}
+	|	MAX {$history_mode = HistoryReductionMode.MAX;}
+	|	MIN {$history_mode = HistoryReductionMode.MIN;}
+	|	MEAN {$history_mode = HistoryReductionMode.MEAN;}
+	|	MEDIAN {$history_mode = HistoryReductionMode.MEDIAN;}
+	|	ANY {$history_mode = HistoryReductionMode.ANY;}
+	;
+
 
 // Paser rules
-
-typed_value	returns [TypedValue val]
-	:	constant=constant_typed_value {$val = constant;}
-	| 	context=context_typed_value {$val = context;}
-	|	left_constant=constant_typed_value WS op=math_operator WS right=typed_value {$val = new CombinedTypedValue(left_constant, $op.value, right);}
-	|	left_context=context_typed_value  WS op=math_operator WS right=typed_value {$val = new CombinedTypedValue(left_context, $op.value, right);}
+context_typed_value returns [ContextTypedValue typed_value]
+	:	entity=ID ':' path=value_path
+			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
+	|	entity=ID ':' path=value_path '?' config=configuration_options
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, config /*.configuration */);}
+	|	entity=ID ':' path=value_path '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, time == null ? 0 : Long.parseLong(time.getText()));}
+	|	entity=ID ':' path=value_path '?' config=configuration_options '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
+			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , time == null ? 0 : Long.parseLong(time.getText()));}
 	;
 
-history_mode returns [HistoryReductionMode mode]
-	:	'NONE' {$mode = HistoryReductionMode.NONE;}
-	|	'MAX' {$mode = HistoryReductionMode.MAX;}
-	|	'MIN' {$mode = HistoryReductionMode.MIN;}
-	|	'MEAN' {$mode = HistoryReductionMode.MEAN;}
-	|	'MEDIAN' {$mode = HistoryReductionMode.MEDIAN;}
+constant_typed_value returns [ConstantTypedValue typed_value]
+	:	i=INT 
+			{$typed_value = new ConstantTypedValue(Long.parseLong($i.getText()));}
+	|	f=FLOAT 
+			{$typed_value = new ConstantTypedValue(Double.parseDouble($f.getText()));}
+	| 	raw=STRING 
+			{$typed_value = new ConstantTypedValue($raw.getText());}
 	;
 
-context_typed_value returns [ContextTypedValue val]
-	:	entity=ID '/' path=value_path {$val = new ContextTypedValue(entity.getText(), path);}
-	|	entity=ID '/' path=value_path '?' config=configuration_options {$val = new ContextTypedValue(entity.getText(), path, config);}
-	|	entity=ID '/' path=value_path WS '{' WS mode=history_mode WS ',' WS time=INT WS '}' {$val = new ContextTypedValue(entity.getText(), path, mode, Long.parseLong(time.getText()));}
-	|	entity=ID '/' path=value_path '?' config=configuration_options '{' WS mode=history_mode WS ',' WS time=INT WS '}' {$val = new ContextTypedValue(entity.getText(), path, config, mode, Long.parseLong(time.getText()));}
-
+typed_value	returns [TypedValue typed_value]
+	:	constant=constant_typed_value 
+			{$typed_value = constant /*.typed_value */ ;}
+	| 	context=context_typed_value 
+			{$typed_value = context /*.typed_value */ ;}
 	;
 
-
-constant_typed_value returns [ConstantTypedValue val]
-	:	raw=RAW_VALUE {$val = new ConstantTypedValue(raw);}
+parentheticalExpression returns [Expression expression]
+	:	val=typed_value 
+			{$expression = new TypedValueExpression(val /* .typed_value */ );}
+	|	'(' WS* exp=orExpression WS* ')' 
+			{$expression = exp /* .expression */ ;}
 	;
 
-expression returns [Expression e]
-	:	op=unary_logic_operator WS exp=expression {$e = new LogicExpression($op.value, exp);}
-	| 	left=typed_value WS s=strategy WS c=comparator WS right=typed_value {$e = new ValueExpression(left, c, s, right);}
-	| 	'(' leftExp=expression WS op=binary_logic_operator WS rightExp=expression ')' {$e = new LogicExpression(leftExp, $op.value, rightExp);}
+comparativeExpression returns [Expression expression]
+@init {
+	Stack<Expression> rightStack = new Stack<Expression>();
+	Stack<Comparator> compareStack = new Stack<Comparator>();
+}
+	: left=additiveExpression
+	(WS* c=comparator WS* right=additiveExpression 
+		{compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
+	)?
+{
+	while(rightStack.size() > 1) {
+		Expression temp = rightStack.pop();
+		rightStack.push(new ComparisonExpression(rightStack.pop(), compareStack.pop(), temp));
+	}
+	if (rightStack.size() > 0) {
+		$expression = new ComparisonExpression(left /* .expression */ , compareStack.pop(), rightStack.pop());
+	} else {
+		$expression = left /* .expression */ ;
+	}
+}
 	;
 
-context_expression returns [Expression e]
-	: exp=expression EOF {$e = exp;}
+multiplicativeExpression returns [Expression expression]
+@init {
+	Stack<Expression> rightStack = new Stack<Expression>();
+	Stack<MathOperator> opStack = new Stack<MathOperator>();
+}
+	: left=parentheticalExpression
+	(WS* op=multiplicative_math_operator WS* right=parentheticalExpression 
+		{opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
+	)*
+{
+	while(rightStack.size() > 1) {
+		Expression temp = rightStack.pop();
+		rightStack.push(new MathExpression(rightStack.pop(), opStack.pop(), temp));
+	}
+	if (rightStack.size() > 0) {
+		$expression = new MathExpression(left /* .expression */ , opStack.pop(), rightStack.pop());
+	} else {
+		$expression = left /* .expression */ ;
+	}
+}
+	;
+
+additiveExpression returns [Expression expression]
+@init {
+	Stack<Expression> rightStack = new Stack<Expression>();
+	Stack<MathOperator> opStack = new Stack<MathOperator>();
+}
+	: left=multiplicativeExpression
+	(op=additive_math_operator right=multiplicativeExpression 
+		{opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
+	)*
+{
+	while(rightStack.size() > 1) {
+		Expression temp = rightStack.pop();
+		rightStack.push(new MathExpression(rightStack.pop(), opStack.pop(), temp));
+	}
+	if (rightStack.size() > 0) {
+		$expression = new MathExpression(left /* .expression */ , opStack.pop(), rightStack.pop());
+	} else {
+		$expression = left /* .expression */ ;
+	}
+}
+	;
+
+unaryExpression returns [Expression expression]
+	: op=unary_logic_operator exp=comparativeExpression 
+		{$expression = new LogicExpression(op /* .logic_operator */ , exp /* .expression */ );}
+	| exp=comparativeExpression 
+		{$expression = exp /* .expression */ ;}
+	;
+
+andExpression returns [Expression expression]
+@init {
+	Stack<Expression> rightStack = new Stack<Expression>();
+}
+	: left=unaryExpression
+	(AND right=unaryExpression 
+		{rightStack.push(right /* .expression */ );}
+	)*
+{
+	while(rightStack.size() > 1) {
+		Expression temp = rightStack.pop();
+		rightStack.push(new LogicExpression(rightStack.pop(), LogicOperator.AND, temp));
+	}
+	if (rightStack.size() > 0) {
+		$expression = new LogicExpression(left /* .expression */ , LogicOperator.AND, rightStack.pop());
+	} else {
+		$expression = left /* .expression */ ;
+	}
+}
+	;
+
+orExpression returns [Expression expression]
+@init {
+	Stack<Expression> rightStack = new Stack<Expression>();
+}
+	: left=andExpression
+	(OR right=andExpression 
+		{rightStack.push(right /* .expression */ );}
+	)*
+{
+	while(rightStack.size() > 1) {
+		Expression temp = rightStack.pop();
+		rightStack.push(new LogicExpression(rightStack.pop(), LogicOperator.OR, temp));
+	}
+	if (rightStack.size() > 0) {
+		$expression = new LogicExpression(left /* .expression */ , LogicOperator.OR, rightStack.pop());
+	} else {
+		$expression = left /* .expression */ ;
+	}
+}
+	;
+
+expression returns [Expression expression]
+	:	
+	logic=orExpression EOF
+		{$expression = logic /* .expression */ ;}
 	;
 
 // Lexar rules
+// Binary
+OR    :     '||' | 'or' | 'OR';
+AND   :     '&&' | 'and' | 'AND';
+// Unary
+NOT   :    '!' | 'not' | 'NOT';
 
-fragment
-RAW_VALUE returns [Object val]
-	:	i=INT {$val = Long.parseLong($i.getText());}
-	|	f=FLOAT {$val = Double.parseDouble($i.getText());}
-	|	s=STRING {$val = String.valueOf($s.getText());}
-	;
+// Config
+CONFIG_IS
+	:	'=';
+CONFIG_AND
+	:	'&';
+
+// Comparators
+EQUALS
+      :    '==' | '=';
+NOTEQUALS
+      :    '!=' | '<>';
+LT    :    '<';
+LTEQ  :    '<=';
+GT    :    '>';
+GTEQ  :    '>=';
+PLUS  :    '+';
+MINUS :    '-';
+MULT  :    '*';
+DIV   :    '/';
+MOD   :    '%';
+REGEX :
+		'regex' | 'REGEX';
+CONTAINS
+	:	 'contains' | 'CONTAINS';
+
+// Strategies
+ALL 	:	('ALL'|'all');
+ANY	:	('ANY'|'any');
+
+// History Reduction
+NONE 	:	('NONE'|'none');
+MAX	:	('MAX'|'max');
+MIN	:	('MIN'|'min');
+MEAN	: 	('MEAN'|'mean');
+MEDIAN 	:	('MEDIAN'|'median');
 
 ID  :	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     ;
 
-INT :	'0'..'9'+
+INT :	('-')? '0'..'9'+
     ;
 
 FLOAT
-    :   ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
-    |   '.' ('0'..'9')+ EXPONENT?
-    |   ('0'..'9')+ EXPONENT
+    :   ('-')? ('0'..'9')+ '.' ('0'..'9')* EXPONENT?
+    |   ('-')? '.' ('0'..'9')+ EXPONENT?
+    |   ('-')? ('0'..'9')+ EXPONENT
     ;
 
 WS  :   ( ' '
@@ -163,8 +349,42 @@ WS  :   ( ' '
         ) {$channel=HIDDEN;}
     ;
 
-STRING
-    :  '"' ( ESC_SEQ | ~('\\'|'"') )* '"'
+STRING          
+@init{StringBuilder lBuf = new StringBuilder();}
+	:
+	'\'' 
+	( ESC_SEQ
+		{lBuf.append(getText());} 
+	| normal=~('\''|'\\')
+		{lBuf.appendCodePoint(normal);}
+	)* 
+	'\''     
+		{setText(lBuf.toString());}
+	;
+
+fragment
+ESC_SEQ
+	:   '\\'
+        (       'n'    {setText("\n");}
+        |       'r'    {setText("\r");}
+        |       't'    {setText("\t");}
+        |       'b'    {setText("\b");}
+        |       'f'    {setText("\f");}
+        |       '"'    {setText("\"");}
+        |       '\''   {setText("\'");}
+        |       '/'    {setText("/");}
+        |       '\\'   {setText("\\");}
+        |       ('u')+ i=HEX_DIGIT j=HEX_DIGIT k=HEX_DIGIT l=HEX_DIGIT   {setText(String.valueOf((char) Integer.parseInt(i.getText() + j.getText() + k.getText() + l.getText(), 16)));}
+        )
+        ;
+
+CONFIG_VAL
+    :	'=' (STRING 
+    		{
+    		/* String uses setText which drops the '='. Put it back so it is the same as the other branch. */ 
+    		setText("=" + getText());
+    		}
+    	| ('a'..'z'|'A'..'Z'|'0'..'9'|'.')*)
     ;
 
 fragment
@@ -172,22 +392,3 @@ EXPONENT : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
 fragment
 HEX_DIGIT : ('0'..'9'|'a'..'f'|'A'..'F') ;
-
-fragment
-ESC_SEQ
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
-    |   UNICODE_ESC
-    |   OCTAL_ESC
-    ;
-
-fragment
-OCTAL_ESC
-    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7')
-    ;
-
-fragment
-UNICODE_ESC
-    :   '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
-    ;

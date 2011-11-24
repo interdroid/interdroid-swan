@@ -15,7 +15,9 @@ public enum MathOperator implements ParseableEnum<MathOperator> {
 	/** The times operator. */
 	TIMES (2, "*"),
 	/** The divide operator. */
-	DIVIDE (3, "/");
+	DIVIDE (3, "/"),
+	/** The modulus operator. */
+	MOD (4, "%");
 
 	/**
 	 * The persistence value of the enum.
