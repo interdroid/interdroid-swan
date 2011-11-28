@@ -59,17 +59,19 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	}
 
 	/**
-	 * Vicinity field name.
+	 * Vicinity field name. Vicinity gives the 10 log of the distance in meters
+	 * to the configured destination.
 	 */
 	public static final String VICINITY = "vicinity";
 
 	/**
-	 * Within field name
+	 * Within field name. Within gives "true" when within the specified rang to
+	 * the configured destination, "false" otherwise.
 	 */
 	public static final String WITHIN = "within";
 
 	/**
-	 * The type of provider desired.
+	 * The type of provider desired. 
 	 */
 	public static final String PROVIDER = "provider";
 
