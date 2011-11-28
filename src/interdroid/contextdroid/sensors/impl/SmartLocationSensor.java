@@ -71,7 +71,7 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	public static final String WITHIN = "within";
 
 	/**
-	 * The type of provider desired. 
+	 * The type of provider desired.
 	 */
 	public static final String PROVIDER = "provider";
 
@@ -332,6 +332,10 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	 * Updates the listener.
 	 */
 	private void requestSingleUpdate() {
+		// stop if we don't have any registerd configurations!
+		if (registeredConfigurations.size() == 0) {
+			return;
+		}
 
 		String mostAccurateProvider;
 		String passiveProvider = null;
