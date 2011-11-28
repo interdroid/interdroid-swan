@@ -29,10 +29,7 @@
                 <action android:name="interdroid.contextdroid.EXPRESSIONUNDEFINED" />
                 <action android:name="interdroid.contextdroid.NEWREADING" />
 
-                <data android:scheme="contextexpression" />
-                <data
-                    android:host="myFirstValue"
-                    android:scheme="contextvalues" />
+                <data android:scheme="contextvalues" />
             </intent-filter>
         </receiver>
 
@@ -772,6 +769,8 @@
     <uses-permission android:name="interdroid.vdb.permission.READ_DATABASE" />
     <uses-permission android:name="interdroid.vdb.permission.WRITE_DATABASE" />
     <uses-permission android:name="android.permission.READ_LOGS" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
     </uses-permission>
 
 </manifest>

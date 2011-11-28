@@ -196,7 +196,7 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 			}
 			// don't get the value too often if we're close to a point where the
 			// value changes
-			minDelay = Math.max(minDelay, MIN_TIME_BETWEEN_UPDATES);
+			minDelay = Math.max(minDelay * SECOND, MIN_TIME_BETWEEN_UPDATES);
 
 			// now sleep for minDelay
 			final long sleepTime = minDelay;
@@ -205,7 +205,7 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 			new Thread() {
 				public void run() {
 					try {
-						sleep(sleepTime * SECOND);
+						sleep(sleepTime);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

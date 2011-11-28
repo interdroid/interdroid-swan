@@ -17,7 +17,9 @@ public class TestReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		File locationLogFile = new File("/sdcard/locationlog.log");
+
+		File locationLogFile = new File("/sdcard/"
+				+ new Date().toLocaleString() + "-location.log");
 		try {
 			if (!locationLogFile.exists()) {
 
@@ -42,15 +44,5 @@ public class TestReceiver extends BroadcastReceiver {
 		}
 
 	}
-
-	// Intent result = new Intent(context, TestActivity.class);
-	// result.setAction(intent.getAction());
-	// result.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	// result.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-	// result.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-	// result.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	// // result.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-	// // result.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	// context.startActivity(result);
 
 }
