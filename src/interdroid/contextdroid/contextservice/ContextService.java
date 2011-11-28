@@ -184,10 +184,9 @@ public class ContextService extends Service {
 						} catch (InterruptedException e) {
 							LOG.debug("Interrupted while waiting on queue.");
 							interrupted();
-							continue;
 						}
-
 					}
+					continue;
 				} else {
 					synchronized (evaluationQueue) {
 						long waitingTime = expression.getNextEvaluationTime()
@@ -257,9 +256,9 @@ public class ContextService extends Service {
 		@Override
 		public void run() {
 			TimestampedValue[] values;
+			ContextTypedValue value;
 			while (!shouldStop) {
-				ContextTypedValue value = contextTypedValueQueue.poll();
-				if (value == null) {
+				while ((value = contextTypedValueQueue.poll()) == null) {
 					synchronized (contextTypedValueQueue) {
 						try {
 							contextTypedValueQueue.wait();
@@ -756,7 +755,7 @@ public class ContextService extends Service {
 						contextTypedValueQueue.notifyAll();
 					}
 				}
-				
+
 			}
 		}
 
