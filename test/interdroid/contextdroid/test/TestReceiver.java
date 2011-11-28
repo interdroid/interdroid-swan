@@ -5,27 +5,33 @@ import interdroid.contextdroid.ContextManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
+import android.os.Vibrator;
 
 public class TestReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		File calendarLogFile = new File("/sdcard/calendarlog.log");
+		File locationLogFile = new File("/sdcard/locationlog.log");
 		try {
-			if (!calendarLogFile.exists()) {
+			if (!locationLogFile.exists()) {
 
-				calendarLogFile.createNewFile();
+				locationLogFile.createNewFile();
 			}
 
 			if (intent.getAction().equals(ContextManager.ACTION_NEWREADING)) {
+				((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE))
+						.vibrate(1000);
+
 				Parcelable[] objects = (Parcelable[]) intent.getExtras().get(
 						"values");
-				FileWriter writer = new FileWriter(calendarLogFile, true);
+				FileWriter writer = new FileWriter(locationLogFile, true);
+				writer.write("time: " + new Date().toLocaleString() + ": ");
 				writer.write(objects[0].toString() + "\n");
 				writer.flush();
 				writer.close();

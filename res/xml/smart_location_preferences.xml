@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Value Path" >
+
+        <ListPreference
+            android:entries="@array/smart_location_valuepaths"
+            android:entryValues="@array/smart_location_valuepaths"
+            android:key="valuepath"
+            android:summary="Select a Value Path"
+            android:title="Value Path" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Configuration" >
+
+        <EditTextPreference
+            android:dialogTitle="Enter Latitude"
+            android:key="latitude"
+            android:summary="Set the latitude"
+            android:title="Latitude" />
+
+        <EditTextPreference
+            android:dialogTitle="Enter Longitude"
+            android:key="longitude"
+            android:summary="Set the Longitude"
+            android:title="Longitude" />
+
+        <interdroid.contextdroid.util.SeekBarPreference
+            android:defaultValue="300"
+            android:key="range"
+            android:max="10000"
+            android:text=" meters"
+            android:title="The Within-Range" />
+
+        <interdroid.contextdroid.util.SeekBarPreference
+            android:defaultValue="28"
+            android:key="max_speed"
+            android:max="100"
+            android:text=" m/s"
+            android:title="Maximum Moving Speed" />
+
+        <ListPreference
+            android:entries="@array/smart_location_provider"
+            android:entryValues="@array/smart_location_provider"
+            android:key="provider"
+            android:summary="Select location provider"
+            android:title="Location Provider" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

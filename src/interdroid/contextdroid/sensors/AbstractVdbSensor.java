@@ -20,9 +20,9 @@ import android.net.Uri;
 
 /**
  * Base class for sensors which store their data into a VDB database.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
@@ -92,7 +92,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param id
 	 *            the id
 	 * @param values
@@ -100,7 +100,8 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param now
 	 *            the timestamp
 	 */
-	public final void putValues(final String id, final ContentValues values, final long now) {
+	public final void putValues(final String id, final ContentValues values,
+			final long now) {
 		notifyDataChangedForId(id);
 		values.put(EXPRESSION_ID, id);
 		putValues(getContentResolver(), uri, values, now);
@@ -109,7 +110,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param values
 	 *            the values to store
 	 * @param now
@@ -125,7 +126,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this given content
 	 * resolver. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param resolver
 	 *            the resolver to store with
 	 * @param values
@@ -165,33 +166,34 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 		}
 		List<TimestampedValue> ret = null;
 		if (values != null && values.moveToFirst()) {
+			int column = values.getColumnIndex(fieldName);
 			ret = new ArrayList<TimestampedValue>(values.getCount());
 			do {
 				switch (fieldType) {
 				case INT:
-					ret.add(new TimestampedValue(values.getInt(2), values
+					ret.add(new TimestampedValue(values.getInt(column), values
 							.getLong(0)));
 					break;
 				case LONG:
-					ret.add(new TimestampedValue(values.getLong(2), values
+					ret.add(new TimestampedValue(values.getLong(column), values
 							.getLong(0)));
 					break;
 				case ENUM:
 				case STRING:
-					ret.add(new TimestampedValue(values.getString(2), values
+					ret.add(new TimestampedValue(values.getString(column), values
 							.getLong(0)));
 					break;
 				case FLOAT:
-					ret.add(new TimestampedValue(values.getFloat(2), values
+					ret.add(new TimestampedValue(values.getFloat(column), values
 							.getLong(0)));
 					break;
 				case DOUBLE:
-					ret.add(new TimestampedValue(values.getDouble(2), values
+					ret.add(new TimestampedValue(values.getDouble(column), values
 							.getLong(0)));
 					break;
 				case FIXED:
 				case BYTES:
-					ret.add(new TimestampedValue(values.getBlob(2), values
+					ret.add(new TimestampedValue(values.getBlob(column), values
 							.getLong(0)));
 				default:
 					throw new RuntimeException("Unsupported type.");
@@ -230,14 +232,15 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @return a cursor with the value data
 	 */
 	private static Cursor getValuesCursor(final Context context, final Uri uri,
-			final String[] values, final long now, final long timespan, String id) {
+			final String[] values, final long now, final long timespan,
+			String id) {
 		LOG.debug("timespan: {} end: {}", timespan, now);
 
 		String[] projection = new String[values.length + 1];
 		System.arraycopy(values, 0, projection, 1, values.length);
 		projection[0] = TIMESTAMP_FIELD;
 
-		LOG.debug("Projection: {}", projection);
+		LOG.debug("Projection: {} {}", projection, projection.length);
 
 		String where = null;
 		String[] whereArgs = null;
@@ -247,27 +250,29 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 			where = EXPRESSION_ID + "=?";
 
 			if (timespan <= 0) {
-				whereArgs = new String[] {id};
+				whereArgs = new String[] { id };
 			} else {
-				whereArgs = new String[] {id, String.valueOf(now - timespan)};
+				whereArgs = new String[] { id, String.valueOf(now - timespan) };
 			}
 		} else {
 			whereArgs = new String[] { String.valueOf(now - timespan) };
 		}
 
-
 		Cursor c = null;
 		if (timespan <= 0) {
 
-			c = context.getContentResolver().query(uri, projection, where, whereArgs,
-			// If timespan is zero we just pull the last one in time
+			c = context.getContentResolver().query(uri, projection, where,
+					whereArgs,
+					// If timespan is zero we just pull the last one in time
 					TIMESTAMP_FIELD + " DESC");
 
 		} else {
 
-			c = context.getContentResolver().query(uri, projection,
-					(where == null ? "" : where + " AND ") + " TIMESTAMP_FIELD >= ? ",
-					whereArgs,
+			c = context.getContentResolver().query(
+					uri,
+					projection,
+					(where == null ? "" : where + " AND ") + TIMESTAMP_FIELD
+							+ " >= ? ", whereArgs,
 					// If timespan is zero we just pull the last one in time
 					TIMESTAMP_FIELD + " ASC");
 
@@ -275,5 +280,4 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
 		return c;
 	}
-
 }

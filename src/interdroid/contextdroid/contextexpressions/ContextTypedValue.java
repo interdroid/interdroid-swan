@@ -42,7 +42,7 @@ public class ContextTypedValue extends TypedValue {
 	/**
 	 * The separator used between an entity and a value path
 	 */
-	public static final String	ENTITY_VALUE_PATH_SEPARATOR	= ":";
+	public static final String ENTITY_VALUE_PATH_SEPARATOR = ":";
 
 	/**
 	 * The separator used inside a value path
@@ -55,7 +55,7 @@ public class ContextTypedValue extends TypedValue {
 	private static final int CONNECTION_TIMEOUT = 1000;
 
 	/** The default history length to keep. 1 second. */
-	public static final int	DEFAULT_HISTORY_LENGTH	= 1000;
+	public static final int DEFAULT_HISTORY_LENGTH = 1000;
 
 	/**
 	 * ID within the expression.
@@ -183,9 +183,11 @@ public class ContextTypedValue extends TypedValue {
 	}
 
 	/**
-	 * Sets the timespan of history to keep.
-	 * This sets to DEFAULT_HISTORY_LENGTH if timespan <= 0
-	 * @param timespan the timespan to set to.
+	 * Sets the timespan of history to keep. This sets to DEFAULT_HISTORY_LENGTH
+	 * if timespan <= 0
+	 * 
+	 * @param timespan
+	 *            the timespan to set to.
 	 */
 	private void setHistoryTimespan(final long timespan) {
 		if (timespan > 0) {
@@ -208,7 +210,8 @@ public class ContextTypedValue extends TypedValue {
 	public ContextTypedValue(final String unparsedContextInfo,
 			final HistoryReductionMode mode, final long timespan) {
 		super(mode);
-		String[] splitOnEntity = unparsedContextInfo.split("/", 2);
+		String[] splitOnEntity = unparsedContextInfo.split(
+				ENTITY_VALUE_PATH_SEPARATOR, 2);
 		this.mEntity = splitOnEntity[0];
 		if (splitOnEntity.length != 2) {
 			throw new RuntimeException("bad id: '" + unparsedContextInfo
@@ -419,8 +422,8 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	private String getModeString() {
 		String ret;
-		if (!(getHistoryReductionMode().equals(HistoryReductionMode.DEFAULT_MODE)
-				&& mTimespan == 0)) {
+		if (!(getHistoryReductionMode().equals(
+				HistoryReductionMode.DEFAULT_MODE) && mTimespan == 0)) {
 			ret = " {" + getHistoryReductionMode().toParseString() + ","
 					+ mTimespan + "}";
 		} else {

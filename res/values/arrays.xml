@@ -148,6 +148,18 @@
         <item>network</item>
         <item>passive</item>
     </string-array>
+
+    <!-- smart location sensor -->
+    <string-array name="smart_location_valuepaths">
+        <item>vicinity</item>
+        <item>within</item>
+    </string-array>
+    <string-array name="smart_location_provider">
+        <item>gps</item>
+        <item>network</item>
+        <item>passive</item>
+    </string-array>
+
     <!-- logcat sensor -->
     <string-array name="logcat_valuepaths">
         <item>log</item>
@@ -182,7 +194,7 @@
         <item>level</item>
         <item>scanresult</item>
     </string-array>
-    
+
     <!-- polar heart rate -->
     <string-array name="hrm_valuepaths">
         <item>bpm</item>

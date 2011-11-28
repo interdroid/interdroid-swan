@@ -41,13 +41,10 @@
             android:name=".test.TestActivity"
             android:screenOrientation="portrait" >
             <intent-filter >
-
-                <!--
                 <action android:name="android.intent.action.MAIN" >
                 </action>
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                -->
             </intent-filter>
         </activity>
         <activity
@@ -55,10 +52,13 @@
             android:name=".ui.ExpressionBuilderActivity"
             android:screenOrientation="portrait" >
             <intent-filter >
+
+                <!--
                 <action android:name="android.intent.action.MAIN" >
                 </action>
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                -->
             </intent-filter>
         </activity>
 
@@ -74,7 +74,8 @@
              <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
 			/>
         -->
-
+        <activity android:name=".sensors.impl.SmartLocationSensor$ConfigurationActivity" >
+        </activity>
         <activity android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity" >
         </activity>
         <activity android:name=".sensors.impl.LightSensor$ConfigurationActivity" >
@@ -123,9 +124,8 @@
         </activity>
         <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity" >
         </activity>
-        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity">
-		</activity>
-            
+        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity" >
+        </activity>
 
         <service
             android:exported="true"
@@ -463,6 +463,47 @@
         <provider
             android:authorities="interdroid.context.sensor.location"
             android:name="interdroid.contextdroid.sensors.impl.LocationSensor$Provider" />
+
+        <service
+            android:exported="true"
+            android:name=".sensors.impl.SmartLocationSensor"
+            android:process=":smartlocationsensor" >
+            <meta-data
+                android:name="entityId"
+                android:value="smart_location" />
+            <meta-data
+                android:name="valuePaths"
+                android:value="vicinity,within" />
+            <meta-data
+                android:name="max_speed"
+                android:value="28.0D" />
+            <meta-data
+                android:name="latitude"
+                android:value="null" />
+            <meta-data
+                android:name="longitude"
+                android:value="null" />
+            <meta-data
+                android:name="provider"
+                android:value="network" />
+            <meta-data
+                android:name="range"
+                android:value="100.0D" />
+            <meta-data
+                android:name="authority"
+                android:value="interdroid.context.sensor.smartlocation" />
+
+            <intent-filter >
+                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".sensors.impl.SmartLocationSensor$AlarmReceiver" >
+        </receiver>
+
+        <provider
+            android:authorities="interdroid.context.sensor.smartlocation"
+            android:name="interdroid.contextdroid.sensors.impl.SmartLocationSensor$Provider" />
 
         <service
             android:exported="true"

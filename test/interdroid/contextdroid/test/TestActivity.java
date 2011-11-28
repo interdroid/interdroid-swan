@@ -49,8 +49,9 @@ public class TestActivity extends Activity {
 		setContentView(R.layout.test);
 
 		final ContextTypedValue left = new ContextTypedValue(
-				"cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
-		final String valueName = "myFirstValue";
+				"smart_location:vicinity?latitude=52.152962&longitude=5.367988&provider=test&max_speed=1000");
+		// "cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
+		final String valueName = "vicinity";
 		contextManager = new ContextManager(TestActivity.this);
 
 		findViewById(R.id.register).setOnClickListener(
