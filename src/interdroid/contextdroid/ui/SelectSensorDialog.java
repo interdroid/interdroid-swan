@@ -3,8 +3,6 @@ package interdroid.contextdroid.ui;
 import interdroid.contextdroid.ContextManager;
 import interdroid.contextdroid.R;
 import interdroid.contextdroid.SensorServiceInfo;
-import interdroid.contextdroid.contextexpressions.ContextTypedValue;
-import interdroid.contextdroid.contextexpressions.TypedValueExpression;
 
 import java.util.List;
 
@@ -51,14 +49,9 @@ public class SelectSensorDialog extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
 			Intent result = new Intent();
-			result.putExtra("Expression", new TypedValueExpression(
-					new ContextTypedValue(sensors.get(requestCode).getEntity()
-							+ ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
-							+ data.getStringExtra("configuration")))
-					.toParseString());
+			result.putExtra("Expression", data.getStringExtra("Expression"));
 			setResult(RESULT_OK, result);
 			finish();
 		}
 	}
-
 }

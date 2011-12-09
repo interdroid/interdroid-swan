@@ -210,7 +210,10 @@ public class SensorServiceInfo {
 		ComponentName configurationComponent = new ComponentName(
 				component.getPackageName(), component.getClassName()
 						+ "$ConfigurationActivity");
-		return new Intent().setComponent(configurationComponent);
+
+		Intent result = new Intent().setComponent(configurationComponent);
+		result.putExtra("entityId", entityId);
+		return result;
 	}
 
 	public String toString() {

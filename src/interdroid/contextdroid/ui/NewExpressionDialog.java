@@ -19,6 +19,10 @@ public class NewExpressionDialog extends Activity {
 	public static final int RIGHT = 2;
 	public static final int COMPARATOR = 3;
 
+	boolean leftActive = false;
+	boolean rightActive = false;
+	boolean comparatorActive = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -106,18 +110,23 @@ public class NewExpressionDialog extends Activity {
 			case LEFT:
 				((Button) findViewById(R.id.left)).setText(data
 						.getStringExtra("Expression"));
+				leftActive = true;
 				break;
 			case RIGHT:
 				((Button) findViewById(R.id.right)).setText(data
 						.getStringExtra("Expression"));
+				rightActive = true;
 				break;
 			case COMPARATOR:
 				((Button) findViewById(R.id.comparator)).setText(data
 						.getStringExtra("Comparator"));
+				comparatorActive = true;
 				break;
 			default:
 				break;
 			}
+			findViewById(R.id.ok).setEnabled(
+					leftActive && rightActive && comparatorActive);
 		}
 	}
 

@@ -1,5 +1,11 @@
 package interdroid.contextdroid.sensors;
 
+import interdroid.contextdroid.R;
+import interdroid.contextdroid.contextexpressions.ContextTypedValue;
+import interdroid.contextdroid.contextexpressions.HistoryReductionMode;
+import interdroid.contextdroid.contextexpressions.TypedValueExpression;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,21 +22,21 @@ import android.preference.PreferenceManager;
 
 /**
  * Base for ConfigurationActivities for configuring sensors.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		implements OnPreferenceChangeListener {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(AbstractConfigurationActivity.class);
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(AbstractConfigurationActivity.class);
 
 	/**
 	 * Returns the id for the sensors preferences XML setup.
+	 * 
 	 * @return the id for the preferences XML
 	 */
 	public abstract int getPreferencesXML();
@@ -40,10 +46,12 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addPreferencesFromResource(R.xml.default_preferences);
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
 		setResult(RESULT_CANCELED);
 	}
+
 	// CHECKSTYLE:ON
 
 	/**
@@ -55,7 +63,9 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 	/**
 	 * Sets up using the given preferences.
-	 * @param preference the preferences for the sensor.
+	 * 
+	 * @param preference
+	 *            the preferences for the sensor.
 	 */
 	private void setupPref(final Preference preference) {
 		if (preference instanceof PreferenceGroup) {
@@ -101,35 +111,42 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	public final void onBackPressed() {
 		setResult(
 				RESULT_OK,
-				getIntent().putExtra("configuration",
+				getIntent().putExtra("Expression",
 						prefsToConfigurationString()));
 		finish();
 	}
 
 	/**
 	 * Converts the prefs to a parseable configuration string.
+	 * 
 	 * @return the prefs as a string.
 	 */
-	private  String prefsToConfigurationString() {
+	private String prefsToConfigurationString() {
 		Map<String, ?> map = PreferenceManager.getDefaultSharedPreferences(
 				getBaseContext()).getAll();
-		String result = map.remove("valuepath").toString() + "?";
+
+		String path = map.remove("valuepath").toString();
+		HistoryReductionMode mode = HistoryReductionMode.parse(map.remove(
+				"history_reduction_mode").toString());
+		long timespan = Long.parseLong(map.remove("history_window").toString());
+		String entityId = getIntent().getStringExtra("entityId");
+
+		Map<String, String> stringMap = new HashMap<String, String>();
 		for (String key : map.keySet()) {
-			result += key + "=" + map.get(key).toString() + "&";
+			stringMap.put(key, map.get(key).toString());
 		}
-		return result.substring(0, result.length() - 1);
+
+		return new TypedValueExpression(new ContextTypedValue(entityId, path,
+				stringMap, mode, timespan)).toParseString();
 	}
 
 	@Override
 	public final boolean onPreferenceChange(final Preference preference,
 			final Object newValue) {
 		if (preference instanceof ListPreference) {
-			for (int i = 0;
-					i < ((ListPreference) preference).getEntryValues().length;
-					i++) {
+			for (int i = 0; i < ((ListPreference) preference).getEntryValues().length; i++) {
 				if (((ListPreference) preference).getEntryValues()[i]
-						.toString().equals(newValue.toString()
-								)) {
+						.toString().equals(newValue.toString())) {
 					preference.setSummary(((ListPreference) preference)
 							.getEntries()[i]);
 					return true;

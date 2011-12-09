@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- history_reduction_modes -->
+    <string-array name="history_reduction_modes">
+        <item>ANY</item>
+        <item>ALL</item>
+        <item>MAX</item>
+        <item>MIN</item>
+        <item>AVG</item>
+        <item>MED</item>
+    </string-array>
+
     <!-- battery sensor -->
     <string-array name="battery_valuepaths">
         <item>level</item>
