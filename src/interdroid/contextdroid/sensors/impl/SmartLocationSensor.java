@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -152,6 +151,8 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 		public void onLocationChanged(final Location location) {
 			// if we couldn't use the requestSingleUpdate method, we have to
 			// stop listening explicitly
+			System.out.println("location changed");
+
 			if (mRequestSingleUpdateMethod == null) {
 				stopListener();
 			}
@@ -271,21 +272,21 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 		} catch (Throwable t) {
 			mRequestSingleUpdateMethod = null;
 		}
-		// construct the mock location provider (for testing)
-		try {
-			locationManager.removeTestProvider("test");
-		} catch (Throwable t) {
-			// ignore
-		}
-		locationManager
-				.addTestProvider("test", false, false, false, false, false,
-						false, false, Criteria.POWER_LOW,
-						Criteria.ACCURACY_FINE);
-		// and enable it
-		locationManager.setTestProviderEnabled("test", true);
-
-		// and run the update thread
-		mockUpdateThread.start();
+		// // construct the mock location provider (for testing)
+		// try {
+		// locationManager.removeTestProvider("test");
+		// } catch (Throwable t) {
+		// // ignore
+		// }
+		// locationManager
+		// .addTestProvider("test", false, false, false, false, false,
+		// false, false, Criteria.POWER_LOW,
+		// Criteria.ACCURACY_FINE);
+		// // and enable it
+		// locationManager.setTestProviderEnabled("test", true);
+		//
+		// // and run the update thread
+		// mockUpdateThread.start();
 
 	}
 
@@ -376,6 +377,7 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	}
 
 	private void requestSingleUpdateGingerBread(String provider) {
+		System.out.println("ginger: " + provider);
 		try {
 			mRequestSingleUpdateMethod.invoke(locationManager, new Object[] {
 					provider, locationListener, Looper.getMainLooper() });

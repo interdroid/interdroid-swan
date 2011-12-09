@@ -274,6 +274,8 @@ public class ContextService extends Service {
 							System.currentTimeMillis());
 				} catch (ContextDroidException e) {
 					LOG.info("{} unexpected exception ", value, e);
+
+					e.printStackTrace();
 					// TODO: should we send an exception?
 					continue;
 				} catch (NullPointerException e) {

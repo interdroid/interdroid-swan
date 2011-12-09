@@ -6,6 +6,7 @@
         <item>level</item>
         <item>voltage</item>
         <item>temperature</item>
+        <item>plugged</item>
     </string-array>
 
     <!-- train sensor -->

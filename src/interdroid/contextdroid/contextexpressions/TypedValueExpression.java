@@ -9,23 +9,23 @@ import android.os.Parcel;
 
 /**
  * This class wraps a value in an expression.
- *
+ * 
  * TODO: Refactor TypedValue so that it is an expression.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class TypedValueExpression extends Expression {
 
 	/**
 	 * Serial Version ID for this class.
 	 */
-	private static final long	serialVersionUID	= 1L;
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The typed value we wrap.
 	 */
-	private final TypedValue	mValue;
+	private final TypedValue mValue;
 
 	public TypedValueExpression(TypedValue value) {
 		mValue = value;
@@ -75,8 +75,16 @@ public class TypedValueExpression extends Expression {
 
 	@Override
 	protected long getDeferUntilImpl() {
-		// Defer until is meaningless here.
-		return 0;
+		// TODO look at reasoning below!
+		// Defer until is meaningless here. Rather use current time millis than
+		// 0, otherwise it will be the head of the queue continuously. Maybe add
+		// some threshold?
+		if (isConstant()) {
+			return Long.MAX_VALUE;
+		} else {
+			return System.currentTimeMillis()
+					+ ContextTypedValue.DEFAULT_HISTORY_LENGTH / 2;
+		}
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class ComparisonExpression extends Expression {
 
 	private static final String TAG = "ComparisonExpression";
 
-	private static final long SLEEP_THRESHOLD = 10 * 1000; //
+	private static final long SLEEP_THRESHOLD = 60 * 1000; //
 
 	/**
 	 *
@@ -378,7 +378,7 @@ public class ComparisonExpression extends Expression {
 				if (contextValue.getHistoryReductionMode() == HistoryReductionMode.MAX) {
 					mDeferUntil = contextValues[0].getTimestamp()
 							+ contextValue.getHistoryLength();
-				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ALL) {
+				} else if (contextValue.getHistoryReductionMode() == HistoryReductionMode.ANY) {
 					mDeferUntil = contextValues[index].getTimestamp()
 							+ contextValue.getHistoryLength();
 				} else {
@@ -528,7 +528,12 @@ public class ComparisonExpression extends Expression {
 
 	@Override
 	public void sleepAndBeReadyAt(final long readyTime) {
-		final long wakeupTime = readyTime - getHistoryLength();
+		final long wakeupTime;
+		if (getHistoryLength() > 0) {
+			wakeupTime = readyTime - getHistoryLength();
+		} else {
+			wakeupTime = readyTime;
+		}
 		if (wakeupTime - System.currentTimeMillis() > SLEEP_THRESHOLD) {
 			try {
 				mLeftValue.destroy(getId() + ".L", mSensorManager);

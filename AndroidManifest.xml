@@ -38,17 +38,6 @@
             android:name=".test.TestActivity"
             android:screenOrientation="portrait" >
             <intent-filter >
-                <action android:name="android.intent.action.MAIN" >
-                </action>
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:label="Expression Builder"
-            android:name=".ui.ExpressionBuilderActivity"
-            android:screenOrientation="portrait" >
-            <intent-filter >
 
                 <!--
                 <action android:name="android.intent.action.MAIN" >
@@ -57,6 +46,52 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 -->
             </intent-filter>
+        </activity>
+        <activity
+            android:label="Expression Builder"
+            android:name=".ui.ExpressionBuilderActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" >
+                </action>
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="New Expression"
+            android:name=".ui.NewExpressionDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Choose Value Type"
+            android:name=".ui.SelectTypedValueDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Select Comparator"
+            android:name=".ui.SelectComparatorDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Enter Constant"
+            android:name=".ui.EnterConstantDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Select Sensor"
+            android:name=".ui.SelectSensorDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
 
         <!--
@@ -141,7 +176,7 @@
                 android:value="battery" />
             <meta-data
                 android:name="valuePaths"
-                android:value="level,voltage,temperature" />
+                android:value="level,voltage,temperature,plugged" />
             <meta-data
                 android:name="authority"
                 android:value="interdroid.context.sensor.battery" />

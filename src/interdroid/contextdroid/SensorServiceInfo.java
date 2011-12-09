@@ -21,8 +21,8 @@ public class SensorServiceInfo {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(SensorServiceInfo.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SensorServiceInfo.class);
 
 	/**
 	 * The name of the component the sensor runs in.
@@ -51,8 +51,11 @@ public class SensorServiceInfo {
 
 	/**
 	 * Construct information about a sensor.
-	 * @param sensorComponent The component the sensor lives in
-	 * @param metaData metadata bundle for the service from the package manager
+	 * 
+	 * @param sensorComponent
+	 *            The component the sensor lives in
+	 * @param metaData
+	 *            metadata bundle for the service from the package manager
 	 */
 	public SensorServiceInfo(final ComponentName sensorComponent,
 			final Bundle metaData) {
@@ -92,7 +95,7 @@ public class SensorServiceInfo {
 				try {
 					double doubleValue = Double.parseDouble(metaData.getString(
 							key).substring(0,
-									metaData.getString(key).length() - 1));
+							metaData.getString(key).length() - 1));
 					metaData.remove(key);
 					metaData.putDouble(key, doubleValue);
 				} catch (NumberFormatException e) {
@@ -126,9 +129,12 @@ public class SensorServiceInfo {
 
 	/**
 	 * Checks if this sensor accepts the given configuration.
-	 * @param b the bundle to check
+	 * 
+	 * @param b
+	 *            the bundle to check
 	 * @return true if this sensor supports the given bundle
-	 * @throws SensorConfigurationException if the sensor is not configured
+	 * @throws SensorConfigurationException
+	 *             if the sensor is not configured
 	 */
 	public final boolean acceptsConfiguration(final Bundle b)
 			throws SensorConfigurationException {
@@ -144,20 +150,15 @@ public class SensorServiceInfo {
 						try {
 							String value = b.getString(key);
 							b.remove(key);
-							if (configuration.get(key).getClass()
-									== Integer.class) {
+							if (configuration.get(key).getClass() == Integer.class) {
 								b.putInt(key, Integer.parseInt(value));
-							} else if (configuration.get(key).getClass()
-									== Long.class) {
+							} else if (configuration.get(key).getClass() == Long.class) {
 								b.putLong(key, Long.parseLong(value));
-							} else if (configuration.get(key).getClass()
-									== Float.class) {
+							} else if (configuration.get(key).getClass() == Float.class) {
 								b.putFloat(key, Float.parseFloat(value));
-							} else if (configuration.get(key).getClass()
-									== Double.class) {
+							} else if (configuration.get(key).getClass() == Double.class) {
 								b.putDouble(key, Double.parseDouble(value));
-							} else if (configuration.get(key).getClass()
-									== Boolean.class) {
+							} else if (configuration.get(key).getClass() == Boolean.class) {
 								b.putBoolean(key, Boolean.parseBoolean(value));
 							}
 						} catch (NumberFormatException e) {
@@ -165,8 +166,7 @@ public class SensorServiceInfo {
 									"Unable to parse value for configuration '"
 											+ key + "' in entity " + entityId
 											+ " to type "
-											+ configuration.get(key)
-											.getClass());
+											+ configuration.get(key).getClass());
 						}
 					}
 				} else {
@@ -182,7 +182,7 @@ public class SensorServiceInfo {
 					} else {
 						throw new SensorConfigurationException(
 								"Missing required configuration key '" + key
-								+ "' for " + entityId);
+										+ "' for " + entityId);
 					}
 				}
 			}
@@ -192,6 +192,7 @@ public class SensorServiceInfo {
 
 	/**
 	 * Returns an intent to launch this sensor.
+	 * 
 	 * @return new Intent().setComponent(getComponent())
 	 */
 	public final Intent getIntent() {
@@ -202,12 +203,17 @@ public class SensorServiceInfo {
 	 * Returns an intent with component.getClassName() +
 	 * "$ConfigurationActivity" for launching the sensors configuration
 	 * activity.
+	 * 
 	 * @return an intent for launching the configuration activity
 	 */
 	public final Intent getConfigurationIntent() {
 		ComponentName configurationComponent = new ComponentName(
 				component.getPackageName(), component.getClassName()
-				+ "$ConfigurationActivity");
+						+ "$ConfigurationActivity");
 		return new Intent().setComponent(configurationComponent);
+	}
+
+	public String toString() {
+		return entityId;
 	}
 }

@@ -14,19 +14,20 @@ import android.os.Bundle;
 
 /**
  * A sensor for battery temperature, level and voltage.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class BatterySensor extends AbstractVdbSensor {
 
 	/**
 	 * The configuration activity for this sensor.
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
-	public static class ConfigurationActivity
-	extends AbstractConfigurationActivity {
+	public static class ConfigurationActivity extends
+			AbstractConfigurationActivity {
 
 		@Override
 		public final int getPreferencesXML() {
@@ -47,6 +48,10 @@ public class BatterySensor extends AbstractVdbSensor {
 	 * The temperature field.
 	 */
 	public static final String TEMPERATURE_FIELD = "temperature";
+	/**
+	 * The plugged field
+	 */
+	public static final String PLUGGED_FIELD = "plugged";
 
 	/**
 	 * The schema for this sensor.
@@ -55,9 +60,9 @@ public class BatterySensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -74,22 +79,13 @@ public class BatterySensor extends AbstractVdbSensor {
 	 * @return the schema for this sensor.
 	 */
 	private static String getSchema() {
-		String scheme =
-				"{'type': 'record', 'name': 'battery', "
-						+ "'namespace': 'interdroid.context.sensor.battery',"
-						+ "\n'fields': ["
-						+ SCHEMA_TIMESTAMP_FIELDS
-						+ "\n{'name': '"
-						+ LEVEL_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ VOLTAGE_FIELD
-						+ "', 'type': 'int'},"
-						+ "\n{'name': '"
-						+ TEMPERATURE_FIELD
-						+ "', 'type': 'int'}"
-						+ "\n]"
-						+ "}";
+		String scheme = "{'type': 'record', 'name': 'battery', "
+				+ "'namespace': 'interdroid.context.sensor.battery',"
+				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
+				+ LEVEL_FIELD + "', 'type': 'int'}," + "\n{'name': '"
+				+ VOLTAGE_FIELD + "', 'type': 'int'}," + "\n{'name': '"
+				+ PLUGGED_FIELD + "', 'type': 'int'}," + "\n{'name': '"
+				+ TEMPERATURE_FIELD + "', 'type': 'int'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -104,12 +100,14 @@ public class BatterySensor extends AbstractVdbSensor {
 				long now = System.currentTimeMillis();
 
 				ContentValues values = new ContentValues();
-				values.put(LEVEL_FIELD, intent.getIntExtra(
-						BatteryManager.EXTRA_LEVEL, 0));
-				values.put(TEMPERATURE_FIELD, intent.getIntExtra(
-						BatteryManager.EXTRA_TEMPERATURE, 0));
-				values.put(VOLTAGE_FIELD, intent.getIntExtra(
-						BatteryManager.EXTRA_VOLTAGE, 0));
+				values.put(LEVEL_FIELD,
+						intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0));
+				values.put(TEMPERATURE_FIELD,
+						intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0));
+				values.put(VOLTAGE_FIELD,
+						intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0));
+				values.put(PLUGGED_FIELD,
+						intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
 				putValues(values, now);
 			}
 		}
@@ -118,7 +116,8 @@ public class BatterySensor extends AbstractVdbSensor {
 
 	@Override
 	public final String[] getValuePaths() {
-		return new String[] { TEMPERATURE_FIELD, LEVEL_FIELD, VOLTAGE_FIELD };
+		return new String[] { TEMPERATURE_FIELD, LEVEL_FIELD, VOLTAGE_FIELD,
+				PLUGGED_FIELD };
 	}
 
 	@Override

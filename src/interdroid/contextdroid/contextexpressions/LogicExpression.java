@@ -123,6 +123,11 @@ public class LogicExpression extends Expression {
 		// for a while (e.g. one.deferUntil - other.history) iff we're able to
 		// short circuit the expression. That depends one the operator and the
 		// value of the first expression
+		
+		
+		
+		
+		
 		long leftDeferUntil = mLeftExpression.getDeferUntil();
 		long leftHistory = mLeftExpression.getHistoryLength();
 		long rightDeferUntil = mRightExpression.getDeferUntil();
