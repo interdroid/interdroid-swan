@@ -118,7 +118,6 @@ public class NewExpressionDialog extends Activity {
 			default:
 				break;
 			}
-			if ()
 		}
 	}
 
