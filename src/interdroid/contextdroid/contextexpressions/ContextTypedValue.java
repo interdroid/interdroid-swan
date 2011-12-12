@@ -439,16 +439,17 @@ public class ContextTypedValue extends TypedValue {
 	private String getParseConfig() {
 		String ret;
 		if (mConfiguration.size() > 0) {
-			StringBuffer buf = new StringBuffer('?');
+			StringBuffer buf = new StringBuffer();
+			buf.append("?");
 			boolean first = true;
 			for (String key : mConfiguration.keySet()) {
 				if (!first) {
 					buf.append("&");
-					first = false;
 				}
 				buf.append(key);
 				buf.append("=");
 				buf.append(mConfiguration.getString(key));
+				first = false;
 			}
 			ret = buf.toString();
 		} else {

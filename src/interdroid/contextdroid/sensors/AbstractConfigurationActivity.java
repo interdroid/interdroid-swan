@@ -5,7 +5,9 @@ import interdroid.contextdroid.contextexpressions.ContextTypedValue;
 import interdroid.contextdroid.contextexpressions.HistoryReductionMode;
 import interdroid.contextdroid.contextexpressions.TypedValueExpression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -41,6 +43,8 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	 */
 	public abstract int getPreferencesXML();
 
+	private List<String> keys = new ArrayList<String>();
+
 	// Android includes lifecycle checks ensuring super.onCreate() was called.
 	// CHECKSTYLE:OFF
 	@Override
@@ -75,6 +79,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 				setupPref(((PreferenceGroup) preference).getPreference(i));
 			}
 		} else {
+			keys.add(preference.getKey());
 			// setup the listener
 			preference.setOnPreferenceChangeListener(this);
 			// set the summary
@@ -109,10 +114,9 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 	@Override
 	public final void onBackPressed() {
-		setResult(
-				RESULT_OK,
-				getIntent().putExtra("Expression",
-						prefsToConfigurationString()));
+		setResult(RESULT_OK,
+				getIntent()
+						.putExtra("Expression", prefsToConfigurationString()));
 		finish();
 	}
 
@@ -132,12 +136,24 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		String entityId = getIntent().getStringExtra("entityId");
 
 		Map<String, String> stringMap = new HashMap<String, String>();
-		for (String key : map.keySet()) {
-			stringMap.put(key, map.get(key).toString());
+		for (String key : keys) {
+			if (map.containsKey(key)) {
+				stringMap.put(key, map.get(key).toString());
+			}
 		}
 
-		return new TypedValueExpression(new ContextTypedValue(entityId, path,
-				stringMap, mode, timespan)).toParseString();
+		ContextTypedValue sensor = new ContextTypedValue(entityId, path,
+				stringMap, mode, timespan);
+		System.out.println("Sensor Parse: " + sensor.toParseString());
+		System.out.println("Sensor: " + sensor.toString());
+
+		TypedValueExpression typedValueExpression = new TypedValueExpression(
+				sensor);
+		System.out.println("Typed Value Parse: "
+				+ typedValueExpression.toParseString());
+		System.out.println("Typed Value: " + typedValueExpression.toString());
+
+		return typedValueExpression.toParseString();
 	}
 
 	@Override

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/left"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="select expression" />
+
+    <RadioGroup
+        android:id="@+id/operator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/and"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="AND" />
+
+        <RadioButton
+            android:id="@+id/or"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OR" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/right"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="select expression" />
+
+    <CheckBox
+        android:id="@+id/keep_originals"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="keep original expressions" />
+
+    <Button
+        android:id="@+id/ok"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="OK" />
+
+</LinearLayout>

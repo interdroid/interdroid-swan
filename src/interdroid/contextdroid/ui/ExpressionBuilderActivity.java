@@ -1,79 +1,33 @@
 package interdroid.contextdroid.ui;
 
 import interdroid.contextdroid.R;
-import interdroid.contextdroid.contextexpressions.Comparator;
-import interdroid.contextdroid.contextexpressions.ComparisonExpression;
 import interdroid.contextdroid.contextexpressions.Expression;
 import interdroid.contextdroid.contextexpressions.ExpressionParseException;
-import interdroid.contextdroid.contextexpressions.TypedValue;
+import interdroid.contextdroid.contextexpressions.LogicExpression;
+import interdroid.contextdroid.contextexpressions.LogicOperator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ExpressionBuilderActivity extends Activity {
-
-	private static final int DIALOG_CHOOSE_TYPEDVALUE_LEFT = 0;
-	private static final int DIALOG_CHOOSE_TYPEDVALUE_RIGHT = 1;
-	private static final int DIALOG_CHOOSE_COMPARATOR = 2;
-	private static final int DIALOG_ENTER_CONSTANT_LEFT = 3;
-	private static final int DIALOG_ENTER_CONSTANT_RIGHT = 4;
-	private static final int DIALOG_CHOOSE_EXPRESSION_LEFT = 5;
-	private static final int DIALOG_CHOOSE_EXPRESSION_RIGHT = 6;
-	private static final int DIALOG_CHOOSE_OPERATOR = 7;
-	private static final int DIALOG_RENAME_EXPRESSION = 8;
-	private static final int DIALOG_CHOOSE_SENSOR_LEFT = 9;
-	private static final int DIALOG_CHOOSE_SENSOR_RIGHT = 10;
-	private static final int DIALOG_NEW_EXPRESSION = 11;
-	private static final int DIALOG_MERGE_EXPRESSION = 12;
-	private static final int DIALOG_NEGATE_EXPRESSION = 13;
-
-	private static final int REQUEST_CODE_CONFIGURE_SENSOR_LEFT = 0;
-	private static final int REQUEST_CODE_CONFIGURE_SENSOR_RIGHT = 1;
-
-	private static final CharSequence[] COMPARATORS = new CharSequence[] { "<",
-			"<=", "==", "!=", ">", ">=", "contains", "regexp" };
-	private static final CharSequence[] OPERATORS = new CharSequence[] { "&&",
-			"||" };
-
-	private static final int TYPEDVALUE_OPTION_CONSTANT = 0;
-	private static final int TYPEDVALUE_OPTION_CONTEXT = 1;
-	private static final int TYPEDVALUE_OPTION_COMBINED = 2;
-
-	private static final CharSequence[] TYPEDVALUE_OPTIONS = new CharSequence[] {
-			"constant", "context", "combined" };
-
-	private boolean not = false;
-
-	private TypedValue leftValue;
-	private TypedValue rightValue;
-
-	private Expression leftExpression;
-	private Expression rightExpression;
-
-	private int currentPosition;
 
 	private final List<Expression> expressions = new ArrayList<Expression>();
 
@@ -83,7 +37,7 @@ public class ExpressionBuilderActivity extends Activity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				convertView = new TextView(ExpressionBuilderActivity.this);
-				((TextView) convertView).setTextSize(22.0f);
+				((TextView) convertView).setTextSize(14.0f);
 			}
 			((TextView) convertView).setText(expressions.get(position)
 					.toString());
@@ -106,11 +60,12 @@ public class ExpressionBuilderActivity extends Activity {
 		}
 	};
 
-	private final static int NEW_EXPRESSION = 1;
+	private final static String TAG = "Expression Builder";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setResult(RESULT_CANCELED);
 		setContentView(R.layout.expression_builder);
 
 		findViewById(R.id.new_expression).setOnClickListener(
@@ -120,7 +75,7 @@ public class ExpressionBuilderActivity extends Activity {
 					public void onClick(View v) {
 						startActivityForResult(new Intent(
 								getApplicationContext(),
-								NewExpressionDialog.class), NEW_EXPRESSION);
+								NewExpressionDialog.class), 0);
 					}
 				});
 
@@ -129,7 +84,25 @@ public class ExpressionBuilderActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						showDialog(DIALOG_MERGE_EXPRESSION);
+						if (expressions.size() >= 2) {
+							// we need at least two expression to merge
+							ArrayList<String> expressionList = new ArrayList<String>();
+							for (Expression expression : expressions) {
+								expressionList.add(expression.toParseString());
+							}
+							Intent request = new Intent(
+									getApplicationContext(),
+									MergeExpressionDialog.class);
+							request.putStringArrayListExtra("Expressions",
+									expressionList);
+
+							startActivityForResult(request, 0);
+						} else {
+							Toast.makeText(
+									getApplicationContext(),
+									"At least 2 expressions needed for merging. Create them with the new button",
+									Toast.LENGTH_LONG).show();
+						}
 					}
 				});
 
@@ -138,25 +111,35 @@ public class ExpressionBuilderActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						showDialog(DIALOG_NEGATE_EXPRESSION);
+						// showDialog(DIALOG_NEGATE_EXPRESSION);
 					}
 				});
 
 		((ListView) findViewById(R.id.expression_list))
 				.setAdapter(expressionlistAdapter);
 		((ListView) findViewById(R.id.expression_list))
-				.setOnItemSelectedListener(new OnItemSelectedListener() {
+				.setOnItemClickListener(new OnItemClickListener() {
 
 					@Override
-					public void onItemSelected(AdapterView<?> parent,
-							View view, int position, long id) {
+					public void onItemClick(AdapterView<?> parent, View view,
+							int position, long id) {
+						System.out.println("current: " + currentPosition
+								+ " new: " + position + " row: " + id);
+						if (currentPosition >= 0
+								&& currentPosition < parent.getChildCount()) {
+							System.out.println("Setting " + currentPosition
+									+ " to transparent");
+							parent.getChildAt(currentPosition)
+									.setBackgroundColor(Color.TRANSPARENT);
+						}
+						currentPosition = position;
+						System.out.println("Setting " + currentPosition
+								+ " to red");
+						parent.getChildAt(currentPosition).setBackgroundColor(
+								Color.RED);
+						parent.invalidate();
 						findViewById(R.id.expression_finished).setEnabled(true);
-					}
 
-					@Override
-					public void onNothingSelected(AdapterView<?> parent) {
-						findViewById(R.id.expression_finished)
-								.setEnabled(false);
 					}
 				});
 
@@ -168,420 +151,77 @@ public class ExpressionBuilderActivity extends Activity {
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
+						if (currentPosition >= 0
+								&& currentPosition < expressions.size()) {
+							String expression = expressions
+									.get(currentPosition).toParseString();
+							setResult(RESULT_OK, new Intent().putExtra(
+									"Expression", expression));
+						} else {
+							Toast.makeText(getApplicationContext(),
+									"Please Select an Expression",
+									Toast.LENGTH_SHORT).show();
+						}
 
 					}
 				});
 
 	}
 
-	/*********************** DIALOG STUFF ***********************/
-
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		boolean isLeft = false;
-		switch (id) {
-		// case DIALOG_CHOOSE_TYPEDVALUE_LEFT:
-		// isLeft = true;
-		// case DIALOG_CHOOSE_TYPEDVALUE_RIGHT:
-		// final boolean isRightChoose = !isLeft;
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Choose Typed Value")
-		// .setItems(TYPEDVALUE_OPTIONS,
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// switch (which) {
-		// case TYPEDVALUE_OPTION_CONSTANT:
-		// if (isRightChoose) {
-		// showDialog(DIALOG_ENTER_CONSTANT_RIGHT);
-		// } else {
-		// showDialog(DIALOG_ENTER_CONSTANT_LEFT);
-		// }
-		// break;
-		// case TYPEDVALUE_OPTION_COMBINED:
-		// break;
-		// case TYPEDVALUE_OPTION_CONTEXT:
-		// if (isRightChoose) {
-		// showDialog(DIALOG_CHOOSE_SENSOR_RIGHT);
-		// } else {
-		// showDialog(DIALOG_CHOOSE_SENSOR_LEFT);
-		// }
-		// break;
-		//
-		// default:
-		// break;
-		// }
-		//
-		// }
-		// }).create();
-		//
-		// case DIALOG_CHOOSE_COMPARATOR:
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Choose Comparator")
-		// .setItems(COMPARATORS,
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// ((Button) findViewById(R.id.typedvalue_comparator))
-		// .setText(COMPARATORS[which]);
-		// checkTypedValueOkEnabled();
-		// }
-		// }).create();
-		// case DIALOG_ENTER_CONSTANT_LEFT:
-		// isLeft = true;
-		// case DIALOG_ENTER_CONSTANT_RIGHT:
-		// final boolean isRightEnter = !isLeft;
-		// final View view = LayoutInflater.from(this).inflate(
-		// R.layout.expression_builder_constant_dialog, null);
-		//
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Enter Constant")
-		// .setView(view)
-		// .setPositiveButton("OK",
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// String constant = ((EditText) view
-		// .findViewById(R.id.value))
-		// .getText().toString();
-		// if (isRightEnter) {
-		// rightValue = new ConstantTypedValue(
-		// constant);
-		// ((Button) findViewById(R.id.typedvalue_right))
-		// .setText(constant);
-		// } else {
-		// leftValue = new ConstantTypedValue(
-		// constant);
-		// ((Button) findViewById(R.id.typedvalue_left))
-		// .setText(constant);
-		// }
-		// checkTypedValueOkEnabled();
-		// }
-		// }).create();
-		// case DIALOG_CHOOSE_OPERATOR:
-		// return new AlertDialog.Builder(this).setTitle("Choose Operator")
-		// .setItems(OPERATORS, new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog, int which) {
-		// ((Button) findViewById(R.id.expression_operator))
-		// .setText(OPERATORS[which]);
-		// checkExpressionOkEnabled();
-		//
-		// }
-		// }).create();
-		// case DIALOG_CHOOSE_EXPRESSION_LEFT:
-		// isLeft = true;
-		// case DIALOG_CHOOSE_EXPRESSION_RIGHT:
-		// final boolean isRightExpression = !isLeft;
-		//
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Select Expression")
-		// .setItems(new CharSequence[] { "test" },
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// if (isRightExpression) {
-		// rightExpression = expressions
-		// .get(which);
-		// ((Button) findViewById(R.id.expression_right))
-		// .setText(rightExpression
-		// .toString());
-		// } else {
-		// leftExpression = expressions.get(which);
-		// ((Button) findViewById(R.id.expression_left))
-		// .setText(leftExpression
-		// .toString());
-		// }
-		// checkExpressionOkEnabled();
-		// }
-		// }).create();
-		// case DIALOG_RENAME_EXPRESSION:
-		// final View renameView = LayoutInflater.from(this).inflate(
-		// R.layout.expression_builder_rename_dialog, null);
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Rename Expression")
-		// .setView(renameView)
-		// .setPositiveButton("OK",
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// String renamed = ((EditText) renameView
-		// .findViewById(R.id.value))
-		// .getText().toString();
-		// expressions.get(currentPosition).setId(
-		// renamed);
-		// expressionlistAdapter
-		// .notifyDataSetChanged();
-		// }
-		// }).create();
-		// case DIALOG_CHOOSE_SENSOR_LEFT:
-		// isLeft = true;
-		// case DIALOG_CHOOSE_SENSOR_RIGHT:
-		// final boolean isRightSensor = !isLeft;
-		// final List<SensorServiceInfo> sensors = ContextManager
-		// .getSensors(this);
-		// String[] sensorNames = new String[sensors.size()];
-		// for (int i = 0; i < sensorNames.length; i++) {
-		// sensorNames[i] = sensors.get(i).getEntity();
-		// }
-		//
-		// return new AlertDialog.Builder(this)
-		// .setTitle("Choose Sensor")
-		// .setItems(sensorNames,
-		// new DialogInterface.OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog,
-		// int which) {
-		// startActivityForResult(
-		// sensors.get(which)
-		// .getConfigurationIntent()
-		// .putExtra(
-		// "entityId",
-		// sensors.get(which)
-		// .getEntity()),
-		// isRightSensor ? REQUEST_CODE_CONFIGURE_SENSOR_RIGHT
-		// : REQUEST_CODE_CONFIGURE_SENSOR_LEFT);
-		// }
-		// }).create();
-
-		default:
-			break;
-		}
-		return super.onCreateDialog(id);
-	}
+	private int currentPosition = -1;
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// if (resultCode == RESULT_OK) {
-		// switch (requestCode) {
-		// case REQUEST_CODE_CONFIGURE_SENSOR_LEFT:
-		// leftValue = new ContextTypedValue(
-		// data.getStringExtra("entityId")
-		// + ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
-		// + data.getStringExtra("configuration"));
-		// ((Button) findViewById(R.id.typedvalue_left)).setText(leftValue
-		// .toString());
-		// checkTypedValueOkEnabled();
-		// break;
-		// case REQUEST_CODE_CONFIGURE_SENSOR_RIGHT:
-		// rightValue = new ContextTypedValue(
-		// data.getStringExtra("entityId")
-		// + ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
-		// + data.getStringExtra("configuration"));
-		// ((Button) findViewById(R.id.typedvalue_right))
-		// .setText(rightValue.toString());
-		// checkTypedValueOkEnabled();
-		// break;
-		// default:
-		// break;
-		// }
-		// }
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+		if (resultCode == RESULT_OK) {
+			if (data.hasExtra("Expression")) {
+				try {
+					expressions.add(Expression.parse(data
+							.getStringExtra("Expression")));
+					expressionlistAdapter.notifyDataSetChanged();
+				} catch (ExpressionParseException e) {
+					// should not happen, already checked for in new expression
+					// dialog
 
-	@Override
-	protected void onPrepareDialog(int id, Dialog dialog) {
-		switch (id) {
-		case DIALOG_CHOOSE_EXPRESSION_RIGHT:
-		case DIALOG_CHOOSE_EXPRESSION_LEFT:
-			// Create new adapter
-			ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
-					this, android.R.layout.select_dialog_singlechoice);
-			for (int i = 0; i < expressions.size(); i++) {
-				adapter.add(expressions.get(i).toString());
+					Log.e(TAG, "should not happen: " + e);
+				}
+			} else if (data.hasExtra("Expressions")) {
+				expressions.clear();
+				for (String expression : data
+						.getStringArrayListExtra("Expressions")) {
+					try {
+						expressions.add(Expression.parse(expression));
+					} catch (ExpressionParseException e) {
+						// should not happen
+						e.printStackTrace();
+					}
+				}
+				expressionlistAdapter.notifyDataSetChanged();
 			}
-
-			// Use the new adapter
-			AlertDialog alert = (AlertDialog) dialog;
-			alert.getListView().setAdapter(adapter);
-
-			break;
-		case DIALOG_RENAME_EXPRESSION:
-			((EditText) dialog.findViewById(R.id.value)).setText(expressions
-					.get(currentPosition).toString());
-			break;
-		default:
-			break;
 		}
-
-		// TODO Auto-generated method stub
-		super.onPrepareDialog(id, dialog);
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		menu.add("use");
-		menu.add("delete");
-		menu.add("rename");
-		menu.add("edit");
+		menu.add("Negate");
+		menu.add("Delete");
 
 		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		if (item.getTitle().toString().equals("rename")) {
-			currentPosition = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
-			showDialog(DIALOG_RENAME_EXPRESSION);
-		} else if (item.getTitle().toString().equals("delete")) {
-			expressions
-					.remove(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+		int position = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
+		if (item.getTitle().toString().equals("Negate")) {
+			expressions.set(position, new LogicExpression(LogicOperator.NOT,
+					expressions.get((position))));
+			expressionlistAdapter.notifyDataSetChanged();
+		} else if (item.getTitle().toString().equals("Delete")) {
+			expressions.remove(position);
 			expressionlistAdapter.notifyDataSetChanged();
 		}
 		return super.onContextItemSelected(item);
 	}
-
 	/*** OLD STUFF ***/
-
-	// private void old() {
-	// ((CheckBox) findViewById(R.id.typedvalue_not))
-	// .setOnCheckedChangeListener(new OnCheckedChangeListener() {
-	//
-	// @Override
-	// public void onCheckedChanged(CompoundButton buttonView,
-	// boolean isChecked) {
-	// not = isChecked;
-	// }
-	// });
-	//
-	// findViewById(R.id.typedvalue_left).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_TYPEDVALUE_LEFT);
-	// }
-	// });
-	//
-	// findViewById(R.id.typedvalue_right).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_TYPEDVALUE_RIGHT);
-	// }
-	// });
-	//
-	// findViewById(R.id.typedvalue_comparator).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_COMPARATOR);
-	// }
-	// });
-	//
-	// findViewById(R.id.typedvalue_ok).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// String comparator = ((Button) findViewById(R.id.typedvalue_comparator))
-	// .getText().toString();
-	// Expression expression = new ComparisonExpression(
-	// leftValue, Comparator.parse(comparator),
-	// rightValue);
-	// if (not) {
-	// expressions.add(new LogicExpression(
-	// LogicOperator.NOT, expression));
-	// } else {
-	// expressions.add(expression);
-	// }
-	// // reset the buttons
-	// ((Button) findViewById(R.id.typedvalue_right))
-	// .setText(" . ");
-	// ((Button) findViewById(R.id.typedvalue_left))
-	// .setText(" . ");
-	// ((Button) findViewById(R.id.typedvalue_comparator))
-	// .setText(" ? ");
-	// ((CheckBox) findViewById(R.id.typedvalue_not))
-	// .setChecked(false);
-	// // reset all intermediate values
-	// leftValue = rightValue = null;
-	// checkTypedValueOkEnabled();
-	// checkExpressionEnabled();
-	// expressionlistAdapter.notifyDataSetChanged();
-	// }
-	// });
-	//
-	// findViewById(R.id.expression_left).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_EXPRESSION_LEFT);
-	// }
-	// });
-	//
-	// findViewById(R.id.expression_right).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_EXPRESSION_RIGHT);
-	// }
-	// });
-	//
-	// findViewById(R.id.expression_operator).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// showDialog(DIALOG_CHOOSE_OPERATOR);
-	// }
-	// });
-	// findViewById(R.id.expression_ok).setOnClickListener(
-	// new View.OnClickListener() {
-	//
-	// @Override
-	// public void onClick(View v) {
-	// String operator = ((Button) findViewById(R.id.expression_operator))
-	// .getText().toString();
-	// expressions
-	// .add(new LogicExpression(leftExpression,
-	// LogicOperator.parse(operator),
-	// rightExpression));
-	// checkExpressionEnabled();
-	// expressionlistAdapter.notifyDataSetChanged();
-	// }
-	// });
-	//
-	// }
-	//
-	// private void checkTypedValueOkEnabled() {
-	// findViewById(R.id.typedvalue_ok)
-	// .setEnabled(
-	// (leftValue != null && rightValue != null && !" . "
-	// .equals(((Button) findViewById(R.id.typedvalue_comparator))
-	// .getText().toString())));
-	// }
-	//
-	// private void checkExpressionEnabled() {
-	// findViewById(R.id.expression_left).setEnabled(expressions.size() >= 2);
-	// findViewById(R.id.expression_right).setEnabled(expressions.size() >= 2);
-	// findViewById(R.id.expression_operator).setEnabled(
-	// expressions.size() >= 2);
-	// }
-	//
-	// private void checkExpressionOkEnabled() {
-	// findViewById(R.id.expression_ok)
-	// .setEnabled(
-	// (leftExpression != null && rightExpression != null && !" . "
-	// .equals(((Button) findViewById(R.id.expression_operator))
-	// .getText().toString())));
-	// }
-
 }

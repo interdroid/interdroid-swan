@@ -93,6 +93,34 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Select Expression"
+            android:name=".ui.SelectExpressionDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Merge Expressions"
+            android:name=".ui.MergeExpressionDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="New Combined Expressions"
+            android:name=".ui.NewMathExpressionDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:excludeFromRecents="true"
+            android:label="Select Operator"
+            android:name=".ui.SelectOperatorDialog"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
 
         <!--
              <activity android:label="ContextDroid Monitor" android:name=".servicemonitor.ServiceMonitor">

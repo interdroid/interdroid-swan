@@ -100,7 +100,7 @@ public class LogicExpression extends Expression {
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-					throws SensorConfigurationException, SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		setId(id);
 		mLeftExpression.initialize(id + ".L", sensorManager);
 		if (mRightExpression != null) {
@@ -123,11 +123,7 @@ public class LogicExpression extends Expression {
 		// for a while (e.g. one.deferUntil - other.history) iff we're able to
 		// short circuit the expression. That depends one the operator and the
 		// value of the first expression
-		
-		
-		
-		
-		
+
 		long leftDeferUntil = mLeftExpression.getDeferUntil();
 		long leftHistory = mLeftExpression.getHistoryLength();
 		long rightDeferUntil = mRightExpression.getDeferUntil();
@@ -186,7 +182,7 @@ public class LogicExpression extends Expression {
 			break;
 		case AND:
 			if (firstResult == ContextManager.UNDEFINED
-			|| lastResult == ContextManager.UNDEFINED) {
+					|| lastResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED, now);
 			} else if (firstResult == ContextManager.TRUE
 					&& lastResult == ContextManager.TRUE) {
@@ -197,7 +193,7 @@ public class LogicExpression extends Expression {
 			break;
 		case OR:
 			if (firstResult == ContextManager.UNDEFINED
-			&& lastResult == ContextManager.UNDEFINED) {
+					&& lastResult == ContextManager.UNDEFINED) {
 				setResult(ContextManager.UNDEFINED, now);
 			} else if (firstResult == ContextManager.TRUE
 					|| lastResult == ContextManager.TRUE) {
@@ -279,9 +275,8 @@ public class LogicExpression extends Expression {
 		if (mRightExpression == null) {
 			return mOperator.toString() + " " + mLeftExpression.toParseString();
 		} else {
-			return "(" + mLeftExpression.toParseString()
-					+ " " + mOperator + " "
-					+ mLeftExpression.toParseString() +")";
+			return "(" + mLeftExpression.toParseString() + " " + mOperator
+					+ " " + mRightExpression.toParseString() + ")";
 		}
 	}
 
@@ -303,8 +298,8 @@ public class LogicExpression extends Expression {
 
 	@Override
 	public TimestampedValue[] getValues(String string, long now) {
-		return new TimestampedValue[] {new TimestampedValue(getResult(),
-				getLastEvaluationTime())};
+		return new TimestampedValue[] { new TimestampedValue(getResult(),
+				getLastEvaluationTime()) };
 	}
 
 	/**

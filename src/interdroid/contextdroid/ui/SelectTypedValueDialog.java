@@ -46,7 +46,7 @@ public class SelectTypedValueDialog extends Activity {
 						case 2: // combined (math)
 							startActivityForResult(new Intent(
 									getApplicationContext(),
-									EnterConstantDialog.class), 0);
+									NewMathExpressionDialog.class), 0);
 
 							break;
 						default:

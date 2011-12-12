@@ -12,7 +12,7 @@
         android:text="select data" />
 
     <Button
-        android:id="@+id/comparator"
+        android:id="@+id/operator"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="select operator" />

@@ -113,17 +113,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	@Override
 	public final String toParseString() {
-		StringBuffer result = new StringBuffer();
-		result.append("}");
-		boolean first = true;
-		for (TimestampedValue value : values) {
-			if (!first) {
-				result.append(", ");
-				first = false;
-			}
-			result.append(value);
-		}
-		return result.toString();
+		return values[0].getValue().toString();
 	}
 
 	@Override
