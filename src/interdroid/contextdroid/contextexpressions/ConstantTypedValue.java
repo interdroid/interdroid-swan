@@ -8,10 +8,10 @@ import android.os.Parcel;
 
 /**
  * Represents a typed expression which is a constant.
- * 
+ *
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- * 
+ *
  */
 public class ConstantTypedValue extends TypedValue {
 
@@ -27,7 +27,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Constructs a constant with the given value.
-	 * 
+	 *
 	 * @param constantValue
 	 *            the value of the constant.
 	 */
@@ -38,7 +38,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Construct via Parcelable interface.
-	 * 
+	 *
 	 * @param saved
 	 *            the saved values to read from.
 	 */
@@ -65,7 +65,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */
@@ -113,7 +113,11 @@ public class ConstantTypedValue extends TypedValue {
 
 	@Override
 	public final String toParseString() {
-		return values[0].getValue().toString();
+		if (values[0].getValue() instanceof String) {
+			return "'" + values[0].getValue().toString() + "'";
+		} else {
+			return values[0].getValue().toString();
+		}
 	}
 
 	@Override
