@@ -11,6 +11,45 @@
         android:layout_height="wrap_content"
         android:hint="constant" />
 
+    <RadioGroup
+        android:id="@+id/type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/integer_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Integer" />
+
+        <RadioButton
+            android:id="@+id/long_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Long" />
+
+        <RadioButton
+            android:id="@+id/float_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Float" />
+
+        <RadioButton
+            android:id="@+id/double_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Double" />
+
+        <RadioButton
+            android:id="@+id/string_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="String" />
+    </RadioGroup>
+
     <Button
         android:id="@+id/ok"
         android:layout_width="fill_parent"

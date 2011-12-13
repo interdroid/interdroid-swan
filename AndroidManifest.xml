@@ -52,10 +52,11 @@
             android:name=".ui.ExpressionBuilderActivity"
             android:screenOrientation="portrait" >
             <intent-filter >
-                <action android:name="android.intent.action.MAIN" >
+                <action android:name="interdroid.contextdroid.ui.BUILD_EXPRESSION" >
                 </action>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" >
+                </category>
             </intent-filter>
         </activity>
         <activity
@@ -252,9 +253,10 @@
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.ProximitySensor"
+            android:exported="true"
             android:process=":proximitysensor" >
+
             <meta-data
                 android:name="entityId"
                 android:value="proximity" />

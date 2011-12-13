@@ -18,27 +18,26 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 /**
- * This class is the abstract base for all Sensor services.
- * Sensor implementors are advised to use AbstractVdbSensor or
- * AbstractMemorySensor as a basis for their sensors instead of
- * using this class directly.
- *
+ * This class is the abstract base for all Sensor services. Sensor implementors
+ * are advised to use AbstractVdbSensor or AbstractMemorySensor as a basis for
+ * their sensors instead of using this class directly.
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
-public abstract class AbstractSensorBase extends Service
-implements SensorInterface {
+public abstract class AbstractSensorBase extends Service implements
+		SensorInterface {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(AbstractSensorBase.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(AbstractSensorBase.class);
 
 	/**
 	 * Gets all readings from timespan seconds ago until now. Readings are in
 	 * reverse order (latest first). This is important for the expression
 	 * engine.
-	 *
+	 * 
 	 * @param now
 	 *            the start
 	 * @param timespan
@@ -50,31 +49,32 @@ implements SensorInterface {
 	protected static final List<TimestampedValue> getValuesForTimeSpan(
 			final List<TimestampedValue> values, final long now,
 			final long timespan) {
-				// make a copy of the list
-				List<TimestampedValue> result;
+		// make a copy of the list
+		List<TimestampedValue> result;
 
-				if (timespan == 0) {
-					result =  values.
-							subList(Math.max(0, values.size() - 1),
-									values.size());
-				} else {
-					result = new ArrayList<TimestampedValue>();
-					result.addAll(values);
-
-					int startPos = 0;
-					int endPos = 0;
-					for (int i = 0; i < values.size(); i++) {
-						if ((now - timespan) > values.get(i).getTimestamp()) {
-							startPos++;
-						}
-						if (now > values.get(i).getTimestamp()) {
-							endPos++;
-						}
+		if (timespan == 0) {
+			result = values.subList(Math.max(0, values.size() - 1),
+					values.size());
+		} else {
+			result = new ArrayList<TimestampedValue>();
+			int startPos = 0;
+			int endPos = 0;
+			if (values != null) {
+				result.addAll(values);
+				for (int i = 0; i < values.size(); i++) {
+					if ((now - timespan) > values.get(i).getTimestamp()) {
+						startPos++;
 					}
-					result = result.subList(startPos, endPos);
+					if (now > values.get(i).getTimestamp()) {
+						endPos++;
+					}
 				}
-				return result;
 			}
+
+			result = result.subList(startPos, endPos);
+		}
+		return result;
+	}
 
 	/**
 	 * The sensor interface.
@@ -101,20 +101,17 @@ implements SensorInterface {
 	/**
 	 * The registered configurations for the sensor.
 	 */
-	protected final Map<String, Bundle> registeredConfigurations =
-			new HashMap<String, Bundle>();
+	protected final Map<String, Bundle> registeredConfigurations = new HashMap<String, Bundle>();
 
 	/**
 	 * The value paths registered as watched.
 	 */
-	protected final Map<String, String> registeredValuePaths = new
-			HashMap<String, String>();
+	protected final Map<String, String> registeredValuePaths = new HashMap<String, String>();
 
 	/**
 	 * The expression ids for each value path.
 	 */
-	protected final Map<String, List<String>> expressionIdsPerValuePath =
-			new HashMap<String, List<String>>();
+	protected final Map<String, List<String>> expressionIdsPerValuePath = new HashMap<String, List<String>>();
 
 	/** Access to the sensor service to send notifications. */
 	protected SensorContextServiceConnector contextServiceConnector;
@@ -124,18 +121,19 @@ implements SensorInterface {
 	/**
 	 * A map of what has been notified.
 	 */
-	private final HashMap<String, Boolean> notified =
-			new HashMap<String, Boolean>();
+	private final HashMap<String, Boolean> notified = new HashMap<String, Boolean>();
 
 	/**
 	 * Initializes the default configuration for this sensor.
-	 * @param defaults the bundle to add defaults to
+	 * 
+	 * @param defaults
+	 *            the bundle to add defaults to
 	 */
 	public abstract void initDefaultConfiguration(Bundle defaults);
 
 	/**
-	 * Called when the sensor is starting to allow subclasses to handle
-	 * any setup that needs to be done.
+	 * Called when the sensor is starting to allow subclasses to handle any
+	 * setup that needs to be done.
 	 */
 	protected abstract void init();
 
@@ -144,9 +142,9 @@ implements SensorInterface {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see android.app.Service#onCreate()
-	 *
+	 * 
 	 * Creates the ContextManager and connects to the ContextDroid service.
 	 */
 	@Override
@@ -174,13 +172,11 @@ implements SensorInterface {
 	}
 
 	/** The binder. */
-	private final IAsynchronousContextSensor.Stub mBinder =
-			new IAsynchronousContextSensor.Stub() {
+	private final IAsynchronousContextSensor.Stub mBinder = new IAsynchronousContextSensor.Stub() {
 
 		@Override
 		public void register(final String id, final String valuePath,
-				final Bundle configuration)
-				throws RemoteException {
+				final Bundle configuration) throws RemoteException {
 
 			// TODO: We should be checking if valuePath exists and if id is
 			// unique.
@@ -236,14 +232,13 @@ implements SensorInterface {
 		}
 
 		@Override
-		public List<TimestampedValue> getValues(final String id, final long now,
-				final long timespan) throws RemoteException {
+		public List<TimestampedValue> getValues(final String id,
+				final long now, final long timespan) throws RemoteException {
 			synchronized (AbstractSensorBase.this) {
 				notified.put(getRootIdFor(id), false);
 			}
 			try {
-				return mSensorInterface.getValues(id, now,
-						timespan);
+				return mSensorInterface.getValues(id, now, timespan);
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
@@ -278,9 +273,9 @@ implements SensorInterface {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see android.app.Service#onBind(android.content.Intent)
-	 *
+	 * 
 	 * returns the sensor interface
 	 */
 	@Override
@@ -290,17 +285,17 @@ implements SensorInterface {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see android.app.Service#onDestroy()
-	 *
+	 * 
 	 * Stops the connection to ContextDroid
 	 */
 	@Override
 	public final void onDestroy() {
 		try {
-		LOG.debug("unbind context service from: {}", getClass());
-		contextServiceConnector.stop();
-		mSensorInterface.onDestroySensor();
+			LOG.debug("unbind context service from: {}", getClass());
+			contextServiceConnector.stop();
+			mSensorInterface.onDestroySensor();
 		} catch (Exception e) {
 			LOG.error("Got exception destroying sensor service", e);
 		}
@@ -310,7 +305,8 @@ implements SensorInterface {
 	// =-=-=-=- Utility Functions -=-=-=-=
 
 	/**
-	 * @param id the id to find the root of
+	 * @param id
+	 *            the id to find the root of
 	 * @return the id of the root expression
 	 */
 	protected final String getRootIdFor(final String id) {
@@ -323,7 +319,9 @@ implements SensorInterface {
 
 	/**
 	 * Send a notification that data changed for the given id.
-	 * @param id the id of the value to notify for.
+	 * 
+	 * @param id
+	 *            the id of the value to notify for.
 	 */
 	protected final void notifyDataChangedForId(final String id) {
 		String rootId = getRootIdFor(id);
@@ -342,7 +340,9 @@ implements SensorInterface {
 
 	/**
 	 * Send a notification that data for the given value path changed.
-	 * @param valuePath the value path to notify for.
+	 * 
+	 * @param valuePath
+	 *            the value path to notify for.
 	 */
 	protected final void notifyDataChanged(final String valuePath) {
 		List<String> notify = new ArrayList<String>();

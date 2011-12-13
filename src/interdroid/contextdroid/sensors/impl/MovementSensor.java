@@ -59,9 +59,9 @@ public class MovementSensor extends AbstractMemorySensor {
 			if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
 				for (int i = 0; i < 3; i++) {
 					putValueTrimSize(VALUE_PATHS[i], null, now,
-							event.values[i], HISTORY_SIZE);
+							(double) event.values[i], HISTORY_SIZE);
 				}
-				float len2 = (float) Math.sqrt(event.values[0]
+				double len2 = (double) Math.sqrt(event.values[0]
 						* event.values[0] + event.values[1] * event.values[1]
 						+ event.values[2] * event.values[2]);
 				putValueTrimSize(TOTAL_FIELD, null, now, len2, HISTORY_SIZE);

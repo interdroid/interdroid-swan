@@ -78,7 +78,6 @@ public class SoundSensor extends AbstractMemorySensor {
 		}
 		rmspow = 10.0 * Math.log10(Math.sqrt((double) sum_squares / numshorts)
 				/ Short.MAX_VALUE);
-		System.out.println(rmspow);
 		return rmspow;
 	}
 
@@ -110,7 +109,6 @@ public class SoundSensor extends AbstractMemorySensor {
 
 	@Override
 	public void onConnected() {
-		System.out.println("sound sensor connected!");
 	}
 
 	@Override

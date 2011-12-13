@@ -33,10 +33,10 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 */
 	private static final long serialVersionUID = 1056115630721395151L;
 
-	/**
-	 * Subtype ID for a Value Expression.
-	 */
-	protected static final int VALUE_EXPRESSION_TYPE = 0;
+	// /**
+	// * Subtype ID for a Value Expression.
+	// */
+	// protected static final int VALUE_EXPRESSION_TYPE = 0;
 
 	/**
 	 * Subtype ID for a Logic Expression.
@@ -57,7 +57,6 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 * Subtype ID for a Typed Value Expression.
 	 */
 	protected static final int TYPED_VALUE_EXPRESSION_TYPE = 4;
-
 
 	/**
 	 * Time until we need to reevaluate this expression.
@@ -102,6 +101,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	public static final Parcelable.Creator<Expression> CREATOR = new Parcelable.Creator<Expression>() {
 		@Override
 		public Expression createFromParcel(final Parcel in) {
+
 			Expression result;
 			// Ugh. I kind of hate this since we have to know
 			// all subclass types and include a flag for it
@@ -109,9 +109,9 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 			// and makes it easier to see what we are constructing.
 			int type = in.readInt();
 			switch (type) {
-			case VALUE_EXPRESSION_TYPE:
-				result = new ComparisonExpression(in);
-				break;
+			// case VALUE_EXPRESSION_TYPE:
+			// result = new ComparisonExpression(in);
+			// break;
 			case LOGIC_EXPRESSION_TYPE:
 				result = new LogicExpression(in);
 				break;
@@ -372,10 +372,13 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	protected abstract boolean hasCurrentTime();
 
 	/**
-	 * @param string the id for the expression
-	 * @param now the current timestamp
+	 * @param string
+	 *            the id for the expression
+	 * @param now
+	 *            the current timestamp
 	 * @return the values for this expression
-	 * @throws ContextDroidException if fetching values fails.
+	 * @throws ContextDroidException
+	 *             if fetching values fails.
 	 */
 	public abstract TimestampedValue[] getValues(String string, long now)
 			throws ContextDroidException;
@@ -397,7 +400,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	public abstract void sleepAndBeReadyAt(long readyTime);
 
 	public abstract long getHistoryLength();
-	
+
 	public abstract boolean isConstant();
 
 	/**

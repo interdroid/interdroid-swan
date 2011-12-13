@@ -144,15 +144,9 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 		ContextTypedValue sensor = new ContextTypedValue(entityId, path,
 				stringMap, mode, timespan);
-		System.out.println("Sensor Parse: " + sensor.toParseString());
-		System.out.println("Sensor: " + sensor.toString());
 
 		TypedValueExpression typedValueExpression = new TypedValueExpression(
 				sensor);
-		System.out.println("Typed Value Parse: "
-				+ typedValueExpression.toParseString());
-		System.out.println("Typed Value: " + typedValueExpression.toString());
-
 		return typedValueExpression.toParseString();
 	}
 
