@@ -81,8 +81,6 @@ public class NewExpressionDialog extends Activity {
 					// .getText().toString();
 					Expression newExpression = new ComparisonExpression(left,
 							comparator, right);
-					System.out.println("new Expression: "
-							+ newExpression.toString());
 					Intent result = new Intent();
 					result.putExtra("Expression", newExpression.toParseString());
 					// if (name != null && !name.equals("")) {

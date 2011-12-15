@@ -55,9 +55,13 @@ public class ComparisonExpression extends Expression {
 
 	/**
 	 * Constructs a comparison expression.
-	 * @param left the left expression
-	 * @param comparator the comparator
-	 * @param right the right expression
+	 * 
+	 * @param left
+	 *            the left expression
+	 * @param comparator
+	 *            the comparator
+	 * @param right
+	 *            the right expression
 	 */
 	public ComparisonExpression(final Expression left,
 			final Comparator comparator, final Expression right) {
@@ -74,20 +78,24 @@ public class ComparisonExpression extends Expression {
 	 */
 	protected ComparisonExpression(final Parcel in) {
 		super(in);
-		mLeftValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
+		mLeftValue = in.readParcelable(getClass().getClassLoader());
 		mComparator = Comparator.convert(in.readInt());
-		mRightValue = in.readParcelable(ComparisonExpression.class.getClassLoader());
+		mRightValue = in.readParcelable(getClass().getClassLoader());
 	}
 
 	/**
-	 * Constructs a comparison expression.
-	 * This is a convenience which wraps the TypedValues in
-	 * TypedValueExpressions until we refactor TypedValue to be
+	 * Constructs a comparison expression. This is a convenience which wraps the
+	 * TypedValues in TypedValueExpressions until we refactor TypedValue to be
 	 * an expression directly.
-	 * @param left the left expression
-	 * @param comparator the comparator
-	 * @param strategy the strategy used when comparing.
-	 * @param right the right expression
+	 * 
+	 * @param left
+	 *            the left expression
+	 * @param comparator
+	 *            the comparator
+	 * @param strategy
+	 *            the strategy used when comparing.
+	 * @param right
+	 *            the right expression
 	 */
 	public ComparisonExpression(TypedValue leftValue, Comparator comparator,
 			TypedValue rightValue) {
@@ -99,8 +107,7 @@ public class ComparisonExpression extends Expression {
 	/**
 	 * The CREATOR used to construct from a parcel.
 	 */
-	public static final Parcelable.Creator<ComparisonExpression> CREATOR
-	= new Parcelable.Creator<ComparisonExpression>() {
+	public static final Parcelable.Creator<ComparisonExpression> CREATOR = new Parcelable.Creator<ComparisonExpression>() {
 		@Override
 		public ComparisonExpression createFromParcel(final Parcel in) {
 			return new ComparisonExpression(in);
@@ -135,7 +142,7 @@ public class ComparisonExpression extends Expression {
 	@Override
 	public final void initialize(final String id,
 			final SensorManager sensorManager)
-					throws SensorConfigurationException, SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		setId(id);
 		mSensorManager = sensorManager;
 		mLeftValue.initialize(id + ".L", sensorManager);
@@ -177,11 +184,10 @@ public class ComparisonExpression extends Expression {
 		// do this with highest timestamp first, so we can maximize the
 		// deferuntil
 		for (int leftItem = left.length - 1; leftItem >= 0; leftItem--) {
-			for (int rightItem = left.length - 1; rightItem >= 0; rightItem--) {
+			for (int rightItem = right.length - 1; rightItem >= 0; rightItem--) {
 				int tempResult = evaluateLeafItem(left[leftItem].getValue(),
 						right[rightItem].getValue());
-				if (getHistoryReductionMode().equals(
-						HistoryReductionMode.ALL)) {
+				if (getHistoryReductionMode().equals(HistoryReductionMode.ALL)) {
 					if (tempResult == ContextManager.FALSE) {
 						endResult = ContextManager.FALSE;
 						leftIndex = leftItem;
@@ -271,7 +277,7 @@ public class ComparisonExpression extends Expression {
 	}
 
 	private static Mode[][][] mDeferStrategy = new Mode[2][2][Comparator
-	                                                          .values().length];
+			.values().length];
 	private static int LEFT_CONST = 0;
 	private static int RIGHT_CONST = 1;
 
@@ -285,46 +291,46 @@ public class ComparisonExpression extends Expression {
 			case GREATER_THAN:
 			case GREATER_THAN_OR_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-				                                                .convert()] = Mode.MAX_ANY;
+						.convert()] = Mode.MAX_ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-				                                                 .convert()] = Mode.MIN_ANY;
+						.convert()] = Mode.MIN_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-				                                                 .convert()] = Mode.MIN_ANY;
+						.convert()] = Mode.MIN_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-				                                                  .convert()] = Mode.MAX_ANY;
+						.convert()] = Mode.MAX_ANY;
 				break;
 			case LESS_THAN:
 			case LESS_THAN_OR_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-				                                                .convert()] = Mode.MIN_ANY;
+						.convert()] = Mode.MIN_ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-				                                                 .convert()] = Mode.MAX_ANY;
+						.convert()] = Mode.MAX_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-				                                                 .convert()] = Mode.MAX_ANY;
+						.convert()] = Mode.MAX_ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-				                                                  .convert()] = Mode.MIN_ANY;
+						.convert()] = Mode.MIN_ANY;
 				break;
 			case EQUALS:
 			case REGEX_MATCH:
 			case STRING_CONTAINS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-				                                                .convert()] = Mode.ANY;
+						.convert()] = Mode.ANY;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-				                                                 .convert()] = Mode.ALL;
+						.convert()] = Mode.ALL;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-				                                                 .convert()] = Mode.ANY;
+						.convert()] = Mode.ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-				                                                  .convert()] = Mode.ALL;
+						.convert()] = Mode.ALL;
 				break;
 			case NOT_EQUALS:
 				mDeferStrategy[LEFT_CONST][ContextManager.TRUE][comparator
-				                                                .convert()] = Mode.ALL;
+						.convert()] = Mode.ALL;
 				mDeferStrategy[LEFT_CONST][ContextManager.FALSE][comparator
-				                                                 .convert()] = Mode.ANY;
+						.convert()] = Mode.ANY;
 				mDeferStrategy[RIGHT_CONST][ContextManager.TRUE][comparator
-				                                                 .convert()] = Mode.ALL;
+						.convert()] = Mode.ALL;
 				mDeferStrategy[RIGHT_CONST][ContextManager.FALSE][comparator
-				                                                  .convert()] = Mode.ANY;
+						.convert()] = Mode.ANY;
 				break;
 			default:
 				throw new RuntimeException("Unknown Comparator.");
@@ -361,13 +367,13 @@ public class ComparisonExpression extends Expression {
 			int index;
 			if (mLeftValue.isConstant()) {
 				mode = mDeferStrategy[LEFT_CONST][getResult()][mComparator
-				                                               .convert()];
+						.convert()];
 				contextValue = mRightValue;
 				contextValues = right;
 				index = rightIndex;
 			} else {
 				mode = mDeferStrategy[RIGHT_CONST][getResult()][mComparator
-				                                                .convert()];
+						.convert()];
 				contextValue = mLeftValue;
 				contextValues = left;
 				index = leftIndex;
@@ -513,7 +519,6 @@ public class ComparisonExpression extends Expression {
 		dest.writeParcelable(mLeftValue, flags);
 		dest.writeInt(mComparator.convert());
 		dest.writeParcelable(mRightValue, flags);
-		dest.writeLong(mDeferUntil);
 	}
 
 	@Override
@@ -523,7 +528,7 @@ public class ComparisonExpression extends Expression {
 
 	@Override
 	protected final int getSubtypeId() {
-		return VALUE_EXPRESSION_TYPE;
+		return COMPARISON_EXPRESSION_TYPE;
 	}
 
 	@Override
@@ -556,7 +561,8 @@ public class ComparisonExpression extends Expression {
 					}
 
 					try {
-						initialize(ComparisonExpression.this.getId(), mSensorManager);
+						initialize(ComparisonExpression.this.getId(),
+								mSensorManager);
 					} catch (SensorConfigurationException e) {
 						Log.e(TAG, "Failed to re-initialize sensor", e);
 					} catch (SensorSetupFailedException e) {
@@ -571,7 +577,8 @@ public class ComparisonExpression extends Expression {
 
 	@Override
 	public long getHistoryLength() {
-		return Math.max(mLeftValue.getHistoryLength(), mRightValue.getHistoryLength());
+		return Math.max(mLeftValue.getHistoryLength(),
+				mRightValue.getHistoryLength());
 	}
 
 	protected boolean hasCurrentTime() {
@@ -580,8 +587,8 @@ public class ComparisonExpression extends Expression {
 
 	@Override
 	public TimestampedValue[] getValues(String string, long now) {
-		return new TimestampedValue[] {new TimestampedValue(getResult(),
-				getLastEvaluationTime())};
+		return new TimestampedValue[] { new TimestampedValue(getResult(),
+				getLastEvaluationTime()) };
 	}
 
 	/**

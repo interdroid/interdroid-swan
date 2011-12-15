@@ -151,7 +151,6 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 		public void onLocationChanged(final Location location) {
 			// if we couldn't use the requestSingleUpdate method, we have to
 			// stop listening explicitly
-			System.out.println("location changed");
 
 			if (mRequestSingleUpdateMethod == null) {
 				stopListener();
@@ -377,7 +376,6 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	}
 
 	private void requestSingleUpdateGingerBread(String provider) {
-		System.out.println("ginger: " + provider);
 		try {
 			mRequestSingleUpdateMethod.invoke(locationManager, new Object[] {
 					provider, locationListener, Looper.getMainLooper() });

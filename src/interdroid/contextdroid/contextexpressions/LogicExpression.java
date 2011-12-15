@@ -76,10 +76,9 @@ public class LogicExpression extends Expression {
 	 */
 	protected LogicExpression(final Parcel in) {
 		super(in);
-		ClassLoader loader = LogicExpression.class.getClassLoader();
-		mLeftExpression = in.readParcelable(loader);
+		mLeftExpression = in.readParcelable(getClass().getClassLoader());
 		mOperator = LogicOperator.convert(in.readInt());
-		mRightExpression = in.readParcelable(loader);
+		mRightExpression = in.readParcelable(getClass().getClassLoader());
 	}
 
 	/**

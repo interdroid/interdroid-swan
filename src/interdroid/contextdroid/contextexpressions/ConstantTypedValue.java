@@ -8,10 +8,10 @@ import android.os.Parcel;
 
 /**
  * Represents a typed expression which is a constant.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class ConstantTypedValue extends TypedValue {
 
@@ -27,7 +27,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Constructs a constant with the given value.
-	 *
+	 * 
 	 * @param constantValue
 	 *            the value of the constant.
 	 */
@@ -38,7 +38,7 @@ public class ConstantTypedValue extends TypedValue {
 
 	/**
 	 * Construct via Parcelable interface.
-	 *
+	 * 
 	 * @param saved
 	 *            the saved values to read from.
 	 */
@@ -60,18 +60,22 @@ public class ConstantTypedValue extends TypedValue {
 	@Override
 	protected final void writeSubclassToParcel(final Parcel dest,
 			final int flags) {
-		dest.writeParcelableArray(values, 0);
+		dest.writeParcelable(values[0], flags);
+
+		// dest.writeParcelableArray(values, flags);
 	}
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
 	public final void readFromParcel(final Parcel in) {
-		values = (TimestampedValue[]) in.readParcelableArray(this.getClass()
-				.getClassLoader());
+		values = new TimestampedValue[] { in.readParcelable(getClass()
+				.getClassLoader()) };
+		// values = (TimestampedValue[]) in.readParcelableArray(this.getClass()
+		// .getClassLoader());
 	}
 
 	/** The CREATOR. */

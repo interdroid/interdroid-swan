@@ -37,7 +37,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 	/** Value of ACCURACY must be one of SensorManager.SENSOR_DELAY_* */
 	public static final String ACCURACY = "accuracy";
 
-	public static final String PROXIMITY_FIELD = "proximity";
+	public static final String DISTANCE_FIELD = "distance";
 
 	protected static final int HISTORY_SIZE = 30;
 
@@ -54,17 +54,15 @@ public class ProximitySensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-				for (int i = 0; i < 3; i++) {
-					putValueTrimSize(VALUE_PATHS[i], null, now,
-							event.values[i], HISTORY_SIZE);
-				}
+				putValueTrimSize(VALUE_PATHS[0], null, now,
+						(double) event.values[0], HISTORY_SIZE);
 			}
 		}
 	};
 
 	@Override
 	public String[] getValuePaths() {
-		return new String[] { PROXIMITY_FIELD };
+		return new String[] { DISTANCE_FIELD };
 	}
 
 	@Override
@@ -75,10 +73,10 @@ public class ProximitySensor extends AbstractMemorySensor {
 
 	@Override
 	public String getScheme() {
-		return "{'type': 'record', 'name': 'proximitySensor', 'namespace': 'context.sensor',"
+		return "{'type': 'record', 'name': 'proximity', 'namespace': 'context.sensor',"
 				+ " 'fields': ["
 				+ "            {'name': '"
-				+ PROXIMITY_FIELD
+				+ DISTANCE_FIELD
 				+ "', 'type': 'double'}"
 				+ "           ]"
 				+ "}".replace('\'', '"');
@@ -119,8 +117,8 @@ public class ProximitySensor extends AbstractMemorySensor {
 			}
 			highestAccuracy = Math.max(highestAccuracy,
 					SensorManager.SENSOR_DELAY_FASTEST);
-			sensorManager.registerListener(sensorEventListener, proximitySensor,
-					highestAccuracy);
+			sensorManager.registerListener(sensorEventListener,
+					proximitySensor, highestAccuracy);
 		}
 
 	}

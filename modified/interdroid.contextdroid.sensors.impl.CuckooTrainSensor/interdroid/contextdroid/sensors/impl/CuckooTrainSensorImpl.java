@@ -98,7 +98,6 @@ public class CuckooTrainSensorImpl extends PushService implements
 							"interdroid.contextdroid.sensors.impl",
 							"CuckooTrainSensor", (date.getTime() + ":" + id
 									+ ":" + valuePath).getBytes())) {
-						System.out.println("success");
 						previous = date;
 					}
 				}

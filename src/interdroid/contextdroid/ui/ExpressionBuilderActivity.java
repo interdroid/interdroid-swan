@@ -41,6 +41,11 @@ public class ExpressionBuilderActivity extends Activity {
 			}
 			((TextView) convertView).setText(expressions.get(position)
 					.toString());
+			if (position == currentPosition) {
+				convertView.setBackgroundColor(Color.RED);
+			} else {
+				convertView.setBackgroundColor(Color.TRANSPARENT);
+			}
 			return convertView;
 		}
 
@@ -123,23 +128,9 @@ public class ExpressionBuilderActivity extends Activity {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
-						System.out.println("current: " + currentPosition
-								+ " new: " + position + " row: " + id);
-						if (currentPosition >= 0
-								&& currentPosition < parent.getChildCount()) {
-							System.out.println("Setting " + currentPosition
-									+ " to transparent");
-							parent.getChildAt(currentPosition)
-									.setBackgroundColor(Color.TRANSPARENT);
-						}
 						currentPosition = position;
-						System.out.println("Setting " + currentPosition
-								+ " to red");
-						parent.getChildAt(currentPosition).setBackgroundColor(
-								Color.RED);
-						parent.invalidate();
 						findViewById(R.id.expression_finished).setEnabled(true);
-
+						parent.invalidate();
 					}
 				});
 
@@ -150,13 +141,13 @@ public class ExpressionBuilderActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						// TODO Auto-generated method stub
 						if (currentPosition >= 0
 								&& currentPosition < expressions.size()) {
 							String expression = expressions
 									.get(currentPosition).toParseString();
 							setResult(RESULT_OK, new Intent().putExtra(
 									"Expression", expression));
+							finish();
 						} else {
 							Toast.makeText(getApplicationContext(),
 									"Please Select an Expression",

@@ -32,7 +32,8 @@ public class TypedValueExpression extends Expression {
 	}
 
 	public TypedValueExpression(Parcel in) {
-		mValue = in.readParcelable(TypedValue.class.getClassLoader());
+		super(in);
+		mValue = in.readParcelable(getClass().getClassLoader());
 	}
 
 	@Override
