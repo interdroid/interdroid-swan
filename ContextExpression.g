@@ -47,6 +47,21 @@ public static final TypedValue parseTypedValue(final String expression) throws E
         }
 }
 
+public static final long convertTime(Token time, Token unit) {
+	long unitFactor = 1;
+	if (unit != null) {
+		String unitText = unit.getText();
+		if (unitText.equals("h") || unitText.equals("H")) {
+			unitFactor = 60 * 60 * 1000;
+		} else if (unitText.equals("m") || unitText.equals("M")) {
+			unitFactor = 60 * 1000;
+		} else if (unitText.equals("s") || unitText.equals("S")) {
+			unitFactor = 1000;
+		}
+	}
+	return Long.parseLong(time.getText()) * unitFactor;
+}
+
 }
 
 // Simple rules
@@ -137,10 +152,18 @@ context_typed_value returns [ContextTypedValue typed_value]
 			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
 	|	entity=ID ':' path=value_path '?' config=configuration_options
 			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, config /*.configuration */);}
-	|	entity=ID ':' path=value_path '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
-			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, time == null ? 0 : Long.parseLong(time.getText()));}
-	|	entity=ID ':' path=value_path '?' config=configuration_options '{' ((mode=history_mode ',' time=INT) | mode=history_mode | time=INT) '}'
-			{$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , time == null ? 0 : Long.parseLong(time.getText()));}
+	|	entity=ID ':' path=value_path '{' ((mode=history_mode ',' time=time_value) | mode=history_mode | time=time_value) '}'
+			{if (time == null) {
+				$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */);
+			} else {
+				$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */, mode /*.history_mode */, time);
+			}}
+	|	entity=ID ':' path=value_path '?' config=configuration_options '{' ((mode=history_mode ',' time=time_value) | mode=history_mode | time=time_value) '}'
+			{if (time == null) {
+				$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */);
+			} else {
+				$typed_value = new ContextTypedValue(entity.getText(), path /* .value_path */ , config /*.configuration */ , mode /* .history_mode */ , time);
+			}}
 	;
 
 constant_typed_value returns [ConstantTypedValue typed_value]
@@ -287,7 +310,22 @@ expression returns [Expression expression]
 		{$expression = logic /* .expression */ ;}
 	;
 
+// Time
+time_value returns [Long time]
+	:
+	val=INT unit=TIME_UNIT? 
+	{ long theTime = convertTime(val, unit); }
+	(rep_val=INT rep_unit=TIME_UNIT? 
+	{ theTime += convertTime(rep_val, rep_unit);}
+	)*
+	{$time = new Long(theTime);}
+	;
+
 // Lexar rules
+
+TIME_UNIT 
+	:	'h'|'H'|'m'|'M'|'s'|'S'|'ms';
+
 // Binary
 OR    :     '||' | 'or' | 'OR';
 AND   :     '&&' | 'and' | 'AND';

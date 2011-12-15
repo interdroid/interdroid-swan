@@ -22,10 +22,10 @@ import android.os.RemoteException;
 
 /**
  * This represents a TypedValue where the values come from context.
- * 
+ *
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- * 
+ *
  */
 public class ContextTypedValue extends TypedValue {
 	/**
@@ -99,7 +99,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from a string.
-	 * 
+	 *
 	 * @param unparsedContextInfo
 	 *            the string to parse
 	 */
@@ -110,7 +110,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path.
-	 * 
+	 *
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -123,7 +123,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map.
-	 * 
+	 *
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -139,7 +139,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map with mode and timespan.
-	 * 
+	 *
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -155,8 +155,41 @@ public class ContextTypedValue extends TypedValue {
 	}
 
 	/**
+	 * Construct from an entity and path and config map with mode and timespan.
+	 *
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
+	 * @param mode
+	 *            the history reduction mode
+	 */
+	public ContextTypedValue(final String entity, final String path,
+			final HistoryReductionMode mode) {
+		this(entity, path, null, mode, DEFAULT_HISTORY_LENGTH);
+	}
+
+	/**
 	 * Construct from an entity and path and config map.
-	 * 
+	 *
+	 * @param entity
+	 *            the entity id
+	 * @param path
+	 *            the value path
+	 * @param config
+	 *            the map with configuration data
+	 * @param mode
+	 *            the history reduction mode
+	 */
+	public ContextTypedValue(final String entity, final String path,
+			final Map<String, String> config, final HistoryReductionMode mode) {
+		this(entity, path, config, mode, DEFAULT_HISTORY_LENGTH);
+	}
+
+
+	/**
+	 * Construct from an entity and path and config map.
+	 *
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -185,7 +218,7 @@ public class ContextTypedValue extends TypedValue {
 	/**
 	 * Sets the timespan of history to keep. This sets to DEFAULT_HISTORY_LENGTH
 	 * if timespan <= 0
-	 * 
+	 *
 	 * @param timespan
 	 *            the timespan to set to.
 	 */
@@ -199,7 +232,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct with a specific history mode and timespan.
-	 * 
+	 *
 	 * @param unparsedContextInfo
 	 *            the string to parse
 	 * @param mode
@@ -239,7 +272,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from a Parcel.
-	 * 
+	 *
 	 * @param source
 	 *            the Parcel to read from
 	 */
@@ -332,7 +365,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */
@@ -433,7 +466,7 @@ public class ContextTypedValue extends TypedValue {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return a string with the configuration for this value.
 	 */
 	private String getParseConfig() {
@@ -460,7 +493,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Sets the id for this TypedValue.
-	 * 
+	 *
 	 * @param id
 	 *            the id to set to
 	 */
