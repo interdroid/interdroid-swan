@@ -20,9 +20,9 @@ import android.net.Uri;
 
 /**
  * Base class for sensors which store their data into a VDB database.
- * 
+ *
  * @author nick &lt;palmer@cs.vu.nl&gt;
- * 
+ *
  */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
@@ -92,7 +92,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 * 
+	 *
 	 * @param id
 	 *            the id
 	 * @param values
@@ -110,7 +110,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 * 
+	 *
 	 * @param values
 	 *            the values to store
 	 * @param now
@@ -126,7 +126,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this given content
 	 * resolver. Fills in the timestamp and expiration before storing.
-	 * 
+	 *
 	 * @param resolver
 	 *            the resolver to store with
 	 * @param values
@@ -136,7 +136,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param uri
 	 *            the uri to store into
 	 */
-	private static final void putValues(final ContentResolver resolver,
+	public static final void putValues(final ContentResolver resolver,
 			final Uri uri, final ContentValues values, final long now) {
 		values.put(TIMESTAMP_FIELD, now);
 		resolver.insert(uri, values);
@@ -231,7 +231,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param id
 	 * @return a cursor with the value data
 	 */
-	private static Cursor getValuesCursor(final Context context, final Uri uri,
+	protected static Cursor getValuesCursor(final Context context, final Uri uri,
 			final String[] values, final long now, final long timespan,
 			String id) {
 		LOG.debug("timespan: {} end: {}", timespan, now);
@@ -255,7 +255,9 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 				whereArgs = new String[] { id, String.valueOf(now - timespan) };
 			}
 		} else {
-			whereArgs = new String[] { String.valueOf(now - timespan) };
+			if (timespan > 0) {
+				whereArgs = new String[] { String.valueOf(now - timespan) };
+			}
 		}
 
 		Cursor c = null;
