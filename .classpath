@@ -28,6 +28,5 @@
 	<classpathentry kind="lib" path="/vdb/external/jackson-mapper-asl-1.7.3.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/jsch-0.1.44-1.jar"/>
 	<classpathentry kind="lib" path="/vdb/external/paranamer-2.3.jar"/>
-	<classpathentry kind="lib" path="/vdb/vdb.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
