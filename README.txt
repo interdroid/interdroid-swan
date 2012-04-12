@@ -1,10 +1,10 @@
-** ContextDroid **
+** Swan **
 ------------------
 
-ContextDroid is a framework which makes it easy to build context aware
+Swan is a framework which makes it easy to build context aware
 applications for the Android platform.
 
-What is ContextDroid?
+What is Swan?
 ---------------------
 
 This project aims to make it easy to build context aware applications.
@@ -22,7 +22,7 @@ More information can be found on the Interdroid project website:
 
 The latest source repository tree is accessible through Git at:
 
-git@github.com:interdroid/ContextDroid.git
+git@github.com:interdroid/interdroid-swan.git
 
 You can send bug reports, feature requests, cries for help, or descriptions of 
 interesting way in which you have used this project to: palmer at cs.vu.nl 

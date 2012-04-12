@@ -1,3 +1,0 @@
-package interdroid.contextdroid.contextservice;
-
-parcelable ContextDroidServiceException;

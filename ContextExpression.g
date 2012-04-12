@@ -5,7 +5,7 @@ options {
 }
 
 @header {
-package interdroid.contextdroid.contextexpressions;
+package interdroid.swan.contextexpressions;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Stack;
 }
 
 @lexer::header {
-package interdroid.contextdroid.contextexpressions;
+package interdroid.swan.contextexpressions;
 }
 
 @members {

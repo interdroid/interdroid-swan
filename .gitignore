@@ -1,5 +1,5 @@
 doc/
 bin/
 gen/
-contextdroid.jar
-contextdroid-sensor.jar
+swan.jar
+swan-sensor.jar

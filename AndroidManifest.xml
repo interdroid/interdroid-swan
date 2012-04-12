@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="interdroid.contextdroid"
+    package="interdroid.swan"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -9,7 +9,7 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name" >
         <activity
-            android:label="Launch ContextDroid Service"
+            android:label="Launch Swan Service"
             android:name=".LaunchService" >
         </activity>
 
@@ -24,10 +24,10 @@
             android:label="CD-Test-receiver"
             android:name=".test.TestReceiver" >
             <intent-filter >
-                <action android:name="interdroid.contextdroid.EXPRESSIONTRUE" />
-                <action android:name="interdroid.contextdroid.EXPRESSIONFALSE" />
-                <action android:name="interdroid.contextdroid.EXPRESSIONUNDEFINED" />
-                <action android:name="interdroid.contextdroid.NEWREADING" />
+                <action android:name="interdroid.swan.EXPRESSIONTRUE" />
+                <action android:name="interdroid.swan.EXPRESSIONFALSE" />
+                <action android:name="interdroid.swan.EXPRESSIONUNDEFINED" />
+                <action android:name="interdroid.swan.NEWREADING" />
 
                 <data android:scheme="contextvalues" />
             </intent-filter>
@@ -52,7 +52,7 @@
             android:name=".ui.ExpressionBuilderActivity"
             android:screenOrientation="portrait" >
             <intent-filter >
-                <action android:name="interdroid.contextdroid.ui.BUILD_EXPRESSION" >
+                <action android:name="interdroid.swan.ui.BUILD_EXPRESSION" >
                 </action>
 
                 <category android:name="android.intent.category.DEFAULT" >
@@ -124,7 +124,7 @@
         </activity>
 
         <!--
-             <activity android:label="ContextDroid Monitor" android:name=".servicemonitor.ServiceMonitor">
+             <activity android:label="Swan Monitor" android:name=".servicemonitor.ServiceMonitor">
 			<intent-filter> <action android:name="android.intent.action.MAIN"></action>
 			<category android:name="android.intent.category.LAUNCHER" /> </intent-filter>
 			</activity>
@@ -193,7 +193,7 @@
             android:name=".contextservice.ContextService"
             android:process=":contextservice" >
             <intent-filter >
-                <action android:name="interdroid.contextdroid.intent.CONTEXTSERVICE" />
+                <action android:name="interdroid.swan.intent.CONTEXTSERVICE" />
             </intent-filter>
         </service>
         <service
@@ -211,13 +211,13 @@
                 android:value="interdroid.context.sensor.battery" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.battery"
-            android:name="interdroid.contextdroid.sensors.impl.BatterySensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.BatterySensor$Provider" />
 
         <service
             android:exported="true"
@@ -231,7 +231,7 @@
                 android:value="current" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -249,7 +249,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -268,7 +268,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -286,7 +286,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -308,13 +308,13 @@
                 android:value="interdroid.context.sensor.polar_hrm" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.polar_hrm"
-            android:name="interdroid.contextdroid.sensors.impl.PolarHeartRate$Provider" />
+            android:name="interdroid.swan.sensors.impl.PolarHeartRate$Provider" />
 
         <service
             android:exported="true"
@@ -331,7 +331,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -349,7 +349,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -367,7 +367,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -385,7 +385,7 @@
                 android:value="3" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -418,7 +418,7 @@
                 android:value="2" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -440,13 +440,13 @@
                 android:value="interdroid.context.sensor.bluetooth" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.bluetooth"
-            android:name="interdroid.contextdroid.sensors.impl.BluetoothSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.BluetoothSensor$Provider" />
 
         <service
             android:exported="true"
@@ -463,13 +463,13 @@
                 android:value="interdroid.context.sensor.signal" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.signal"
-            android:name="interdroid.contextdroid.sensors.impl.SignalStrengthSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.SignalStrengthSensor$Provider" />
 
         <service
             android:exported="true"
@@ -486,13 +486,13 @@
                 android:value="interdroid.context.sensor.screen" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.screen"
-            android:name="interdroid.contextdroid.sensors.impl.ScreenSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.ScreenSensor$Provider" />
 
         <service
             android:exported="true"
@@ -518,13 +518,13 @@
                 android:value="interdroid.context.sensor.location" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.location"
-            android:name="interdroid.contextdroid.sensors.impl.LocationSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.LocationSensor$Provider" />
 
         <service
             android:exported="true"
@@ -556,7 +556,7 @@
                 android:value="interdroid.context.sensor.smartlocation" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
@@ -565,7 +565,7 @@
 
         <provider
             android:authorities="interdroid.context.sensor.smartlocation"
-            android:name="interdroid.contextdroid.sensors.impl.SmartLocationSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.SmartLocationSensor$Provider" />
 
         <service
             android:exported="true"
@@ -582,13 +582,13 @@
                 android:value="interdroid.context.sensor.call" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.call"
-            android:name="interdroid.contextdroid.sensors.impl.CallSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.CallSensor$Provider" />
 
         <service
             android:exported="true"
@@ -608,13 +608,13 @@
                 android:value="interdroid.context.sensor.wifi" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
             android:authorities="interdroid.context.sensor.wifi"
-            android:name="interdroid.contextdroid.sensors.impl.WifiSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.WifiSensor$Provider" />
 
         <service
             android:exported="true"
@@ -637,7 +637,7 @@
                 android:value="null" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -664,7 +664,7 @@
                 android:value="null" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -688,7 +688,7 @@
                 android:value="null" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -718,7 +718,7 @@
                 android:value="0.0" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -742,7 +742,7 @@
                 android:value="null" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -769,7 +769,7 @@
                 android:value="true" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -787,7 +787,7 @@
                 android:value="*:I" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
@@ -802,7 +802,7 @@
                 android:value="started" />
 
             <intent-filter >
-                <action android:name="interdroid.contextdroid.sensor.DISCOVER" />
+                <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
     </application>
