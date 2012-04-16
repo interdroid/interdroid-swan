@@ -2,7 +2,6 @@ package interdroid.swan.sensors.impl;
 
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
-import interdroid.swan.sensors.AbstractMemorySensor;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
@@ -18,9 +17,9 @@ import android.os.Bundle;
 
 /**
  * A sensor for if the screen is on or off.
- * 
+ *
  * @author nick &lt;palmer@cs.vu.nl&gt;
- * 
+ *
  */
 public class ScreenSensor extends AbstractVdbSensor {
 	/**
@@ -31,9 +30,9 @@ public class ScreenSensor extends AbstractVdbSensor {
 
 	/**
 	 * The configuration activity for this sensor.
-	 * 
+	 *
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 * 
+	 *
 	 */
 	public static class ConfigurationActivity extends
 			AbstractConfigurationActivity {
@@ -67,9 +66,9 @@ public class ScreenSensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 * 
+	 *
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 * 
+	 *
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 

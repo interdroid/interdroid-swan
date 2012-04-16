@@ -7,7 +7,6 @@ import interdroid.swan.contextexpressions.LogicExpression;
 import interdroid.swan.contextexpressions.LogicOperator;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;

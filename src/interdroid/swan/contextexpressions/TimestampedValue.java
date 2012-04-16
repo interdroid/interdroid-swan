@@ -5,12 +5,11 @@ import java.util.Arrays;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * A tuple containing a value, a timestamp. Also includes static methods for
  * some calculations on lists of TimestampedValues
- * 
+ *
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  */
@@ -30,7 +29,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Construct from a parcel.
-	 * 
+	 *
 	 * @param saved
 	 *            read from a parcel
 	 */
@@ -40,7 +39,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Instantiates a new timestamped value.
-	 * 
+	 *
 	 * @param value
 	 *            the value
 	 */
@@ -50,7 +49,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Instantiates a new timestamped value.
-	 * 
+	 *
 	 * @param value
 	 *            the value
 	 * @param timestamp
@@ -77,7 +76,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -87,10 +86,10 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Calculate mean over array of values.
-	 * 
+	 *
 	 * @param values
 	 *            an array of timestamped values (double or castable to double)
-	 * 
+	 *
 	 * @return the mean value, with the latest timestamp
 	 */
 	public static TimestampedValue calculateMean(final TimestampedValue[] values) {
@@ -105,10 +104,10 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Calculate a time weighted mean over array of values.
-	 * 
+	 *
 	 * @param values
 	 *            an array of timestamped values (double or castable to double)
-	 * 
+	 *
 	 * @return the time weighted mean value, with the latest timestamp
 	 */
 	public static TimestampedValue calculateTimeWeightedMean(
@@ -130,10 +129,10 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Find maximum value.
-	 * 
+	 *
 	 * @param values
 	 *            an array of timestamped values
-	 * 
+	 *
 	 * @return the timestamped maximum value
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -151,10 +150,10 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Find mininimum value.
-	 * 
+	 *
 	 * @param values
 	 *            an array of timestamped values
-	 * 
+	 *
 	 * @return the timestamped minimum value
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -183,7 +182,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Read from parcel.
-	 * 
+	 *
 	 * @param in
 	 *            the in
 	 */

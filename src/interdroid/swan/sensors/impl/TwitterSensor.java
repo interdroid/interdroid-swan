@@ -3,11 +3,8 @@ package interdroid.swan.sensors.impl;
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractMemorySensor;
-import interdroid.swan.contextexpressions.TimestampedValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,7 +23,7 @@ import android.os.Bundle;
 
 /**
  * Based on the original TwitterSensor written by Rick de Leeuw
- * 
+ *
  * @author rkemp
  */
 public class TwitterSensor extends AbstractMemorySensor {
