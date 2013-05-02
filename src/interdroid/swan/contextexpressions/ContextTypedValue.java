@@ -481,7 +481,7 @@ public class ContextTypedValue extends TypedValue {
 				}
 				buf.append(key);
 				buf.append("=");
-				buf.append(mConfiguration.getString(key));
+				buf.append(mConfiguration.get(key));
 				first = false;
 			}
 			ret = buf.toString();
