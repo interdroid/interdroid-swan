@@ -2,14 +2,14 @@
 <project name="swan" default="grammar">
 	<target name="grammar">
 		<java fork="true" dir="${basedir}" classname="org.antlr.Tool"
-			classpath="${basedir}/external/antlr-3.4-complete-no-antlrv2.jar">
+			classpath="${basedir}/libs/antlr-3.4-complete-no-antlrv2.jar">
 			<arg line="-o ${basedir}/gen/interdroid/swan/contextexpressions/ ${basedir}/ContextExpression.g"/>
 		</java>
 	</target>
 
 	<target name="grammar-verbose">
 		<java fork="true" dir="${basedir}" classname="org.antlr.Tool"
-			classpath="${basedir}/external/antlr-3.4-complete-no-antlrv2.jar">
+			classpath="${basedir}/libs/antlr-3.4-complete-no-antlrv2.jar">
 			<arg line="-Xwatchconversion -Xnfastates -o ${basedir}/gen/interdroid/swan/contextexpressions/ ${basedir}/ContextExpression.g"/>
 		</java>
 	</target>
