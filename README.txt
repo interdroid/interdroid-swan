@@ -39,6 +39,6 @@ project is to create distributed middleware for mobile systems.
 This is free software. See the file "LICENSE.txt" for copying permissions.
 
 This software contains components from several other open source projects.
-Jars from these projects are stored in the "external" directory along
+Jars from these projects are stored in the "libs" directory along
 with licenses for each of these projects.
 
