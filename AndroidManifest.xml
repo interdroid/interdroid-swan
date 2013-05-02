@@ -135,57 +135,57 @@
              <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
 			/>
         -->
-        <activity android:name=".sensors.impl.SmartLocationSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.SmartLocationSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.LightSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.LightSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.MagnetometerSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.MagnetometerSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.PressureSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.PressureSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.ProximitySensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.ProximitySensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.TemperatureSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.TemperatureSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.CallSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.CallSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.RainSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.RainSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity"  android:exported="true">
         </activity>
-        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity" >
+        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity"  android:exported="true">
         </activity>
 
         <service
