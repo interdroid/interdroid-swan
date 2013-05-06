@@ -16,7 +16,7 @@ import android.os.Parcel;
 public class ConstantTypedValue extends TypedValue {
 
 	/**
-	 * Serial version uid.
+	 * Serial version uid
 	 */
 	private static final long serialVersionUID = 662276894518278404L;
 
