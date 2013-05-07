@@ -348,11 +348,15 @@ public abstract class AbstractSensorBase extends Service implements
 		List<String> notify = new ArrayList<String>();
 
 		synchronized (this) {
-			for (String id : expressionIdsPerValuePath.get(valuePath)) {
-				id = getRootIdFor(id);
-				if (!notified.get(id)) {
-					notify.add(id);
-					notified.put(id, true);
+			// can be null if multiple valuepaths are updated together and not
+			// for all of them, there's an id registered.
+			if (expressionIdsPerValuePath.get(valuePath) != null) {
+				for (String id : expressionIdsPerValuePath.get(valuePath)) {
+					id = getRootIdFor(id);
+					if (!notified.get(id)) {
+						notify.add(id);
+						notified.put(id, true);
+					}
 				}
 			}
 		}
