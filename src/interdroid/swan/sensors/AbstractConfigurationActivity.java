@@ -1,6 +1,5 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.R;
 import interdroid.swan.contextexpressions.ContextTypedValue;
 import interdroid.swan.contextexpressions.HistoryReductionMode;
 import interdroid.swan.contextexpressions.TypedValueExpression;
@@ -13,6 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -50,7 +50,9 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.default_preferences);
+		// addPreferencesFromResource(R.xml.default_preferences);
+		addPreferencesFromIntent(new Intent(
+				"interdroid.swan.DEFAULT_PREFERENCES"));
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
 		setResult(RESULT_CANCELED);
