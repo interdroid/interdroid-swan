@@ -8,6 +8,8 @@
         android:debuggable="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name" >
+        
+        
         <activity
             android:label="Launch Swan Service"
             android:name=".LaunchService" >
@@ -199,6 +201,7 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.BatterySensor"
+            android:icon="@drawable/battery_icon"
             android:process=":batterysensor" >
             <meta-data
                 android:name="entityId"
@@ -222,7 +225,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.TimeSensor"
-            android:process=":timesensor" >
+            android:process=":timesensor"
+            android:icon="@drawable/time_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="time" />
@@ -237,7 +241,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.TemperatureSensor"
-            android:process=":temperaturesensor" >
+            android:process=":temperaturesensor" 
+            android:icon="@drawable/temperature_icon">
             <meta-data
                 android:name="entityId"
                 android:value="temperature" />
@@ -255,7 +260,8 @@
         <service
             android:name=".sensors.impl.ProximitySensor"
             android:exported="true"
-            android:process=":proximitysensor" >
+            android:process=":proximitysensor" 
+            android:icon="@drawable/proximity_icon">
 
             <meta-data
                 android:name="entityId"
@@ -274,7 +280,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.PressureSensor"
-            android:process=":pressuresensor" >
+            android:process=":pressuresensor"
+            android:icon="@drawable/pressure_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="pressure" />
@@ -292,7 +299,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.PolarHeartRate"
-            android:process=":PolarHeartRate" >
+            android:process=":PolarHeartRate"
+            android:icon="@drawable/polar_hrm_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="polar_hrm" />
@@ -319,7 +327,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.MagnetometerSensor"
-            android:process=":magnetometersensor" >
+            android:process=":magnetometersensor"
+            android:icon="@drawable/magnetometer_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="magnetometer" />
@@ -337,7 +346,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.LightSensor"
-            android:process=":lightsensor" >
+            android:process=":lightsensor" 
+            android:icon="@drawable/light_icon">
             <meta-data
                 android:name="entityId"
                 android:value="light" />
@@ -355,7 +365,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.GyroscopeSensor"
-            android:process=":gyroscopesensor" >
+            android:process=":gyroscopesensor" 
+            android:icon="@drawable/gyroscope_icon">
             <meta-data
                 android:name="entityId"
                 android:value="gyroscope" />
@@ -373,7 +384,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.MovementSensor"
-            android:process=":movementsensor" >
+            android:process=":movementsensor" 
+            android:icon="@drawable/movement_icon">
             <meta-data
                 android:name="entityId"
                 android:value="movement" />
@@ -391,7 +403,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.SoundSensor"
-            android:process=":soundsensor" >
+            android:process=":soundsensor"
+            android:icon="@drawable/sound_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="sound" />
@@ -424,7 +437,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.BluetoothSensor"
-            android:process=":bluetoothsensor" >
+            android:process=":bluetoothsensor"
+            android:icon="@drawable/bluetooth_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="bluetooth" />
@@ -451,7 +465,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.SignalStrengthSensor"
-            android:process=":signalsensor" >
+            android:process=":signalsensor"
+            android:icon="@drawable/signal_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="signal" />
@@ -474,7 +489,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.ScreenSensor"
-            android:process=":screensensor" >
+            android:process=":screensensor"
+            android:icon="@drawable/screen_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="screen" />
@@ -497,7 +513,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.LocationSensor"
-            android:process=":locationsensor" >
+            android:process=":locationsensor"
+            android:icon="@drawable/location_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="location" />
@@ -529,7 +546,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.SmartLocationSensor"
-            android:process=":smartlocationsensor" >
+            android:process=":smartlocationsensor" 
+            android:icon="@drawable/smart_location_icon">
             <meta-data
                 android:name="entityId"
                 android:value="smart_location" />
@@ -570,7 +588,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.CallSensor"
-            android:process=":callsensor" >
+            android:process=":callsensor"
+            android:icon="@drawable/call_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="call" />
@@ -593,7 +612,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.WifiSensor"
-            android:process=":wifisensor" >
+            android:process=":wifisensor"
+            android:icon="@drawable/wifi_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="wifi" />
@@ -619,7 +639,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.ServerStatusSensor"
-            android:process=":serverstatussensor" >
+            android:process=":serverstatussensor" 
+            android:icon="@drawable/serverstatus_icon">
             <meta-data
                 android:name="entityId"
                 android:value="serverstatus" />
@@ -643,7 +664,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.TrainSensor"
-            android:process=":trainsensor" >
+            android:process=":trainsensor"
+            android:icon="@drawable/train_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="train" />
@@ -670,7 +692,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.CuckooTrainSensor"
-            android:process=":trainsensor" >
+            android:process=":trainsensor"
+            android:icon="@drawable/cuckootrain_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="cuckootrain" />
@@ -694,7 +717,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.RainSensor"
-            android:process=":rainsensor" >
+            android:process=":rainsensor"
+            android:icon="@drawable/rain_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="rain" />
@@ -724,7 +748,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.TwitterSensor"
-            android:process=":twittersensor" >
+            android:process=":twittersensor" 
+            android:icon="@drawable/twitter_icon">
             <meta-data
                 android:name="entityId"
                 android:value="twitter" />
@@ -748,7 +773,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.CalendarSensor"
-            android:process=":calendarsensor" >
+            android:process=":calendarsensor"
+            android:icon="@drawable/calendar_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="calendar" />
@@ -775,7 +801,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.LogCatSensor"
-            android:process=":logcatsensor" >
+            android:process=":logcatsensor"
+            android:icon="@drawable/logcat_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="logcat" />
@@ -793,7 +820,8 @@
         <service
             android:exported="true"
             android:name=".sensors.impl.IntentSensor"
-            android:process=":intentsensor" >
+            android:process=":intentsensor"
+            android:icon="@drawable/intent_icon" >
             <meta-data
                 android:name="entityId"
                 android:value="intent" />

@@ -293,7 +293,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 */
 	@Override
 	public final String toParseString() {
-		String result = "(" + this.toParseStringImpl() + ")";
+		String result = "" + this.toParseStringImpl() + "";
 		return result;
 	}
 

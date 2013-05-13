@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 /**
@@ -43,7 +45,13 @@ public class SensorServiceInfo {
 	 * The value paths this sensor supports.
 	 */
 	private final ArrayList<String> valuePaths = new ArrayList<String>();
-
+	
+	/**
+	 * The Drawable icon for this sensor.
+	 */
+	
+	private Drawable icon;
+	
 	/**
 	 * The configuration for this sensor.
 	 */
@@ -58,8 +66,9 @@ public class SensorServiceInfo {
 	 *            metadata bundle for the service from the package manager
 	 */
 	public SensorServiceInfo(final ComponentName sensorComponent,
-			final Bundle metaData) {
+			final Bundle metaData, Drawable icon) {
 		this.component = sensorComponent;
+		this.icon = icon;
 		// strip out the entityId
 		if (metaData == null) {
 			throw new IllegalArgumentException("no metadata!");
@@ -106,6 +115,14 @@ public class SensorServiceInfo {
 
 	}
 
+	/**
+	 * 
+	 * @return icon of the sensor
+	 */
+	public Drawable getIcon() {
+		return icon;
+	}
+	
 	/**
 	 * @return the entity Id for this sensor.
 	 */
