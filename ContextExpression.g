@@ -146,7 +146,7 @@ history_mode returns [HistoryReductionMode history_mode]
 	;
 
 
-// Paser rules
+// Parser rules
 context_typed_value returns [ContextTypedValue typed_value]
 	:	entity=ID ':' path=value_path
 			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
