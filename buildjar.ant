@@ -3,7 +3,7 @@
 	<target name="jars" depends="api-jar,sensor-jar">
 	</target>
 	<target name="api-jar">
-		<mkdir dir="swan-in-your-app"/>
+		<mkdir dir="swan-in-your-app" />
 		<copy todir="swan-in-your-app">
 			<fileset dir="libs">
 				<include name="antlr*.jar" />
@@ -13,6 +13,6 @@
 		<jar destfile="swan-in-your-app/swan.jar" includes="**/I*ContextService*.class,**/swan/*.class,**/swansong/*.class,**/*Exception*.class,**/contextservice/SensorManager.class,**/sensors/I*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
 	</target>
 	<target name="sensor-jar">
-		<jar destfile="swan-sensor.jar" includes="**/swansong/HistoryReductionMode.class,**/swansong/TimestampedValue.class,**/sensors/*.class" excludes="**/sensors/impl/*.class" basedir="bin/classes" />
+		<jar destfile="swan-sensor.jar" includes="**/*.class," excludes="**/sensors/impl/*.class,interdroid/vdb/**/*.class" basedir="bin/classes" />
 	</target>
 </project>

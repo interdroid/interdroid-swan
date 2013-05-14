@@ -1,30 +1,29 @@
 package interdroid.swan.swansong;
 
 /**
- * Represents the way an expression reduces the history it examines and
- * performs matching.
+ * Represents the way an expression reduces the history it examines and performs
+ * matching.
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
-public enum HistoryReductionMode
-implements ParseableEnum<HistoryReductionMode> {
+public enum HistoryReductionMode implements ParseableEnum<HistoryReductionMode> {
 	/** No reduction is performed, matching is against all values. */
-	ALL (0, "ALL"),
+	ALL(0, "ALL"),
 	/** Takes the maximum value. */
-	MAX (1, "MAX"),
+	MAX(1, "MAX"),
 	/** Takes the minimum value. */
-	MIN (2, "MIN"),
+	MIN(2, "MIN"),
 	/** Takes the mean value. */
-	MEAN (3, "MEAN"),
+	MEAN(3, "MEAN"),
 	/** Takes the median value. */
-	MEDIAN (4, "MEDIAN"),
+	MEDIAN(4, "MEDIAN"),
 	/** No reduction is performed, matching is against any value. */
-	ANY (5, "ANY");
+	ANY(5, "ANY");
 
 	/** The default HistoryReductionMode for all expressions. */
-	public static final HistoryReductionMode DEFAULT_MODE =
-			HistoryReductionMode.ALL;
+	public static final HistoryReductionMode DEFAULT_MODE = HistoryReductionMode.ALL;
 
 	/** The convert value. */
 	private final int mValue;
@@ -34,13 +33,17 @@ implements ParseableEnum<HistoryReductionMode> {
 
 	/**
 	 * Construct with the given convert value.
-	 * @param value the convert value.
-	 * @param name the name
+	 * 
+	 * @param value
+	 *            the convert value.
+	 * @param name
+	 *            the name
 	 */
 	private HistoryReductionMode(final int value, final String name) {
 		mValue = value;
 		mName = name;
 	}
+
 	@Override
 	public int convert() {
 		return mValue;
@@ -60,10 +63,12 @@ implements ParseableEnum<HistoryReductionMode> {
 
 	/**
 	 * Parses a string and returns the appropriate mode.
-	 * @param val the string to parse
+	 * 
+	 * @param val
+	 *            the string to parse
 	 * @return the reduction mode
 	 */
-	private HistoryReductionMode parseString(final String val) {
+	private static HistoryReductionMode parseString(final String val) {
 		HistoryReductionMode ret = null;
 		for (HistoryReductionMode mode : HistoryReductionMode.values()) {
 			if (mode.toParseString().equals(val)) {
@@ -76,16 +81,20 @@ implements ParseableEnum<HistoryReductionMode> {
 
 	/**
 	 * Parse a string and return the value.
-	 * @param value the value to parse
+	 * 
+	 * @param value
+	 *            the value to parse
 	 * @return the enum which matches the string.
 	 */
 	public static HistoryReductionMode parse(final String value) {
-		return ALL.parseString(value);
+		return HistoryReductionMode.parseString(value);
 	}
 
 	/**
 	 * Converts a persisted int to the matching enumeration value.
-	 * @param value the value to get the enumeration for
+	 * 
+	 * @param value
+	 *            the value to get the enumeration for
 	 * @return the enumeration matching this value
 	 */
 	public static HistoryReductionMode convert(final int value) {
