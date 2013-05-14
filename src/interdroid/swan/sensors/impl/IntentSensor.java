@@ -3,10 +3,10 @@ package interdroid.swan.sensors.impl;
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextTypedValueListener;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.TimestampedValue;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractMemorySensor;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import android.os.Bundle;
 

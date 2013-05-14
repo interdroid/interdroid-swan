@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 import interdroid.vdb.content.EntityUriBuilder;
 
 import org.apache.avro.Schema;

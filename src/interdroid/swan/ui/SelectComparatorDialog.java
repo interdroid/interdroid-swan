@@ -1,7 +1,7 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Comparator;
+import interdroid.swan.swansong.Comparator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

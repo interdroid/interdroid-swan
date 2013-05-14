@@ -1,9 +1,9 @@
 package interdroid.swan;
 
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.TimestampedValue;
 import interdroid.swan.contextservice.SwanServiceException;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;

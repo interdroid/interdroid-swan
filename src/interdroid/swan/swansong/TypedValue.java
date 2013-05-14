@@ -1,6 +1,7 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
+import interdroid.swan.swansong.ContextExpressionParser;
 import interdroid.swan.contextservice.SensorConfigurationException;
 import interdroid.swan.contextservice.SensorSetupFailedException;
 import interdroid.swan.contextservice.SensorManager;

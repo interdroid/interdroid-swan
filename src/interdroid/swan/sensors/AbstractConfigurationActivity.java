@@ -1,8 +1,8 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.HistoryReductionMode;
-import interdroid.swan.contextexpressions.TypedValueExpression;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.HistoryReductionMode;
+import interdroid.swan.swansong.TypedValueExpression;
 
 import java.util.ArrayList;
 import java.util.HashMap;

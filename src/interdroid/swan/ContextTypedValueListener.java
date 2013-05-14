@@ -1,6 +1,6 @@
 package interdroid.swan;
 
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 /**
  * The listener interface for receiving context events. The class that is

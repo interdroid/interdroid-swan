@@ -5,7 +5,7 @@ options {
 }
 
 @header {
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Stack;
 }
 
 @lexer::header {
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 }
 
 @members {

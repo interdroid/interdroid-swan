@@ -4,10 +4,10 @@ import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;
 import interdroid.swan.ContextServiceConnector;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.Parseable;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.Parseable;
+import interdroid.swan.swansong.TimestampedValue;
 import interdroid.swan.ui.ExpressionBuilderActivity;
 import interdroid.swan.ui.LaunchService;
 

@@ -10,9 +10,9 @@
 				<include name="slf4j*.jar" />
 			</fileset>
 		</copy>
-		<jar destfile="swan-in-your-app/swan.jar" includes="**/I*ContextService*.class,**/swan/*.class,**/contextexpressions/*.class,**/*Exception*.class,**/contextservice/SensorManager.class,**/sensors/I*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
+		<jar destfile="swan-in-your-app/swan.jar" includes="**/I*ContextService*.class,**/swan/*.class,**/swansong/*.class,**/*Exception*.class,**/contextservice/SensorManager.class,**/sensors/I*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
 	</target>
 	<target name="sensor-jar">
-		<jar destfile="swan-sensor.jar" includes="**/contextexpressions/TimestampedValue.class,**/sensors/*.class" excludes="**/sensors/impl/*.class" basedir="bin/classes" />
+		<jar destfile="swan-sensor.jar" includes="**/swansong/HistoryReductionMode.class,**/swansong/TimestampedValue.class,**/sensors/*.class" excludes="**/sensors/impl/*.class" basedir="bin/classes" />
 	</target>
 </project>
