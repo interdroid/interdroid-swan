@@ -84,12 +84,17 @@ value_path	returns [String value_path]
 	StringBuffer buf = new StringBuffer();
 }
 	:
-	id=ID 
-		{buf.append($id.getText());}
-	('.' more_id=ID 
-		{buf.append('.'); buf.append($more_id.getText());} 
+	vp=v_p 
+		{buf.append(vp);}
+	('.' more_id=v_p 
+		{buf.append('.'); buf.append(vp);} 
 	)*
 		{$value_path = buf.toString();}
+	;
+
+v_p		returns [String vp]
+	:	id=ID	{ $vp = $id.getText(); }
+	|	str=STRING { $vp = $str.getText(); }
 	;
 
 comparator	returns [Comparator comparator]
@@ -146,7 +151,7 @@ history_mode returns [HistoryReductionMode history_mode]
 	;
 
 
-// Paser rules
+// Parser rules
 context_typed_value returns [ContextTypedValue typed_value]
 	:	entity=ID ':' path=value_path
 			{$typed_value = new ContextTypedValue(entity.getText(), path /*.value_path */);}
