@@ -4,22 +4,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry kind="lib" path="external/antlr-3.4-complete-no-antlrv2.jar"/>
-	<classpathentry kind="lib" path="external/cuckoo-client.jar"/>
-	<classpathentry kind="lib" path="external/cuckoo-shared.jar"/>
-	<classpathentry kind="lib" path="external/ibis-compile-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ibis-io-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ipl-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ipl-impl-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ipl-impl-smartsockets-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ipl-impl-tcp-2.2.jar"/>
-	<classpathentry kind="lib" path="external/ipl-support-2.2.jar"/>
-	<classpathentry kind="lib" path="external/jstun-0.6.1.jar"/>
-	<classpathentry kind="lib" path="external/log4j-1.2.13.jar"/>
-	<classpathentry kind="lib" path="external/sbbi-upnplib-1.0.2.jar"/>
-	<classpathentry kind="lib" path="external/scribe-1.2.0.jar"/>
-	<classpathentry kind="lib" path="external/smartsockets-1.52.jar"/>
-	<classpathentry kind="lib" path="external/trilead-ssh2-build213.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
