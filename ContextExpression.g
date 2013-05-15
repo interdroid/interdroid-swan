@@ -326,7 +326,7 @@ time_value returns [Long time]
 	{$time = new Long(theTime);}
 	;
 
-// Lexar rules
+// Lexer rules
 
 TIME_UNIT 
 	:	'h'|'H'|'m'|'M'|'s'|'S'|'ms';
