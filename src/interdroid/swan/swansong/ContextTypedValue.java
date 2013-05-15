@@ -205,13 +205,13 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Sets the timespan of history to keep. This sets to DEFAULT_HISTORY_LENGTH
-	 * if timespan <= 0
+	 * if timespan < 0
 	 * 
 	 * @param timespan
 	 *            the timespan to set to.
 	 */
 	private void setHistoryTimespan(final long timespan) {
-		if (timespan > 0) {
+		if (timespan >= 0) {
 			mTimespan = timespan;
 		} else {
 			mTimespan = DEFAULT_HISTORY_LENGTH;
@@ -228,7 +228,8 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	public ContextTypedValue(final String unparsedContextInfo)
 			throws ExpressionParseException {
-		this(unparsedContextInfo, HistoryReductionMode.ANY, 1000);
+		this(unparsedContextInfo, HistoryReductionMode.ANY,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -341,7 +342,7 @@ public class ContextTypedValue extends TypedValue {
 		// If the previous step didn't result in any readings, there's nothing
 		// to evaluate, so the expression's value is undefined.
 		if (values.size() == 0) {
-			LOG.debug("No readings so returning null.");
+			LOG.debug("No readings throwing exception.");
 			throw new NoValuesInIntervalException("No values in interval for "
 					+ this);
 		}

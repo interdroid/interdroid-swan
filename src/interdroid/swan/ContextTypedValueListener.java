@@ -20,6 +20,6 @@ public interface ContextTypedValueListener {
 	 * @param values
 	 *            the values which were read
 	 */
-	void onReading(String id, TimestampedValue[] values);
+	void onReading(String id, TimestampedValue value);
 
 }

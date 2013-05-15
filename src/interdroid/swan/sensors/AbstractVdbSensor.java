@@ -117,10 +117,10 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 *            the timestamp
 	 */
 	public final void putValues(final ContentValues values, final long now) {
+		putValues(getContentResolver(), uri, values, now);
 		for (Entry<String, Object> key : values.valueSet()) {
 			notifyDataChanged(key.getKey());
 		}
-		putValues(getContentResolver(), uri, values, now);
 	}
 
 	/**

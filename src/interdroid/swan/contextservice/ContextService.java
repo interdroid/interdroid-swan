@@ -1,11 +1,12 @@
 package interdroid.swan.contextservice;
 
-import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;
 import interdroid.swan.ContextServiceConnector;
 import interdroid.swan.R;
+import interdroid.swan.SwanException;
 import interdroid.swan.swansong.ContextTypedValue;
 import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.NoValuesInIntervalException;
 import interdroid.swan.swansong.Parseable;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.swan.ui.ExpressionBuilderActivity;
@@ -35,6 +36,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 
 /**
@@ -128,9 +130,9 @@ public class ContextService extends Service {
 
 	/**
 	 * Handles boot notifications so we can reregister expressions.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class BootHandler extends BroadcastReceiver {
 
@@ -254,7 +256,7 @@ public class ContextService extends Service {
 	private final Thread entityThread = new Thread() {
 		@Override
 		public void run() {
-			TimestampedValue[] values;
+			TimestampedValue resultValue;
 			ContextTypedValue value;
 			while (!shouldStop) {
 				while ((value = contextTypedValueQueue.poll()) == null) {
@@ -268,9 +270,19 @@ public class ContextService extends Service {
 					}
 				}
 				try {
-					LOG.debug("Getting values for: {}", value);
-					values = value.getValues(value.getId(),
-							System.currentTimeMillis());
+					LOG.debug("Getting value for: {}", value);
+					// this should always have a single value, because we
+					// registered a context typed value.
+					TimestampedValue[] resultValues = value.getValues(
+							value.getId(), System.currentTimeMillis());
+					if (resultValues.length > 1) {
+						throw new RuntimeException(
+								"This should not happen. Please debug. A context typed value should always a single value.");
+					}
+					resultValue = resultValues[0];
+				} catch (NoValuesInIntervalException e) {
+					LOG.info("No values in interval for {}", value);
+					resultValue = null;
 				} catch (SwanException e) {
 					LOG.info("{} unexpected exception ", value, e);
 
@@ -283,7 +295,7 @@ public class ContextService extends Service {
 					LOG.info("{} unexpected exception d", value, e);
 					continue;
 				}
-				sendValuesBroadcastIntent(value.getId(), values);
+				sendValuesBroadcastIntent(value.getId(), resultValue);
 			}
 		}
 	};
@@ -297,7 +309,7 @@ public class ContextService extends Service {
 	// =-=-=-=- Expression Database -=-=-=-=
 
 	/**
-	 *
+	 * 
 	 * @return all typed values saved in the database.
 	 */
 	private ContextTypedValue[] getSavedValues() {
@@ -384,7 +396,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Delete's an expression from the database.
-	 *
+	 * 
 	 * @param key
 	 *            The id for the expression.
 	 * @param type
@@ -433,7 +445,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Stores an expression to the database.
-	 *
+	 * 
 	 * @param key
 	 *            the key for the expression
 	 * @param value
@@ -516,7 +528,7 @@ public class ContextService extends Service {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see android.app.Service#onCreate()
 	 */
 	@Override
@@ -548,8 +560,8 @@ public class ContextService extends Service {
 		manageForegroundState();
 
 		// TODO: We need a ui to manage registered expressions.
-		Intent notificationIntent =
-				new Intent(this, ExpressionBuilderActivity.class);
+		Intent notificationIntent = new Intent(this,
+				ExpressionBuilderActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Swan", "#expressions: "
@@ -592,7 +604,7 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
+	 * 
 	 * @param expression
 	 *            the expression
 	 */
@@ -617,24 +629,24 @@ public class ContextService extends Service {
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
+	 * 
 	 * @param id
 	 *            the id of the expression
 	 * @param values
 	 *            the values for the expression
 	 */
 	protected final void sendValuesBroadcastIntent(final String id,
-			final TimestampedValue[] values) {
+			final TimestampedValue value) {
 		Intent broadcastIntent = new Intent();
 		broadcastIntent.setData(Uri.parse("contextvalues://" + id));
 		broadcastIntent.setAction(ContextManager.ACTION_NEWREADING);
-		broadcastIntent.putExtra("values", values);
+		broadcastIntent.putExtra("value", (Parcelable) value);
 		sendBroadcast(broadcastIntent);
 	}
 
 	/**
 	 * Send expression change broadcast intent.
-	 *
+	 * 
 	 * @param expression
 	 *            the expression
 	 * @param exception
@@ -665,9 +677,9 @@ public class ContextService extends Service {
 			if (contextExpressions.containsKey(expressionId)) {
 				// for now just throw an exception, may be we should do
 				// replacement,
-				return new SwanServiceException(
-						new SwanException("expression with id '"
-								+ expressionId + "' already exists"));
+				return new SwanServiceException(new SwanException(
+						"expression with id '" + expressionId
+								+ "' already exists"));
 			}
 			// check whether all sensors in the expression exist and accept
 			// the
@@ -763,8 +775,8 @@ public class ContextService extends Service {
 		}
 
 		@Override
-		public SwanServiceException registerContextTypedValue(
-				final String id, final ContextTypedValue contextTypedValue)
+		public SwanServiceException registerContextTypedValue(final String id,
+				final ContextTypedValue contextTypedValue)
 				throws RemoteException {
 			if (contextTypedValues.containsKey(id)) {
 				try {
@@ -791,8 +803,8 @@ public class ContextService extends Service {
 		}
 
 		@Override
-		public SwanServiceException unregisterContextTypedValue(
-				final String id) throws RemoteException {
+		public SwanServiceException unregisterContextTypedValue(final String id)
+				throws RemoteException {
 			synchronized (contextTypedValueQueue) {
 				ContextTypedValue value = contextTypedValues.remove(id);
 				if (value != null) {
