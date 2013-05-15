@@ -228,12 +228,7 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	public ContextTypedValue(final String unparsedContextInfo)
 			throws ExpressionParseException {
-		this(Expression.parse(unparsedContextInfo));
-	}
-
-	private ContextTypedValue(final Expression expression) {
-		this(expression.toString(), expression.getHistoryReductionMode(),
-				expression.getHistoryLength());
+		this(unparsedContextInfo, HistoryReductionMode.ANY, 1000);
 	}
 
 	/**
@@ -521,4 +516,10 @@ public class ContextTypedValue extends TypedValue {
 		// TODO: Rename to mHistoryLength
 		return mTimespan;
 	}
+
+	public static final ContextTypedValue parse(String contextTypedValue)
+			throws ExpressionParseException {
+		return (ContextTypedValue) TypedValue.parse(contextTypedValue);
+	}
+
 }
