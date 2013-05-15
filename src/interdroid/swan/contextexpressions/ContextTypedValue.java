@@ -274,8 +274,7 @@ public class ContextTypedValue extends TypedValue {
 		}
 
 		setHistoryTimespan(timespan);
-		System.out.println(mEntity + "," + mValuePath + "," + mode + ","
-				+ timespan);
+		System.out.println(mEntity + "," + mValuePath + "," + mode + "," + timespan);
 	}
 
 	/**

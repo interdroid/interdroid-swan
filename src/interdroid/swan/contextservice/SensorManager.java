@@ -100,15 +100,15 @@ public class SensorManager {
 						return;
 					}
 				}
-				System.out.println("valuepath " + value.getValuePath()
+				/*System.out.println("valuepath " + value.getValuePath()
 						+ " not in ");
 				for (String vp : sensorInfo.getValuePaths()) {
 					System.out.println("\t" + vp);
-				}
+				}*/
 
 			}
-			System.out.println("sensor " + value.getEntity() + " not in ");
-			System.out.println("\t" + sensorInfo.getEntity());
+			/*System.out.println("sensor " + value.getEntity() + " not in ");
+			System.out.println("\t" + sensorInfo.getEntity()); */
 		}
 		throw new SensorSetupFailedException("Failed to bind to service for: "
 				+ value.toString());

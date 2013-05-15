@@ -71,7 +71,7 @@ public abstract class ContextServiceConnector {
 	 *            the context manager has been initialized.
 	 */
 	public final void start(final ConnectionListener listener) {
-		System.out.println("starting connectioListener");
+		//System.out.println("starting connectioListener");
 		this.connectionListener = listener;
 		getContext().bindService(new Intent(CONTEXT_SERVICE), serviceConnection,
 				Service.BIND_AUTO_CREATE);
@@ -106,7 +106,7 @@ public abstract class ContextServiceConnector {
 		@Override
 		public void onServiceConnected(final ComponentName name,
 				final IBinder service) {
-			System.out.println("Service connected");
+			//System.out.println("Service connected");
 			LOG.debug("service connected: {}", name);
 			setContextService(IContextService.Stub.asInterface(service));
 			isConnected = true;
