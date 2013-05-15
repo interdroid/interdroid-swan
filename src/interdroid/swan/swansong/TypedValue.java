@@ -171,7 +171,7 @@ public abstract class TypedValue implements Serializable, Parcelable,
 	 * @throws ExpressionParseException
 	 *             if the string is not recognized
 	 */
-	public static final TypedValue parse(final String value)
+	public static TypedValue parse(final String value)
 			throws ExpressionParseException {
 		return ContextExpressionParser.parseTypedValue(value);
 	}
