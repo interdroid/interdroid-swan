@@ -1,10 +1,10 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
-import interdroid.swan.contextexpressions.LogicExpression;
-import interdroid.swan.contextexpressions.LogicOperator;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.LogicExpression;
+import interdroid.swan.swansong.LogicOperator;
 
 import java.util.ArrayList;
 import java.util.List;

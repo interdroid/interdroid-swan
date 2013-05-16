@@ -5,7 +5,7 @@ options {
 }
 
 @header {
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Stack;
 }
 
 @lexer::header {
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 }
 
 @members {
@@ -32,11 +32,11 @@ public static final Expression parseExpression(final String expression) throws E
         }
 }
 
-public static final TypedValue parseTypedValue(final String expression) throws ExpressionParseException {
-        if (expression == null || expression.trim().length() == 0)
+public static final TypedValue parseTypedValue(final String typedValue) throws ExpressionParseException {
+        if (typedValue == null || typedValue.trim().length() == 0)
             return null;
 
-        CharStream stream = new ANTLRStringStream(expression);
+        CharStream stream = new ANTLRStringStream(typedValue);
         ContextExpressionLexer lexer = new ContextExpressionLexer(stream);
         TokenStream tokenStream = new CommonTokenStream(lexer);
         ContextExpressionParser parser = new ContextExpressionParser(tokenStream);

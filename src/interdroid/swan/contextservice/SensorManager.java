@@ -2,7 +2,7 @@ package interdroid.swan.contextservice;
 
 import interdroid.swan.ContextManager;
 import interdroid.swan.SensorServiceInfo;
-import interdroid.swan.contextexpressions.ContextTypedValue;
+import interdroid.swan.swansong.ContextTypedValue;
 
 import java.util.ArrayList;
 import java.util.List;

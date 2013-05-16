@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;

@@ -3,10 +3,10 @@ package interdroid.swan.sensors.impl;
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextTypedValueListener;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.TimestampedValue;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractMemorySensor;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import android.os.Bundle;
 
@@ -57,13 +57,10 @@ public class IntentSensor extends AbstractMemorySensor {
 
 	@Override
 	public String getScheme() {
-		return "{'type': 'record', 'name': 'intent', " +
-				"'namespace': 'context.sensor.intent',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ STARTED_FIELD
-				+ "', 'type': 'string'}"
-				+ "           ]"
+		return "{'type': 'record', 'name': 'intent', "
+				+ "'namespace': 'context.sensor.intent'," + " 'fields': ["
+				+ "            {'name': '" + STARTED_FIELD
+				+ "', 'type': 'string'}" + "           ]"
 				+ "}".replace('\'', '"');
 	}
 
@@ -76,23 +73,23 @@ public class IntentSensor extends AbstractMemorySensor {
 			final Bundle configuration) {
 		try {
 			contextServiceConnector.registerContextTypedValue(id + "."
-					+ MAGIC_RELAY, new ContextTypedValue(
-					"logcat" + ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
+					+ MAGIC_RELAY, new ContextTypedValue("logcat"
+					+ ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
 					+ "log?logcat_parameters=ActivityManager:I *:S"),
 					new ContextTypedValueListener() {
 
 						@Override
 						public void onReading(String relayedId,
-								TimestampedValue[] newValues) {
+								TimestampedValue newValue) {
 							// values is always of length 1
-							if (newValues[0].getValue().toString()
+							if (newValue.getValue().toString()
 									.contains("Starting: Intent {")) {
 								if (getValues().size() >= HISTORY_SIZE) {
 									getValues().remove(0);
 								}
 								putValueTrimSize(valuePath, id,
-										newValues[0].getTimestamp(),
-										getIntentFrom(newValues[0].getValue()),
+										newValue.getTimestamp(),
+										getIntentFrom(newValue.getValue()),
 										HISTORY_SIZE);
 							}
 

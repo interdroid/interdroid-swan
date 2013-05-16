@@ -1,6 +1,6 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.io.IOException;
 import java.util.List;
