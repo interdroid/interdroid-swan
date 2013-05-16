@@ -675,16 +675,14 @@ public class ContextService extends Service {
 			// identifier, handle appropriately
 
 			if (contextExpressions.containsKey(expressionId)) {
-				// for now just throw an exception, may be we should do
+				// for now just throw an exception, maybe we should do
 				// replacement,
 				return new SwanServiceException(new SwanException(
 						"expression with id '" + expressionId
 								+ "' already exists"));
 			}
 			// check whether all sensors in the expression exist and accept
-			// the
-			// configuration, initialize will do discovery and binding if
-			// needed
+			// the configuration, initialize will do discovery and binding if needed
 			try {
 				expression.initialize(expressionId, sensorManager);
 			} catch (SwanException e) {
