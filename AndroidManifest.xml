@@ -9,49 +9,34 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name" >
         <activity
-            android:label="Launch Swan Service"
-            android:name=".LaunchService" >
+            android:name=".LaunchService"
+            android:label="Launch Swan Service" >
+        </activity>
+        <activity
+            android:name=".sensors.AbstractConfigurationActivity"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="interdroid.swan.DEFAULT_PREFERENCES" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.preference"
+                android:resource="@xml/default_preferences" />
         </activity>
 
         <receiver android:name=".contextservice.ContextService$BootHandler" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:label="CD-Test-receiver"
-            android:name=".test.TestReceiver" >
-            <intent-filter >
-                <action android:name="interdroid.swan.EXPRESSIONTRUE" />
-                <action android:name="interdroid.swan.EXPRESSIONFALSE" />
-                <action android:name="interdroid.swan.EXPRESSIONUNDEFINED" />
-                <action android:name="interdroid.swan.NEWREADING" />
-
-                <data android:scheme="contextvalues" />
-            </intent-filter>
-        </receiver>
 
         <activity
-            android:label="CD-Test"
-            android:name=".test.TestActivity"
-            android:screenOrientation="portrait" >
-            <intent-filter >
-
-                <!--
-                <action android:name="android.intent.action.MAIN" >
-                </action>
-
-                <category android:name="android.intent.category.LAUNCHER" />
-                -->
-            </intent-filter>
-        </activity>
-        <activity
-            android:label="Expression Builder"
             android:name=".ui.ExpressionBuilderActivity"
+            android:label="Expression Builder"
             android:screenOrientation="portrait" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.ui.BUILD_EXPRESSION" >
                 </action>
 
@@ -60,65 +45,65 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.NewExpressionDialog"
             android:excludeFromRecents="true"
             android:label="New Expression"
-            android:name=".ui.NewExpressionDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.SelectTypedValueDialog"
             android:excludeFromRecents="true"
             android:label="Choose Value Type"
-            android:name=".ui.SelectTypedValueDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.SelectComparatorDialog"
             android:excludeFromRecents="true"
             android:label="Select Comparator"
-            android:name=".ui.SelectComparatorDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.EnterConstantDialog"
             android:excludeFromRecents="true"
             android:label="Enter Constant"
-            android:name=".ui.EnterConstantDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.SelectSensorDialog"
             android:excludeFromRecents="true"
             android:label="Select Sensor"
-            android:name=".ui.SelectSensorDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.SelectExpressionDialog"
             android:excludeFromRecents="true"
             android:label="Select Expression"
-            android:name=".ui.SelectExpressionDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.MergeExpressionDialog"
             android:excludeFromRecents="true"
             android:label="Merge Expressions"
-            android:name=".ui.MergeExpressionDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.NewMathExpressionDialog"
             android:excludeFromRecents="true"
             android:label="New Combined Expressions"
-            android:name=".ui.NewMathExpressionDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
+            android:name=".ui.SelectOperatorDialog"
             android:excludeFromRecents="true"
             android:label="Select Operator"
-            android:name=".ui.SelectOperatorDialog"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
@@ -135,70 +120,122 @@
              <activity android:label="Expression Monitor" android:name=".servicemonitor.ExpressionMonitor"
 			/>
         -->
-        <activity android:name=".sensors.impl.SmartLocationSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.SmartLocationSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.GyroscopeSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.LightSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.LightSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.MagnetometerSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.MagnetometerSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.PressureSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.PressureSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.ProximitySensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.ProximitySensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.TemperatureSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.TemperatureSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.BatterySensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.BatterySensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.BluetoothSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.CalendarSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.CalendarSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.CallSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.CallSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.SignalStrengthSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.IntentSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.IntentSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.LocationSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.LocationSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.LogCatSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.LogCatSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.MovementSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.MovementSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.RainSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.RainSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.ScreenSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.ScreenSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.ServerStatusSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.SoundSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.SoundSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.TrainSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.TrainSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.TimeSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.TimeSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.TwitterSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.TwitterSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.WifiSensor$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.WifiSensor$ConfigurationActivity"
+            android:exported="true" >
         </activity>
-        <activity android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity"  android:exported="true">
+        <activity
+            android:name=".sensors.impl.PolarHeartRate$ConfigurationActivity"
+            android:exported="true" >
         </activity>
 
         <service
-            android:exported="true"
             android:name=".contextservice.ContextService"
+            android:exported="true"
             android:process=":contextservice" >
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.intent.CONTEXTSERVICE" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.BatterySensor"
+            android:exported="true"
             android:process=":batterysensor" >
             <meta-data
                 android:name="entityId"
@@ -210,18 +247,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.battery" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.battery"
-            android:name="interdroid.swan.sensors.impl.BatterySensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.BatterySensor$Provider"
+            android:authorities="interdroid.context.sensor.battery" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.TimeSensor"
+            android:exported="true"
             android:process=":timesensor" >
             <meta-data
                 android:name="entityId"
@@ -230,13 +267,13 @@
                 android:name="valuePaths"
                 android:value="current" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.TemperatureSensor"
+            android:exported="true"
             android:process=":temperaturesensor" >
             <meta-data
                 android:name="entityId"
@@ -248,7 +285,7 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
@@ -256,7 +293,6 @@
             android:name=".sensors.impl.ProximitySensor"
             android:exported="true"
             android:process=":proximitysensor" >
-
             <meta-data
                 android:name="entityId"
                 android:value="proximity" />
@@ -267,13 +303,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.PressureSensor"
+            android:exported="true"
             android:process=":pressuresensor" >
             <meta-data
                 android:name="entityId"
@@ -285,13 +321,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.PolarHeartRate"
+            android:exported="true"
             android:process=":PolarHeartRate" >
             <meta-data
                 android:name="entityId"
@@ -307,18 +343,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.polar_hrm" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.polar_hrm"
-            android:name="interdroid.swan.sensors.impl.PolarHeartRate$Provider" />
+            android:name="interdroid.swan.sensors.impl.PolarHeartRate$Provider"
+            android:authorities="interdroid.context.sensor.polar_hrm" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.MagnetometerSensor"
+            android:exported="true"
             android:process=":magnetometersensor" >
             <meta-data
                 android:name="entityId"
@@ -330,13 +366,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.LightSensor"
+            android:exported="true"
             android:process=":lightsensor" >
             <meta-data
                 android:name="entityId"
@@ -348,13 +384,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.GyroscopeSensor"
+            android:exported="true"
             android:process=":gyroscopesensor" >
             <meta-data
                 android:name="entityId"
@@ -366,13 +402,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.MovementSensor"
+            android:exported="true"
             android:process=":movementsensor" >
             <meta-data
                 android:name="entityId"
@@ -384,13 +420,13 @@
                 android:name="accuracy"
                 android:value="3" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.SoundSensor"
+            android:exported="true"
             android:process=":soundsensor" >
             <meta-data
                 android:name="entityId"
@@ -417,13 +453,13 @@
                 android:name="channel_config"
                 android:value="2" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.BluetoothSensor"
+            android:exported="true"
             android:process=":bluetoothsensor" >
             <meta-data
                 android:name="entityId"
@@ -439,18 +475,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.bluetooth" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.bluetooth"
-            android:name="interdroid.swan.sensors.impl.BluetoothSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.BluetoothSensor$Provider"
+            android:authorities="interdroid.context.sensor.bluetooth" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.SignalStrengthSensor"
+            android:exported="true"
             android:process=":signalsensor" >
             <meta-data
                 android:name="entityId"
@@ -462,18 +498,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.signal" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.signal"
-            android:name="interdroid.swan.sensors.impl.SignalStrengthSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.SignalStrengthSensor$Provider"
+            android:authorities="interdroid.context.sensor.signal" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.ScreenSensor"
+            android:exported="true"
             android:process=":screensensor" >
             <meta-data
                 android:name="entityId"
@@ -485,18 +521,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.screen" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.screen"
-            android:name="interdroid.swan.sensors.impl.ScreenSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.ScreenSensor$Provider"
+            android:authorities="interdroid.context.sensor.screen" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.LocationSensor"
+            android:exported="true"
             android:process=":locationsensor" >
             <meta-data
                 android:name="entityId"
@@ -517,18 +553,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.location" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.location"
-            android:name="interdroid.swan.sensors.impl.LocationSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.LocationSensor$Provider"
+            android:authorities="interdroid.context.sensor.location" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.SmartLocationSensor"
+            android:exported="true"
             android:process=":smartlocationsensor" >
             <meta-data
                 android:name="entityId"
@@ -555,7 +591,7 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.smartlocation" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
@@ -564,12 +600,12 @@
         </receiver>
 
         <provider
-            android:authorities="interdroid.context.sensor.smartlocation"
-            android:name="interdroid.swan.sensors.impl.SmartLocationSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.SmartLocationSensor$Provider"
+            android:authorities="interdroid.context.sensor.smartlocation" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.CallSensor"
+            android:exported="true"
             android:process=":callsensor" >
             <meta-data
                 android:name="entityId"
@@ -581,18 +617,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.call" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.call"
-            android:name="interdroid.swan.sensors.impl.CallSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.CallSensor$Provider"
+            android:authorities="interdroid.context.sensor.call" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.WifiSensor"
+            android:exported="true"
             android:process=":wifisensor" >
             <meta-data
                 android:name="entityId"
@@ -607,18 +643,18 @@
                 android:name="authority"
                 android:value="interdroid.context.sensor.wifi" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
 
         <provider
-            android:authorities="interdroid.context.sensor.wifi"
-            android:name="interdroid.swan.sensors.impl.WifiSensor$Provider" />
+            android:name="interdroid.swan.sensors.impl.WifiSensor$Provider"
+            android:authorities="interdroid.context.sensor.wifi" />
 
         <service
-            android:exported="true"
             android:name=".sensors.impl.ServerStatusSensor"
+            android:exported="true"
             android:process=":serverstatussensor" >
             <meta-data
                 android:name="entityId"
@@ -636,13 +672,13 @@
                 android:name="server_url"
                 android:value="null" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.TrainSensor"
+            android:exported="true"
             android:process=":trainsensor" >
             <meta-data
                 android:name="entityId"
@@ -663,13 +699,13 @@
                 android:name="departure_time"
                 android:value="null" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.CuckooTrainSensor"
+            android:exported="true"
             android:process=":trainsensor" >
             <meta-data
                 android:name="entityId"
@@ -687,13 +723,13 @@
                 android:name="departure_time"
                 android:value="null" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.RainSensor"
+            android:exported="true"
             android:process=":rainsensor" >
             <meta-data
                 android:name="entityId"
@@ -717,13 +753,13 @@
                 android:name="threshold"
                 android:value="0.0" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.TwitterSensor"
+            android:exported="true"
             android:process=":twittersensor" >
             <meta-data
                 android:name="entityId"
@@ -741,13 +777,13 @@
                 android:name="secret_access_token"
                 android:value="null" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.CalendarSensor"
+            android:exported="true"
             android:process=":calendarsensor" >
             <meta-data
                 android:name="entityId"
@@ -768,13 +804,13 @@
                 android:name="ignore_allday_events"
                 android:value="true" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.LogCatSensor"
+            android:exported="true"
             android:process=":logcatsensor" >
             <meta-data
                 android:name="entityId"
@@ -786,13 +822,13 @@
                 android:name="logcat_parameters"
                 android:value="*:I" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>
         <service
-            android:exported="true"
             android:name=".sensors.impl.IntentSensor"
+            android:exported="true"
             android:process=":intentsensor" >
             <meta-data
                 android:name="entityId"
@@ -801,7 +837,7 @@
                 android:name="valuePaths"
                 android:value="started" />
 
-            <intent-filter >
+            <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
         </service>

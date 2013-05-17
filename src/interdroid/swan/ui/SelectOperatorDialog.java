@@ -1,7 +1,7 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.MathOperator;
+import interdroid.swan.swansong.MathOperator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

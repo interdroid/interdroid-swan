@@ -1,8 +1,8 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ConstantTypedValue;
-import interdroid.swan.contextexpressions.TypedValueExpression;
+import interdroid.swan.swansong.ConstantTypedValue;
+import interdroid.swan.swansong.TypedValueExpression;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

@@ -1,6 +1,6 @@
 package interdroid.swan;
 
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 /**
  * The listener interface for receiving context events. The class that is
@@ -20,6 +20,6 @@ public interface ContextTypedValueListener {
 	 * @param values
 	 *            the values which were read
 	 */
-	void onReading(String id, TimestampedValue[] values);
+	void onReading(String id, TimestampedValue value);
 
 }

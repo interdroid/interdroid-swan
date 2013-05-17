@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
 import interdroid.swan.contextservice.SensorConfigurationException;
@@ -22,10 +22,10 @@ import android.os.RemoteException;
 
 /**
  * This represents a TypedValue where the values come from context.
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class ContextTypedValue extends TypedValue {
 	/**
@@ -98,19 +98,8 @@ public class ContextTypedValue extends TypedValue {
 	private ServiceConnection mServiceConnection;
 
 	/**
-	 * Construct from a string.
-	 *
-	 * @param unparsedContextInfo
-	 *            the string to parse
-	 */
-	public ContextTypedValue(final String unparsedContextInfo) {
-		this(unparsedContextInfo, HistoryReductionMode.DEFAULT_MODE,
-				DEFAULT_HISTORY_LENGTH);
-	}
-
-	/**
 	 * Construct from an entity and path.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -123,7 +112,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -139,7 +128,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map with mode and timespan.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -156,7 +145,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map with mode and timespan.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -171,7 +160,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Construct from an entity and path and config map.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -186,10 +175,9 @@ public class ContextTypedValue extends TypedValue {
 		this(entity, path, config, mode, DEFAULT_HISTORY_LENGTH);
 	}
 
-
 	/**
 	 * Construct from an entity and path and config map.
-	 *
+	 * 
 	 * @param entity
 	 *            the entity id
 	 * @param path
@@ -217,13 +205,13 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Sets the timespan of history to keep. This sets to DEFAULT_HISTORY_LENGTH
-	 * if timespan <= 0
-	 *
+	 * if timespan < 0
+	 * 
 	 * @param timespan
 	 *            the timespan to set to.
 	 */
 	private void setHistoryTimespan(final long timespan) {
-		if (timespan > 0) {
+		if (timespan >= 0) {
 			mTimespan = timespan;
 		} else {
 			mTimespan = DEFAULT_HISTORY_LENGTH;
@@ -231,8 +219,22 @@ public class ContextTypedValue extends TypedValue {
 	}
 
 	/**
+	 * Construct from a string. If no History Reduction Mode and History Length
+	 * are provided in the parse string, defaults will be used.
+	 * 
+	 * @param unparsedContextInfo
+	 *            the string to parse
+	 * @throws ExpressionParseException
+	 */
+	public ContextTypedValue(final String unparsedContextInfo)
+			throws ExpressionParseException {
+		this(unparsedContextInfo, HistoryReductionMode.ANY,
+				DEFAULT_HISTORY_LENGTH);
+	}
+
+	/**
 	 * Construct with a specific history mode and timespan.
-	 *
+	 * 
 	 * @param unparsedContextInfo
 	 *            the string to parse
 	 * @param mode
@@ -268,11 +270,13 @@ public class ContextTypedValue extends TypedValue {
 		}
 
 		setHistoryTimespan(timespan);
+		System.out.println(mEntity + "," + mValuePath + "," + mode + ","
+				+ timespan);
 	}
 
 	/**
 	 * Construct from a Parcel.
-	 *
+	 * 
 	 * @param source
 	 *            the Parcel to read from
 	 */
@@ -338,7 +342,7 @@ public class ContextTypedValue extends TypedValue {
 		// If the previous step didn't result in any readings, there's nothing
 		// to evaluate, so the expression's value is undefined.
 		if (values.size() == 0) {
-			LOG.debug("No readings so returning null.");
+			LOG.debug("No readings throwing exception.");
 			throw new NoValuesInIntervalException("No values in interval for "
 					+ this);
 		}
@@ -365,7 +369,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
@@ -466,7 +470,7 @@ public class ContextTypedValue extends TypedValue {
 	}
 
 	/**
-	 *
+	 * 
 	 * @return a string with the configuration for this value.
 	 */
 	private String getParseConfig() {
@@ -493,7 +497,7 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Sets the id for this TypedValue.
-	 *
+	 * 
 	 * @param id
 	 *            the id to set to
 	 */
@@ -513,4 +517,10 @@ public class ContextTypedValue extends TypedValue {
 		// TODO: Rename to mHistoryLength
 		return mTimespan;
 	}
+
+	public static final ContextTypedValue parse(String contextTypedValue)
+			throws ExpressionParseException {
+		return (ContextTypedValue) TypedValue.parse(contextTypedValue);
+	}
+
 }

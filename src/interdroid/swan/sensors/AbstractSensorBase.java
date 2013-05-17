@@ -1,7 +1,7 @@
 package interdroid.swan.sensors;
 
 import interdroid.swan.ConnectionListener;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,11 +50,12 @@ public abstract class AbstractSensorBase extends Service implements
 			final List<TimestampedValue> values, final long now,
 			final long timespan) {
 		// make a copy of the list
-		List<TimestampedValue> result;
+		List<TimestampedValue> result = null;
 
 		if (timespan == 0) {
-			result = values.subList(Math.max(0, values.size() - 1),
-					values.size());
+			if (values != null && values.size() > 0) {
+				result = values.subList(0, 1);
+			}
 		} else {
 			result = new ArrayList<TimestampedValue>();
 			int startPos = 0;
@@ -348,11 +349,15 @@ public abstract class AbstractSensorBase extends Service implements
 		List<String> notify = new ArrayList<String>();
 
 		synchronized (this) {
-			for (String id : expressionIdsPerValuePath.get(valuePath)) {
-				id = getRootIdFor(id);
-				if (!notified.get(id)) {
-					notify.add(id);
-					notified.put(id, true);
+			// can be null if multiple valuepaths are updated together and not
+			// for all of them, there's an id registered.
+			if (expressionIdsPerValuePath.get(valuePath) != null) {
+				for (String id : expressionIdsPerValuePath.get(valuePath)) {
+					id = getRootIdFor(id);
+					if (!notified.get(id)) {
+						notify.add(id);
+						notified.put(id, true);
+					}
 				}
 			}
 		}

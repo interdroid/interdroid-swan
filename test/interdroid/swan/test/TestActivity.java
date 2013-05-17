@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
+import interdroid.swan.swansong.ContextTypedValue;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -47,50 +47,53 @@ public class TestActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
+		try {
+			final ContextTypedValue left = new ContextTypedValue(
+					"smart_location:vicinity?latitude=52.152962&longitude=5.367988&provider=gps");
+			// "cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
+			final String valueName = "custom_value";
+			contextManager = new ContextManager(TestActivity.this);
 
-		final ContextTypedValue left = new ContextTypedValue(
-				"smart_location:vicinity?latitude=52.152962&longitude=5.367988&provider=gps");
-		// "cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
-		final String valueName = "custom_value";
-		contextManager = new ContextManager(TestActivity.this);
+			findViewById(R.id.register).setOnClickListener(
+					new View.OnClickListener() {
 
-		findViewById(R.id.register).setOnClickListener(
-				new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						LOG.debug("registering expression");
-						try {
-							contextManager.registerContextTypedValue(valueName,
-									left, null);
-						} catch (SwanException e) {
-							e.printStackTrace();
+						@Override
+						public void onClick(View v) {
+							LOG.debug("registering expression");
+							try {
+								contextManager.registerContextTypedValue(
+										valueName, left, null);
+							} catch (SwanException e) {
+								e.printStackTrace();
+							}
 						}
-					}
-				});
+					});
 
-		findViewById(R.id.unregister).setOnClickListener(
-				new View.OnClickListener() {
+			findViewById(R.id.unregister).setOnClickListener(
+					new View.OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						LOG.debug("unregistering expression");
-						try {
-							contextManager
-									.unregisterContextTypedValue(valueName);
-						} catch (SwanException e) {
-							e.printStackTrace();
+						@Override
+						public void onClick(View v) {
+							LOG.debug("unregistering expression");
+							try {
+								contextManager
+										.unregisterContextTypedValue(valueName);
+							} catch (SwanException e) {
+								e.printStackTrace();
+							}
 						}
-					}
-				});
-		findViewById(R.id.shutdown).setOnClickListener(
-				new View.OnClickListener() {
+					});
+			findViewById(R.id.shutdown).setOnClickListener(
+					new View.OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						contextManager.shutdown();
-					}
-				});
+						@Override
+						public void onClick(View v) {
+							contextManager.shutdown();
+						}
+					});
+		} catch (SwanException e) {
+			e.printStackTrace();
+		}
 
 	}
 

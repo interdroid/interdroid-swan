@@ -1,6 +1,6 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 interface IAsynchronousContextSensor {
 
