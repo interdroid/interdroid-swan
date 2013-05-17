@@ -414,7 +414,6 @@ public class ContextManager extends ContextServiceConnector {
 						BitmapFactory.decodeResource(pm
 								.getResourcesForApplication("interdroid.swan"),
 								discoveredSensor.getIconResource()));
-
 				LOG.debug("\tDiscovered sensor: {} {}",
 						discoveredSensor.serviceInfo.packageName,
 						discoveredSensor.serviceInfo.name);
