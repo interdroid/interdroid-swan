@@ -8,11 +8,11 @@
 
 
 	<PreferenceCategory android:title="Configuration">
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" meters" android:max="3600" android:defaultValue="300"
 			android:title="Minimum Distance Between Updates" android:key="min_distance" />
 
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Minimum Time Between Updates" android:key="min_time" />
 

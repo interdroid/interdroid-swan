@@ -25,7 +25,7 @@
             android:summary="Select a Railway Station"
             android:title="Destination Station" />
 
-        <interdroid.contextdroid.util.TimePreference
+        <interdroid.swan.util.TimePreference
             android:dialogTitle="Pick Departure Time"
             android:key="departure_time"
             android:persistent="false"
