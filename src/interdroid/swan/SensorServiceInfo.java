@@ -15,7 +15,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * Stores and keeps tracks of sensor service information
+ * Stores and keeps tracks of sensor service information.
  */
 public class SensorServiceInfo {
 	/**
