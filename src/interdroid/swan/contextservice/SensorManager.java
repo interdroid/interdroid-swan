@@ -20,24 +20,21 @@ public class SensorManager {
 	/**
 	 * Access to logger.
 	 */
-	private static final Logger LOG =
-			LoggerFactory.getLogger(SensorManager.class);
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SensorManager.class);
 
 	/** The sensor information. */
-	private List<SensorServiceInfo> sensorList =
-			new ArrayList<SensorServiceInfo>();
+	private List<SensorServiceInfo> sensorList = new ArrayList<SensorServiceInfo>();
 
 	/** The service connections. */
-	private final List<ServiceConnection> connectionList =
-			new ArrayList<ServiceConnection>();
+	private final List<ServiceConnection> connectionList = new ArrayList<ServiceConnection>();
 
 	/** The context (for launching new services). */
 	private final Context context;
 
 	/**
 	 * Instantiates a new sensor manager.
-	 *
+	 * 
 	 * @param appContext
 	 *            the context to launch new services in
 	 */
@@ -47,15 +44,19 @@ public class SensorManager {
 
 	/**
 	 * Binds to a given sensor.
-	 * @param value the value to bind for
-	 * @param connection the connection to use
-	 * @throws SensorConfigurationException if the sensor is miss-configured
-	 * @throws SensorSetupFailedException if setup fails
+	 * 
+	 * @param value
+	 *            the value to bind for
+	 * @param connection
+	 *            the connection to use
+	 * @throws SensorConfigurationException
+	 *             if the sensor is miss-configured
+	 * @throws SensorSetupFailedException
+	 *             if setup fails
 	 */
 	public final void bindToSensor(final ContextTypedValue value,
 			final ServiceConnection connection)
-					throws SensorConfigurationException,
-			SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		try {
 			bindToSensor(value, connection, false);
 		} catch (SensorSetupFailedException e) {
@@ -69,38 +70,55 @@ public class SensorManager {
 
 	/**
 	 * Binds to a given sensor.
-	 * @param value The value to bind for
-	 * @param connection The connection to use
-	 * @param discover true if we should run discover() first
-	 * @throws SensorConfigurationException if the sensor is misconfigured
-	 * @throws SensorSetupFailedException if setup fails.
+	 * 
+	 * @param value
+	 *            The value to bind for
+	 * @param connection
+	 *            The connection to use
+	 * @param discover
+	 *            true if we should run discover() first
+	 * @throws SensorConfigurationException
+	 *             if the sensor is misconfigured
+	 * @throws SensorSetupFailedException
+	 *             if setup fails.
 	 */
 	private void bindToSensor(final ContextTypedValue value,
 			final ServiceConnection connection, final boolean discover)
-			throws SensorConfigurationException,
-			SensorSetupFailedException {
+			throws SensorConfigurationException, SensorSetupFailedException {
 		if (discover) {
 			discover();
 		}
 		for (SensorServiceInfo sensorInfo : sensorList) {
-			if (sensorInfo.getEntity().equals(value.getEntity())
-					&& sensorInfo.getValuePaths()
-							.contains(value.getValuePath())
-					&& sensorInfo
-							.acceptsConfiguration(value.getConfiguration())) {
-				// bind to the sensor
-				context.bindService(sensorInfo.getIntent(), connection,
-						Context.BIND_AUTO_CREATE);
-				return;
+			if (sensorInfo.getEntity().equals(value.getEntity())) {
+				if (sensorInfo.getValuePaths().contains(value.getValuePath())) {
+
+					if (sensorInfo.acceptsConfiguration(value
+							.getConfiguration())) {
+						// bind to the sensor
+						context.bindService(sensorInfo.getIntent(), connection,
+								Context.BIND_AUTO_CREATE);
+						return;
+					}
+				}
+				/*System.out.println("valuepath " + value.getValuePath()
+						+ " not in ");
+				for (String vp : sensorInfo.getValuePaths()) {
+					System.out.println("\t" + vp);
+				}*/
+
 			}
+			/*System.out.println("sensor " + value.getEntity() + " not in ");
+			System.out.println("\t" + sensorInfo.getEntity()); */
 		}
-		throw new SensorSetupFailedException(
-				"Failed to bind to service for: " + value.toString());
+		throw new SensorSetupFailedException("Failed to bind to service for: "
+				+ value.toString());
 	}
 
 	/**
 	 * Unbinds a sensor.
-	 * @param connection the connection to unbind with.
+	 * 
+	 * @param connection
+	 *            the connection to unbind with.
 	 */
 	public final void unbindSensor(final ServiceConnection connection) {
 		context.unbindService(connection);

@@ -27,8 +27,7 @@ public class TestReceiver extends BroadcastReceiver {
 			}
 
 			if (intent.getAction().equals(ContextManager.ACTION_NEWREADING)) {
-				((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE))
-						.vibrate(1000);
+				//((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
 
 				Parcelable[] objects = (Parcelable[]) intent.getExtras().get(
 						"values");
