@@ -20,6 +20,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -155,6 +159,9 @@ public class ContextManager extends ContextServiceConnector {
 			final ContextTypedValue value,
 			final ContextTypedValueListener listener) throws SwanException {
 		try {
+
+			System.out.println("Starting register");
+
 			if (value.getHistoryReductionMode() == HistoryReductionMode.ALL) {
 				throw new SwanException(
 						"It is impossible to register a context typed value with history reduction mode ALL, if you want to see the latest value use ANY with a history length of 0");
@@ -163,6 +170,7 @@ public class ContextManager extends ContextServiceConnector {
 				throw new SwanException(
 						"It is impossible to register a context typed value with history reduction mode ANY and a non-zero history length, if you want to see the latest value use ANY with a history length of 0");
 			}
+
 			SwanServiceException exception = getContextService()
 					.registerContextTypedValue(id, value);
 			if (exception != null) {
@@ -347,8 +355,18 @@ public class ContextManager extends ContextServiceConnector {
 
 			if (intent.getAction().equals(ACTION_NEWREADING)) {
 				if (listener != null) {
+
+					Parcelable[] parcelables = (Parcelable[]) intent
+							.getExtras().get("values");
+					TimestampedValue[] timestampedValues = new TimestampedValue[parcelables.length];
+					System.arraycopy(parcelables, 0, timestampedValues, 0,
+							parcelables.length);
+
+					//listener.onReading(id, timestampedValues);
+
 					listener.onReading(id, (TimestampedValue) intent
 							.getExtras().get("value"));
+
 				}
 			} else if (intent.getAction().equals(ACTION_INVALIDATEREADING)) {
 				if (listener != null) {
@@ -409,13 +427,17 @@ public class ContextManager extends ContextServiceConnector {
 		LOG.debug("Found " + discoveredSensors.size() + " sensors");
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
 			try {
+				Drawable icon = new BitmapDrawable(
+						BitmapFactory.decodeResource(pm
+								.getResourcesForApplication("interdroid.swan"),
+								discoveredSensor.getIconResource()));
 				LOG.debug("\tDiscovered sensor: {} {}",
 						discoveredSensor.serviceInfo.packageName,
 						discoveredSensor.serviceInfo.name);
 				result.add(new SensorServiceInfo(new ComponentName(
 						discoveredSensor.serviceInfo.packageName,
 						discoveredSensor.serviceInfo.name),
-						discoveredSensor.serviceInfo.metaData));
+						discoveredSensor.serviceInfo.metaData, icon));
 			} catch (Exception e) {
 				LOG.error("Error with discovered sensor: {}", discoveredSensor);
 				LOG.error("Exception", e);
