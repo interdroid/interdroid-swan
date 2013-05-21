@@ -1,10 +1,10 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Comparator;
-import interdroid.swan.contextexpressions.ComparisonExpression;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
+import interdroid.swan.swansong.Comparator;
+import interdroid.swan.swansong.ComparisonExpression;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionParseException;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

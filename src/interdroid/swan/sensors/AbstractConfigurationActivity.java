@@ -1,9 +1,8 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.HistoryReductionMode;
-import interdroid.swan.contextexpressions.TypedValueExpression;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.HistoryReductionMode;
+import interdroid.swan.swansong.TypedValueExpression;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +12,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -50,10 +50,73 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.default_preferences);
+		// addPreferencesFromResource(R.xml.default_preferences);
+		addPreferencesFromIntent(new Intent(
+				"interdroid.swan.DEFAULT_PREFERENCES"));
+		reAddPrefs(getPreferenceScreen());
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
 		setResult(RESULT_CANCELED);
+	}
+
+	private void reAddPrefs(PreferenceGroup group) {
+		// re add the preferences from the intent so that they will be bound
+		// with the current context, rather than the context from the intent,
+		// which leads to:
+		// android.view.WindowManager$BadTokenException: Unable to add window --
+		// token null is not for an application
+		List<Preference> oldPrefs = new ArrayList<Preference>();
+		List<Preference> newPrefs = new ArrayList<Preference>();
+		for (int i = 0; i < group.getPreferenceCount(); i++) {
+
+			Preference preference = group.getPreference(i);
+			if (preference instanceof EditTextPreference) {
+				oldPrefs.add(preference);
+				EditTextPreference oldPref = (EditTextPreference) preference;
+				EditTextPreference newPref = new EditTextPreference(this);
+				newPref.setDialogMessage(oldPref.getDialogMessage());
+				newPref.setDialogIcon(oldPref.getDialogIcon());
+				newPref.setDependency(oldPref.getDependency());
+				newPref.setDialogTitle(oldPref.getDialogTitle());
+				newPref.setEnabled(oldPref.isEnabled());
+				newPref.setIntent(oldPref.getIntent());
+				newPref.setKey(oldPref.getKey());
+				newPref.setOrder(oldPref.getOrder());
+				newPref.setSummary(oldPref.getSummary());
+				newPref.setText(oldPref.getText());
+				newPref.setTitle(oldPref.getTitle());
+				newPrefs.add(newPref);
+			} else if (preference instanceof ListPreference) {
+				oldPrefs.add(preference);
+				ListPreference oldPref = (ListPreference) preference;
+				ListPreference newPref = new ListPreference(this);
+				newPref.setDialogMessage(oldPref.getDialogMessage());
+				newPref.setDialogIcon(oldPref.getDialogIcon());
+				newPref.setDependency(oldPref.getDependency());
+				newPref.setDialogTitle(oldPref.getDialogTitle());
+				newPref.setEnabled(oldPref.isEnabled());
+				newPref.setIntent(oldPref.getIntent());
+				newPref.setKey(oldPref.getKey());
+				newPref.setOrder(oldPref.getOrder());
+				newPref.setSummary(oldPref.getSummary());
+				newPref.setTitle(oldPref.getTitle());
+				newPref.setEntries(oldPref.getEntries());
+				newPref.setEntryValues(oldPref.getEntryValues());
+				newPrefs.add(newPref);
+			} else if (preference instanceof PreferenceGroup) {
+				reAddPrefs((PreferenceGroup) preference);
+			} else {
+				group.removePreference(preference);
+				LOG.debug("not re adding preference: '" + preference.getKey()
+						+ "' not supported");
+			}
+		}
+		for (Preference oldPref : oldPrefs) {
+			group.removePreference(oldPref);
+		}
+		for (Preference newPref : newPrefs) {
+			group.addPreference(newPref);
+		}
 	}
 
 	// CHECKSTYLE:ON
@@ -145,9 +208,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		ContextTypedValue sensor = new ContextTypedValue(entityId, path,
 				stringMap, mode, timespan);
 
-		TypedValueExpression typedValueExpression = new TypedValueExpression(
-				sensor);
-		return typedValueExpression.toParseString();
+		return sensor.toParseString();
 	}
 
 	@Override

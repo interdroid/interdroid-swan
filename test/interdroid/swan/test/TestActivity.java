@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
+import interdroid.swan.swansong.ContextTypedValue;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;

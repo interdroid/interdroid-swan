@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import android.os.Parcel;
 import android.os.Parcelable;

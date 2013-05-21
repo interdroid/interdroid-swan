@@ -1,6 +1,7 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
+import interdroid.swan.swansong.ContextExpressionParser;
 import interdroid.swan.contextservice.SensorConfigurationException;
 import interdroid.swan.contextservice.SensorSetupFailedException;
 import interdroid.swan.contextservice.SensorManager;
@@ -170,7 +171,7 @@ public abstract class TypedValue implements Serializable, Parcelable,
 	 * @throws ExpressionParseException
 	 *             if the string is not recognized
 	 */
-	public static final TypedValue parse(final String value)
+	public static TypedValue parse(final String value)
 			throws ExpressionParseException {
 		return ContextExpressionParser.parseTypedValue(value);
 	}

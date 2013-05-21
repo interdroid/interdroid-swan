@@ -1,7 +1,8 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
 import interdroid.swan.ContextManager;
+import interdroid.swan.swansong.ContextExpressionParser;
 import interdroid.swan.contextservice.SensorConfigurationException;
 import interdroid.swan.contextservice.SensorManager;
 import interdroid.swan.contextservice.SensorSetupFailedException;
@@ -293,7 +294,7 @@ public abstract class Expression implements Parseable<Expression>, Parcelable,
 	 */
 	@Override
 	public final String toParseString() {
-		String result = "" + this.toParseStringImpl() + "";
+		String result = "(" + this.toParseStringImpl() + ")";
 		return result;
 	}
 

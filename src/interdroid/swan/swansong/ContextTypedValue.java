@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 import interdroid.swan.SwanException;
 import interdroid.swan.contextservice.SensorConfigurationException;
@@ -205,13 +205,13 @@ public class ContextTypedValue extends TypedValue {
 
 	/**
 	 * Sets the timespan of history to keep. This sets to DEFAULT_HISTORY_LENGTH
-	 * if timespan <= 0
+	 * if timespan < 0
 	 * 
 	 * @param timespan
 	 *            the timespan to set to.
 	 */
 	private void setHistoryTimespan(final long timespan) {
-		if (timespan > 0) {
+		if (timespan >= 0) {
 			mTimespan = timespan;
 		} else {
 			mTimespan = DEFAULT_HISTORY_LENGTH;
@@ -228,12 +228,8 @@ public class ContextTypedValue extends TypedValue {
 	 */
 	public ContextTypedValue(final String unparsedContextInfo)
 			throws ExpressionParseException {
-		this(Expression.parse(unparsedContextInfo));
-	}
-
-	private ContextTypedValue(final Expression expression) {
-		this(expression.toString(), expression.getHistoryReductionMode(),
-				expression.getHistoryLength());
+		this(unparsedContextInfo, HistoryReductionMode.ANY,
+				DEFAULT_HISTORY_LENGTH);
 	}
 
 	/**
@@ -274,7 +270,8 @@ public class ContextTypedValue extends TypedValue {
 		}
 
 		setHistoryTimespan(timespan);
-		System.out.println(mEntity + "," + mValuePath + "," + mode + "," + timespan);
+		System.out.println(mEntity + "," + mValuePath + "," + mode + ","
+				+ timespan);
 	}
 
 	/**
@@ -345,7 +342,7 @@ public class ContextTypedValue extends TypedValue {
 		// If the previous step didn't result in any readings, there's nothing
 		// to evaluate, so the expression's value is undefined.
 		if (values.size() == 0) {
-			LOG.debug("No readings so returning null.");
+			LOG.debug("No readings throwing exception.");
 			throw new NoValuesInIntervalException("No values in interval for "
 					+ this);
 		}
@@ -520,4 +517,10 @@ public class ContextTypedValue extends TypedValue {
 		// TODO: Rename to mHistoryLength
 		return mTimespan;
 	}
+
+	public static final ContextTypedValue parse(String contextTypedValue)
+			throws ExpressionParseException {
+		return (ContextTypedValue) TypedValue.parse(contextTypedValue);
+	}
+
 }

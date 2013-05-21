@@ -3,7 +3,7 @@ package interdroid.swan.sensors.impl;
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractSensorBase;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

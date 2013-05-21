@@ -7,7 +7,7 @@
 	</PreferenceCategory>
 	
 	<PreferenceCategory android:title="Configuration">
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Sample Interval" android:key="sample_interval" />
 		<CheckBoxPreference android:key="ignore_free_events"

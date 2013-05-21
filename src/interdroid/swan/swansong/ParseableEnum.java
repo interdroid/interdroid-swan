@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 /**
  * This class is designed to make enumerations safe to persist more easily

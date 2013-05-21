@@ -1,4 +1,4 @@
-package interdroid.swan.contextexpressions;
+package interdroid.swan.swansong;
 
 /**
  * An enumeration which represents LogicalOperators.

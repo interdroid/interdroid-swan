@@ -1,9 +1,10 @@
 package interdroid.swan;
 
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.TimestampedValue;
 import interdroid.swan.contextservice.SwanServiceException;
+import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.HistoryReductionMode;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,7 +159,18 @@ public class ContextManager extends ContextServiceConnector {
 			final ContextTypedValue value,
 			final ContextTypedValueListener listener) throws SwanException {
 		try {
+
 			System.out.println("Starting register");
+
+			if (value.getHistoryReductionMode() == HistoryReductionMode.ALL) {
+				throw new SwanException(
+						"It is impossible to register a context typed value with history reduction mode ALL, if you want to see the latest value use ANY with a history length of 0");
+			} else if (value.getHistoryReductionMode() == HistoryReductionMode.ANY
+					&& value.getHistoryLength() != 0) {
+				throw new SwanException(
+						"It is impossible to register a context typed value with history reduction mode ANY and a non-zero history length, if you want to see the latest value use ANY with a history length of 0");
+			}
+
 			SwanServiceException exception = getContextService()
 					.registerContextTypedValue(id, value);
 			if (exception != null) {
@@ -343,13 +355,18 @@ public class ContextManager extends ContextServiceConnector {
 
 			if (intent.getAction().equals(ACTION_NEWREADING)) {
 				if (listener != null) {
+
 					Parcelable[] parcelables = (Parcelable[]) intent
 							.getExtras().get("values");
 					TimestampedValue[] timestampedValues = new TimestampedValue[parcelables.length];
 					System.arraycopy(parcelables, 0, timestampedValues, 0,
 							parcelables.length);
 
-					listener.onReading(id, timestampedValues);
+					//listener.onReading(id, timestampedValues);
+
+					listener.onReading(id, (TimestampedValue) intent
+							.getExtras().get("value"));
+
 				}
 			} else if (intent.getAction().equals(ACTION_INVALIDATEREADING)) {
 				if (listener != null) {

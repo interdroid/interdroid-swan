@@ -1,7 +1,7 @@
 package interdroid.swan.contextservice;
 
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ContextTypedValue;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ContextTypedValue;
 import interdroid.swan.contextservice.SwanServiceException;
 
 interface IContextService {

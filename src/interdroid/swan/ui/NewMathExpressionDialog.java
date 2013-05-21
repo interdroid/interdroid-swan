@@ -1,10 +1,10 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
-import interdroid.swan.contextexpressions.MathExpression;
-import interdroid.swan.contextexpressions.MathOperator;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.MathExpression;
+import interdroid.swan.swansong.MathOperator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
