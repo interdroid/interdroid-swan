@@ -335,7 +335,7 @@ public class ContextManager extends ContextServiceConnector {
 
 	/**
 	 * The receiver object that receives updates about the state of context
-	 * expressions.
+	 * expressions..
 	 */
 	private final BroadcastReceiver contextTypedValueBroadcastReceiver = new BroadcastReceiver() {
 		@Override

@@ -25,7 +25,7 @@ public class SensorServiceInfo {
 			.getLogger(SensorServiceInfo.class);
 
 	/**
-	 * The name of the component the sensor runs in.
+	 * The name of the component the sensor runs in..
 	 */
 	private final ComponentName component;
 
