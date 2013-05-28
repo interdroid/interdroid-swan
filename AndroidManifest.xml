@@ -205,10 +205,6 @@
             android:exported="true" >
         </activity>
         <activity
-            android:name=".sensors.impl.CuckooTrainSensor$ConfigurationActivity"
-            android:exported="true" >
-        </activity>
-        <activity
             android:name=".sensors.impl.TimeSensor$ConfigurationActivity"
             android:exported="true" >
         </activity>
@@ -689,30 +685,6 @@
             <meta-data
                 android:name="sample_interval"
                 android:value="300000L" />
-            <meta-data
-                android:name="from_station"
-                android:value="null" />
-            <meta-data
-                android:name="to_station"
-                android:value="null" />
-            <meta-data
-                android:name="departure_time"
-                android:value="null" />
-
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".sensors.impl.CuckooTrainSensor"
-            android:exported="true"
-            android:process=":trainsensor" >
-            <meta-data
-                android:name="entityId"
-                android:value="cuckootrain" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="departure_time,arrival_time" />
             <meta-data
                 android:name="from_station"
                 android:value="null" />

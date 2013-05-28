@@ -25,14 +25,14 @@
             android:summary="Set the Longitude"
             android:title="Longitude" />
 
-        <interdroid.contextdroid.util.SeekBarPreference
+        <interdroid.swan.util.SeekBarPreference
             android:defaultValue="300"
             android:key="range"
             android:max="10000"
             android:text=" meters"
             android:title="The Within-Range" />
 
-        <interdroid.contextdroid.util.SeekBarPreference
+        <interdroid.swan.util.SeekBarPreference
             android:defaultValue="28"
             android:key="max_speed"
             android:max="100"
