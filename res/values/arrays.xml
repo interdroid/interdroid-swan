@@ -17,6 +17,7 @@
         <item>voltage</item>
         <item>temperature</item>
         <item>plugged</item>
+        <item>status_text</item>
     </string-array>
 
     <!-- train sensor -->
@@ -212,6 +213,7 @@
         <item>status</item>
         <item>index</item>
         <item>rri</item>
+        <item>status_text</item>
     </string-array>
 
 </resources>

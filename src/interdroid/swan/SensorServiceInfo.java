@@ -82,7 +82,7 @@ public class SensorServiceInfo {
 		metaData.remove("authority");
 
 		// and the units
-		units.addAll(Arrays.asList(metaData.getString("units").split(",")));
+		units.addAll(Arrays.asList(metaData.getString("units").split(",", -1)));
 		metaData.remove("units");
 		
 		// and the value paths

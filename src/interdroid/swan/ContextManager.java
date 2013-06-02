@@ -160,7 +160,7 @@ public class ContextManager extends ContextServiceConnector {
 			final ContextTypedValueListener listener) throws SwanException {
 		try {
 
-			System.out.println("Starting register");
+			System.out.println("Registering sensorId: " + id);
 
 			if (value.getHistoryReductionMode() == HistoryReductionMode.ALL) {
 				throw new SwanException(
@@ -355,18 +355,8 @@ public class ContextManager extends ContextServiceConnector {
 
 			if (intent.getAction().equals(ACTION_NEWREADING)) {
 				if (listener != null) {
-
-					Parcelable[] parcelables = (Parcelable[]) intent
-							.getExtras().get("values");
-					TimestampedValue[] timestampedValues = new TimestampedValue[parcelables.length];
-					System.arraycopy(parcelables, 0, timestampedValues, 0,
-							parcelables.length);
-
-					//listener.onReading(id, timestampedValues);
-
 					listener.onReading(id, (TimestampedValue) intent
 							.getExtras().get("value"));
-
 				}
 			} else if (intent.getAction().equals(ACTION_INVALIDATEREADING)) {
 				if (listener != null) {
