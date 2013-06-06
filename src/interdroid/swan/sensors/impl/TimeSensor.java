@@ -28,7 +28,7 @@ public class TimeSensor extends AbstractSensorBase {
 			setResult(
 					RESULT_OK,
 					getIntent().putExtra("configuration",
-							TimeSensor.CURRENT_MS_FIELD));
+							TimeSensor.CURRENT_MS_FIELD).putExtra("Expression", "time:" + CURRENT_MS_FIELD + " {ANY,0}"));
 			finish();
 		}
 

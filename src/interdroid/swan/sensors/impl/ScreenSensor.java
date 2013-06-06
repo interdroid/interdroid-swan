@@ -44,6 +44,7 @@ public class ScreenSensor extends AbstractVdbSensor {
 					RESULT_OK,
 					getIntent().putExtra("configuration",
 							ScreenSensor.IS_SCREEN_ON_FIELD));
+			
 			finish();
 		}
 

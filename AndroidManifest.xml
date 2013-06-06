@@ -273,7 +273,7 @@
                 android:value="current" />
             <meta-data
                 android:name="units"
-                android:value="H_M_S" />
+                android:value="ms" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -339,7 +339,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value="Pa" />
+                android:value="Millibar" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -392,7 +392,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value="A_or_Gi,A_or_Gi,A_or_Gi,A_or_Gi" />
+                android:value="Gi,Gi,Gi,Gi" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -458,7 +458,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value="ms,ms,ms,ms" />
+                android:value="m/s2,m/s2,m/s2,m/s2" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -542,7 +542,7 @@
                 android:value="signal" />
             <meta-data
                 android:name="valuePaths"
-                android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
+                android:value="is_gsm,,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
             <meta-data
                 android:name="authority"
                 android:value="interdroid.context.sensor.signal" />

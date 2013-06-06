@@ -22,7 +22,7 @@ public class SoundSensor extends AbstractMemorySensor {
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
 	 * 
 	 */
-	public static class SoundConfigurationActivity extends
+	public static class ConfigurationActivity extends
 			AbstractConfigurationActivity {
 
 		@Override

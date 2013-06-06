@@ -54,7 +54,7 @@ public class LightSensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-				for (int i = 0; i < 3; i++) {
+				for (int i = 0; i < VALUE_PATHS.length; i++) {
 					putValueTrimSize(VALUE_PATHS[i], null, now,
 							event.values[i], HISTORY_SIZE);
 				}

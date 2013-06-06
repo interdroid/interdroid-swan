@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class TemperatureSensor extends AbstractMemorySensor {
 
@@ -46,14 +47,14 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	private SensorEventListener sensorEventListener = new SensorEventListener() {
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-			if (sensor.getType() == Sensor.TYPE_TEMPERATURE) {
+			if (sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
 				currentConfiguration.putInt(ACCURACY, accuracy);
 			}
 		}
 
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
-			if (event.sensor.getType() == Sensor.TYPE_TEMPERATURE) {
+			if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
 				for (int i = 0; i < 3; i++) {
 					putValueTrimSize(VALUE_PATHS[i], null, now,
 							event.values[i], HISTORY_SIZE);
@@ -88,10 +89,11 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager
-				.getSensorList(Sensor.TYPE_TEMPERATURE);
+				.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE);
 		if (sensorList.size() > 0) {
 			temperatureSensor = sensorList.get(0);
 		} else {
+			Toast.makeText(getApplicationContext(), "No temperatureSensor found on device", Toast.LENGTH_SHORT).show();
 			Log.e(TAG, "No temperatureSensor found on device!");
 		}
 	}

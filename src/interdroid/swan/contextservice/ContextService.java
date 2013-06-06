@@ -776,6 +776,7 @@ public class ContextService extends Service {
 		public SwanServiceException registerContextTypedValue(final String id,
 				final ContextTypedValue contextTypedValue)
 				throws RemoteException {
+			System.out.println("register in service: " + id + ", " + contextTypedValue);
 			if (contextTypedValues.containsKey(id)) {
 				try {
 					contextTypedValues.get(id).destroy(id, sensorManager);
