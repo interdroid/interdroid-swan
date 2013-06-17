@@ -266,29 +266,24 @@ public abstract class AbstractSensorBase extends Service implements
 			final List<TimestampedValue> values, final long now,
 			final long timespan) {
 		// make a copy of the list
-		List<TimestampedValue> result = null;
+		List<TimestampedValue> result = new ArrayList<TimestampedValue>();
 
 		if (timespan == 0) {
 			if (values != null && values.size() > 0) {
-				result = values.subList(0, 1);
+				result.add(values.get(0));
 			}
 		} else {
-			result = new ArrayList<TimestampedValue>();
 			int startPos = 0;
-			int endPos = 0;
 			if (values != null) {
 				result.addAll(values);
-				for (int i = 0; i < values.size(); i++) {
-					if ((now - timespan) > values.get(i).getTimestamp()) {
+				for (int i = 0; i < result.size(); i++) {
+					if ((now - timespan) < result.get(i).getTimestamp()) {
 						startPos++;
-					}
-					if (now > values.get(i).getTimestamp()) {
-						endPos++;
 					}
 				}
 			}
 
-			result = result.subList(startPos, endPos);
+			result = result.subList(0, startPos);
 		}
 		return result;
 	}
