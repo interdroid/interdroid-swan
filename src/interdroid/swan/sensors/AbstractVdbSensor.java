@@ -1,11 +1,11 @@
 package interdroid.swan.sensors;
 
+import interdroid.swan.swansong.TimestampedValue;
+import interdroid.vdb.content.EntityUriBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import interdroid.swan.swansong.TimestampedValue;
-import interdroid.vdb.content.EntityUriBuilder;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -20,9 +20,9 @@ import android.net.Uri;
 
 /**
  * Base class for sensors which store their data into a VDB database.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
@@ -92,7 +92,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param id
 	 *            the id
 	 * @param values
@@ -110,7 +110,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param values
 	 *            the values to store
 	 * @param now
@@ -126,7 +126,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this given content
 	 * resolver. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param resolver
 	 *            the resolver to store with
 	 * @param values
@@ -180,16 +180,16 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 					break;
 				case ENUM:
 				case STRING:
-					ret.add(new TimestampedValue(values.getString(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getString(column),
+							values.getLong(0)));
 					break;
 				case FLOAT:
-					ret.add(new TimestampedValue(values.getFloat(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getFloat(column),
+							values.getLong(0)));
 					break;
 				case DOUBLE:
-					ret.add(new TimestampedValue(values.getDouble(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getDouble(column),
+							values.getLong(0)));
 					break;
 				case FIXED:
 				case BYTES:
@@ -231,9 +231,9 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param id
 	 * @return a cursor with the value data
 	 */
-	protected static Cursor getValuesCursor(final Context context, final Uri uri,
-			final String[] values, final long now, final long timespan,
-			String id) {
+	protected static Cursor getValuesCursor(final Context context,
+			final Uri uri, final String[] values, final long now,
+			final long timespan, String id) {
 		LOG.debug("timespan: {} end: {}", timespan, now);
 
 		String[] projection = new String[values.length + 1];

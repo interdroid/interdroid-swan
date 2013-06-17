@@ -2,9 +2,12 @@ package interdroid.swan.ui;
 
 import interdroid.swan.R;
 import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionFactory;
 import interdroid.swan.swansong.ExpressionParseException;
-import interdroid.swan.swansong.MathExpression;
+import interdroid.swan.swansong.HistoryReductionMode;
 import interdroid.swan.swansong.MathOperator;
+import interdroid.swan.swansong.MathValueExpression;
+import interdroid.swan.swansong.ValueExpression;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -67,17 +70,21 @@ public class NewMathExpressionDialog extends Activity {
 				// comparator expression out of it, then add
 				// it to the list of expressions.
 				try {
-					Expression left = Expression
+					Expression left = ExpressionFactory
 							.parse(((Button) findViewById(R.id.left)).getText()
 									.toString());
-					Expression right = Expression
+					Expression right = ExpressionFactory
 							.parse(((Button) findViewById(R.id.right))
 									.getText().toString());
 					MathOperator operator = MathOperator
 							.parse(((Button) findViewById(R.id.operator))
 									.getText().toString());
-					Expression newExpression = new MathExpression(left,
-							operator, right);
+					// TODO get a configurable history reduction mode instead of
+					// default
+					Expression newExpression = new MathValueExpression(
+							(ValueExpression) left, operator,
+							(ValueExpression) right,
+							HistoryReductionMode.DEFAULT_MODE);
 					Intent result = new Intent();
 					result.putExtra("Expression", newExpression.toParseString());
 					// if (name != null && !name.equals("")) {

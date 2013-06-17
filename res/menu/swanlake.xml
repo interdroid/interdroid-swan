@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_share"
+        android:visible="true"/>
+    <item
+        android:id="@+id/action_set_name"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_set_name"
+        android:visible="true"/>
+    <item
+        android:id="@+id/action_enable"
+        android:actionViewClass="android.widget.Switch"
+        android:showAsAction="always"
+        android:title="@string/action_enable"/>
+
+</menu>

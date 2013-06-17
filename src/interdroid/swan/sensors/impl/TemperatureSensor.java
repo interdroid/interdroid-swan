@@ -39,21 +39,21 @@ public class TemperatureSensor extends AbstractMemorySensor {
 
 	public static final String TEMPERATURE_FIELD = "temperature";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 300;
 
 	private Sensor temperatureSensor;
 	private SensorManager sensorManager;
 	private SensorEventListener sensorEventListener = new SensorEventListener() {
 
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-			if (sensor.getType() == Sensor.TYPE_TEMPERATURE) {
+			if (sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
 				currentConfiguration.putInt(ACCURACY, accuracy);
 			}
 		}
 
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
-			if (event.sensor.getType() == Sensor.TYPE_TEMPERATURE) {
+			if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
 				for (int i = 0; i < 3; i++) {
 					putValueTrimSize(VALUE_PATHS[i], null, now,
 							event.values[i], HISTORY_SIZE);
@@ -88,7 +88,7 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager
-				.getSensorList(Sensor.TYPE_TEMPERATURE);
+				.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE);
 		if (sensorList.size() > 0) {
 			temperatureSensor = sensorList.get(0);
 		} else {

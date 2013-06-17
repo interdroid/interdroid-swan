@@ -4,10 +4,6 @@ import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -16,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * A sensor for discovered bluetooth devices.
@@ -24,10 +21,8 @@ import android.os.Bundle;
  * 
  */
 public class BluetoothSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(CallSensor.class);
+
+	private static final String TAG = "Bluetooth Sensor";
 
 	/**
 	 * This configuration activity for this sensor.
@@ -137,8 +132,8 @@ public class BluetoothSensor extends AbstractVdbSensor {
 			BluetoothDevice device = intent
 					.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 			ContentValues values = new ContentValues();
-			LOG.debug("Bluetooth discovered: {} {}", device.getName(),
-					device.getAddress());
+			Log.d(TAG, "Bluetooth discovered: " + device.getName() + " "
+					+ device.getAddress());
 			values.put(DEVICE_NAME_FIELD, device.getName());
 			values.put(DEVICE_ADDRESS_FIELD, device.getAddress());
 
@@ -158,7 +153,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 					if (mBluetoothAdapter != null
 							&& !mBluetoothAdapter.isDiscovering()) {
 						mBluetoothAdapter.startDiscovery();
-						LOG.debug("bt started discovery");
+						Log.d(TAG, "bt started discovery");
 					}
 				}
 				try {
@@ -167,7 +162,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 							+ start
 							- System.currentTimeMillis());
 				} catch (InterruptedException e) {
-					LOG.warn("Interrupted while sleeping.", e);
+					Log.w(TAG, "Interrupted while sleeping.");
 				}
 			}
 		}
@@ -192,7 +187,7 @@ public class BluetoothSensor extends AbstractVdbSensor {
 	@Override
 	public final void onConnected() {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		LOG.debug("bluetooth connected");
+		Log.d(TAG, "bluetooth connected");
 	}
 
 	@Override
@@ -239,8 +234,9 @@ public class BluetoothSensor extends AbstractVdbSensor {
 
 	@Override
 	public final void onDestroySensor() {
-		unregisterReceiver(bluetoothReceiver);
-
+		if (registeredConfigurations.size() != 0) {
+			unregisterReceiver(bluetoothReceiver);
+		}
 		mBluetoothAdapter.cancelDiscovery();
 		stopPolling = true;
 		bluetoothPoller.interrupt();

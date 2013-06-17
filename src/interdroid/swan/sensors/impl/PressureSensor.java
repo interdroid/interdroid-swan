@@ -54,10 +54,8 @@ public class PressureSensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
-				for (int i = 0; i < 3; i++) {
-					putValueTrimSize(VALUE_PATHS[i], null, now,
-							event.values[i], HISTORY_SIZE);
-				}
+				putValueTrimSize(PRESSURE_FIELD, null, now, event.values[0],
+						HISTORY_SIZE);
 			}
 		}
 	};

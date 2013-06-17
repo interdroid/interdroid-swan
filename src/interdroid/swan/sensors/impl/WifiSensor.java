@@ -7,9 +7,6 @@ import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,6 +15,7 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * A sensor for available Wifi networks.
@@ -26,10 +24,13 @@ import android.os.Bundle;
  * 
  */
 public class WifiSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(WifiSensor.class);
+	// wifi:ssid{ANY,1000} == test && wifi:level?ssid=test > 10
+	// wifi:level?bssid=A:B:C:D > 10
+	// wifi:level{MAX,1000} > 10
+	// does getValues provide the config? no, but id, which can be used to get
+	// config (registeredConfigurations)
+
+	private static final String TAG = "WiFi Sensor";
 
 	/**
 	 * Configuration activity for this sensor.
@@ -68,7 +69,7 @@ public class WifiSensor extends AbstractVdbSensor {
 	/**
 	 * The interval at which to run discovery.
 	 */
-	public static final long DEFAULT_DISCOVERY_INTERVAL = 15 * 60 * 1000;
+	public static final long DEFAULT_DISCOVERY_INTERVAL = 60 * 1000;
 
 	/**
 	 * true if we should stop polling and shutdown.
@@ -108,10 +109,11 @@ public class WifiSensor extends AbstractVdbSensor {
 	private static String getSchema() {
 		String scheme = "{'type': 'record', 'name': 'wifi', "
 				+ "'namespace': 'interdroid.context.sensor.wifi',"
-				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
-				+ SSID_FIELD + "', 'type': 'string'}," + "\n{'name': '"
-				+ BSSID_FIELD + "', 'type': 'string'}," + "\n{'name': '"
-				+ LEVEL_FIELD + "', 'type': 'int'}" + "\n]" + "}";
+				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + SCHEMA_ID_FIELDS
+				+ "\n{'name': '" + SSID_FIELD + "', 'type': 'string'},"
+				+ "\n{'name': '" + BSSID_FIELD + "', 'type': 'string'},"
+				+ "\n{'name': '" + LEVEL_FIELD + "', 'type': 'int'}" + "\n]"
+				+ "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -126,14 +128,45 @@ public class WifiSensor extends AbstractVdbSensor {
 
 			List<ScanResult> results = wifiManager.getScanResults();
 			for (ScanResult scanResult : results) {
-				LOG.debug("Got WiFi: {} {} " + scanResult.level,
-						scanResult.SSID, scanResult.BSSID);
-				ContentValues values = new ContentValues();
-
-				values.put(SSID_FIELD, scanResult.SSID);
-				values.put(BSSID_FIELD, scanResult.BSSID);
-				values.put(LEVEL_FIELD, scanResult.level);
-				putValues(values, now);
+				Log.d(TAG, "Got WiFi: " + scanResult.level + ", "
+						+ scanResult.SSID + ", " + scanResult.BSSID);
+				if (expressionIdsPerValuePath.containsKey(SSID_FIELD)) {
+					ContentValues values = new ContentValues();
+					values.put(SSID_FIELD, scanResult.SSID);
+					putValues(values, now);
+				}
+				if (expressionIdsPerValuePath.containsKey(BSSID_FIELD)) {
+					ContentValues values = new ContentValues();
+					values.put(BSSID_FIELD, scanResult.BSSID);
+					putValues(values, now);
+				}
+				if (expressionIdsPerValuePath.containsKey(LEVEL_FIELD)) {
+					for (String id : registeredConfigurations.keySet()) {
+						boolean matching = true;
+						if (registeredConfigurations.get(id).containsKey(
+								SSID_FIELD)) {
+							matching = matching
+									&& (registeredConfigurations.get(id)
+											.getString(SSID_FIELD)
+											.equals(scanResult.SSID));
+						}
+						if (registeredConfigurations.get(id).containsKey(
+								BSSID_FIELD)) {
+							matching = matching
+									&& (registeredConfigurations.get(id)
+											.getString(BSSID_FIELD)
+											.equals(scanResult.BSSID));
+						}
+						if (matching) {
+							Log.w(TAG, "matching result found!");
+							ContentValues values = new ContentValues();
+							values.put(LEVEL_FIELD, scanResult.level);
+							putValues(id, values, now);
+						} else {
+							Log.d(TAG, "No matching result found!");
+						}
+					}
+				}
 			}
 		}
 
@@ -147,19 +180,23 @@ public class WifiSensor extends AbstractVdbSensor {
 			while (!stopPolling) {
 				long start = System.currentTimeMillis();
 				if (registeredConfigurations.size() > 0) {
-					LOG.debug("Starting WiFi scan.");
+					Log.d(TAG, "Starting WiFi scan.");
 					wifiManager.startScan();
 				}
 				try {
-					LOG.debug("Sleeping.");
+					long waitTime = Math.max(
+							1,
+							start
+									+ currentConfiguration
+											.getLong(DISCOVERY_INTERVAL)
+									- System.currentTimeMillis());
+					Log.d(TAG, "Waiting for " + waitTime + " ms.");
+
 					synchronized (wifiPoller) {
-						wifiPoller.wait(currentConfiguration
-								.getLong(DISCOVERY_INTERVAL)
-								+ start
-								- System.currentTimeMillis());
+						wifiPoller.wait(waitTime);
 					}
 				} catch (InterruptedException e) {
-					LOG.error("Interrupted while waiting.", e);
+					Log.e(TAG, "Interrupted while waiting.", e);
 				}
 			}
 		}
@@ -236,7 +273,7 @@ public class WifiSensor extends AbstractVdbSensor {
 		try {
 			unregisterReceiver(wifiReceiver);
 		} catch (IllegalArgumentException e) {
-			LOG.error("Error unregistering", e);
+			Log.e(TAG, "Error unregistering", e);
 		}
 
 		stopPolling = true;
