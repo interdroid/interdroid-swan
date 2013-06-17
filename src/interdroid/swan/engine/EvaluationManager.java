@@ -378,7 +378,7 @@ public class EvaluationManager {
 		// check which evaluation is likely to cause the other to sleep/defer
 		switch ((BinaryLogicOperator) expression.getOperator()) {
 		case AND:
-			
+
 			leftFirstCost = leftSenseCost + (1 - pLeftTrue) * rightSenseCost;
 
 			rightFirstCost = rightEvaluationCost + pRightTrue
@@ -555,6 +555,7 @@ public class EvaluationManager {
 			}
 			TimestampedValue[] reduced = TimestampedValue.applyMode(values,
 					expression.getHistoryReductionMode());
+
 			Result result = new Result(reduced);
 			if (expression.getHistoryLength() == 0 || reduced == null
 					|| reduced.length == 0) {

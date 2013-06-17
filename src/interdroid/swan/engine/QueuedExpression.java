@@ -1,21 +1,28 @@
 package interdroid.swan.engine;
 
-import interdroid.swan.crossdevice.CrossDeviceReceiver;
 import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.Result;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.swan.swansong.TriStateExpression;
 import interdroid.swan.swansong.ValueExpression;
 
+import java.util.Date;
+
 public class QueuedExpression implements Comparable<QueuedExpression> {
 
 	private Expression mExpression;
 	private String mId;
 	private Result mCurrentResult;
+	private long mStartTime;
+	private int mEvaluations; // number of evaluations
+	private long mTotalEvaluationTime; // total time spent on evaluations so far
+	private long mMinEvaluationTime = Long.MAX_VALUE;
+	private long mMaxEvaluationTime = Long.MIN_VALUE;
 
 	public QueuedExpression(String id, Expression expression) {
 		mId = id;
 		mExpression = expression;
+		mStartTime = System.currentTimeMillis();
 	}
 
 	public int compareTo(QueuedExpression another) {
@@ -87,7 +94,32 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		if (mId.contains(Expression.SEPARATOR)) {
 			id = "<remote> " + mId.split(Expression.SEPARATOR, 2)[1];
 		}
-		return id + "\n" + mCurrentResult + "\n" + mExpression.toParseString();
+		return id
+				+ "\n"
+				+ mCurrentResult
+				+ "\n"
+				+ mExpression.toParseString()
+				+ "\nStart time: "
+				+ new Date(mStartTime)
+				+ "\nEvaluation Rate: "
+				+ (mEvaluations / ((System.currentTimeMillis() - mStartTime) / 60000.0))
+				+ " per minute"
+				+ "\nAvg Evaluation Time: "
+				+ (mTotalEvaluationTime / Math.max(mEvaluations, 1))
+				+ "\nMin Evaluation Time: "
+				+ mMinEvaluationTime
+				+ "\nMax Evaluation Time: "
+				+ mMaxEvaluationTime
+				+ "\nEvaluation Percentage: "
+				+ ((mTotalEvaluationTime * 100) / (float) (System
+						.currentTimeMillis() - mStartTime));
+	}
+
+	public void evaluated(long currentEvalutionTime) {
+		mEvaluations += 1;
+		mTotalEvaluationTime += currentEvalutionTime;
+		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
+		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
 	}
 
 }

@@ -127,10 +127,8 @@ public class MovementSensor extends AbstractMemorySensor {
 					continue;
 				}
 				if (configuration.containsKey(ACCURACY)) {
-					highestAccuracy = Math
-							.min(highestAccuracy,
-									Integer.parseInt(configuration
-											.getString(ACCURACY)));
+					highestAccuracy = Math.min(highestAccuracy,
+							configuration.getInt(ACCURACY));
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,
