@@ -5,7 +5,6 @@ import interdroid.swan.R;
 import interdroid.swan.SensorConfigurationException;
 import interdroid.swan.SwanException;
 import interdroid.swan.crossdevice.Converter;
-import interdroid.swan.crossdevice.CrossDeviceReceiver;
 import interdroid.swan.crossdevice.Pusher;
 import interdroid.swan.sensors.SensorInterface;
 import interdroid.swan.swansong.Expression;
@@ -18,7 +17,6 @@ import interdroid.swan.swansong.ValueExpression;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
@@ -98,9 +96,12 @@ public class EvaluationEngineService extends Service {
 					if (head.getDeferUntil() <= System.currentTimeMillis()) {
 						// evaluate now
 						try {
+							long start = System.currentTimeMillis();
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
+							head.evaluated(System.currentTimeMillis() - start);
+							
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
 								sendUpdate(head.getId(), result);
@@ -137,6 +138,8 @@ public class EvaluationEngineService extends Service {
 	NotificationManager mNotificationManager;
 	Notification mNotification;
 	EvaluationManager mEvaluationManager;
+	
+	
 
 	/**
 	 * @return all expressions saved in the database.
@@ -261,6 +264,7 @@ public class EvaluationEngineService extends Service {
 			try {
 				Expression expression = ExpressionFactory.parse(intent
 						.getStringExtra("expression"));
+				
 				doRegister(id, expression);
 			} catch (Throwable t) {
 				Log.d(TAG,
@@ -302,9 +306,11 @@ public class EvaluationEngineService extends Service {
 			}
 			mEvaluationManager.newRemoteResult(id, result);
 			doNotify(new String[] { id });
+			return START_STICKY;
 		} else if (SensorInterface.ACTION_NOTIFY.equals(action)) {
 			String[] ids = intent.getStringArrayExtra("expressionIds");
 			doNotify(ids);
+			return START_STICKY;
 		} else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
 			restoreAfterBoot();
 		} else if (UPDATE_EXPRESSIONS.equals(action)) {
