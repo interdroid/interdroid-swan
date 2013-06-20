@@ -30,7 +30,7 @@ public class TestActivity extends Activity {
 		try {
 			parsedExpression = ExpressionFactory
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
-					.parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
+					.parse("self@movement:total{MAX,5000}");
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
 			finish();
