@@ -630,7 +630,7 @@
                 android:value="location" />
             <meta-data
                 android:name="valuePaths"
-                android:value="latitude,longitude,altitude,speed" />
+                android:value="location,latitude,longitude,altitude,speed,bearing,accuracy" />
             <meta-data
                 android:name="min_distance"
                 android:value="0L" />
@@ -645,7 +645,7 @@
                 android:value="interdroid.context.sensor.location" />
             <meta-data
                 android:name="units"
-                android:value="lat,long,alt,kmh" />
+                android:value=",lat,long,alt,kmh,degrees,meter" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -765,34 +765,6 @@
             android:authorities="interdroid.context.sensor.wifi" />
 
         <service
-            android:name="interdroid.swan.sensors.impl.ServerStatusSensor"
-            android:exported="true"
-            android:icon="@drawable/serverstatus_icon"
-            android:process=":serverstatussensor" >
-            <meta-data
-                android:name="entityId"
-                android:value="serverstatus" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="status" />
-            <meta-data
-                android:name="sample_interval"
-                android:value="300000L" />
-            <meta-data
-                android:name="connection_timeout"
-                android:value="3000" />
-            <meta-data
-                android:name="server_url"
-                android:value="required" />
-            <meta-data
-                android:name="units"
-                android:value="status" />
-
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-        </service>
-        <service
             android:name="interdroid.swan.sensors.impl.TrainSensor"
             android:exported="true"
             android:icon="@drawable/train_icon"
@@ -818,95 +790,6 @@
             <meta-data
                 android:name="units"
                 android:value="departure_time,arrival_time" />
-
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".sensors.impl.CuckooTrainSensor"
-            android:exported="true"
-            android:icon="@drawable/cuckootrain_icon"
-            android:process=":trainsensor" >
-            <meta-data
-                android:name="entityId"
-                android:value="cuckootrain" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="departure_time,arrival_time" />
-            <meta-data
-                android:name="from_station"
-                android:value="required" />
-            <meta-data
-                android:name="to_station"
-                android:value="required" />
-            <meta-data
-                android:name="departure_time"
-                android:value="required" />
-            <meta-data
-                android:name="units"
-                android:value="departure_time,arrival_time" />
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="interdroid.swan.sensors.impl.RainSensor"
-            android:exported="true"
-            android:icon="@drawable/rain_icon"
-            android:process=":rainsensor" >
-            <meta-data
-                android:name="entityId"
-                android:value="rain" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="expected_mm,start_time,stop_time" />
-            <meta-data
-                android:name="sample_interval"
-                android:value="300000L" />
-            <meta-data
-                android:name="latitude"
-                android:value="required" />
-            <meta-data
-                android:name="longitude"
-                android:value="required" />
-            <meta-data
-                android:name="window"
-                android:value="7200000L" />
-            <meta-data
-                android:name="threshold"
-                android:value="0.0" />
-            <meta-data
-                android:name="units"
-                android:value="mm,start_time,stop_time" />
-
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="interdroid.swan.sensors.impl.TwitterSensor"
-            android:exported="true"
-            android:icon="@drawable/twitter_icon"
-            android:process=":twittersensor" >
-            <meta-data
-                android:name="entityId"
-                android:value="twitter" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="mentions" />
-            <meta-data
-                android:name="sample_interval"
-                android:value="300000L" />
-            <meta-data
-                android:name="access_token"
-                android:value="required" />
-            <meta-data
-                android:name="secret_access_token"
-                android:value="required" />
-            <meta-data
-                android:name="units"
-                android:value="mentions" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
