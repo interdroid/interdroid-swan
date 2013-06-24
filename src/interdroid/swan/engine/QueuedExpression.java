@@ -18,6 +18,8 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	private long mTotalEvaluationTime; // total time spent on evaluations so far
 	private long mMinEvaluationTime = Long.MAX_VALUE;
 	private long mMaxEvaluationTime = Long.MIN_VALUE;
+	private long mTotalEvaluationDelay;
+	private long mEvaluationsDelay; //number of evaluations with delay
 
 	public QueuedExpression(String id, Expression expression) {
 		mId = id;
@@ -112,14 +114,20 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 				+ mMaxEvaluationTime
 				+ "\nEvaluation Percentage: "
 				+ ((mTotalEvaluationTime * 100) / (float) (System
-						.currentTimeMillis() - mStartTime));
+						.currentTimeMillis() - mStartTime))
+				+ "\nAvg Evaluation Delay: " + (mTotalEvaluationDelay/Math.max(mEvaluationsDelay, 1));
 	}
 
-	public void evaluated(long currentEvalutionTime) {
+	public void evaluated(long currentEvalutionTime, long evalDelay) {
 		mEvaluations += 1;
 		mTotalEvaluationTime += currentEvalutionTime;
 		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
 		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
+		if(evalDelay != 0 ){
+			mTotalEvaluationDelay += evalDelay;
+			mEvaluationsDelay += 1;
+			System.out.println("Added Delay: " + evalDelay +  " Total Delay: " + mTotalEvaluationDelay);
+		}
 	}
 
 }

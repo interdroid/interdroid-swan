@@ -31,7 +31,9 @@ public class TestActivity extends Activity {
 			parsedExpression = ExpressionFactory
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
 			// .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
-					.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+			//.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+			.parse("self@movement:total?accuracy=3{ANY,0}");
+			// .parse("self@proximity:distance?accuracy=0{ANY,0}");
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
 			finish();
@@ -93,9 +95,9 @@ public class TestActivity extends Activity {
 												}
 											});
 
-//											System.out.println(id
-//													+ ": "
-//													+ Arrays.toString(newValues));
+											// System.out.println(id
+											// + ": "
+											// + Arrays.toString(newValues));
 										}
 
 									});

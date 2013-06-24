@@ -110,9 +110,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 				}
 				if (configuration.containsKey(ACCURACY)) {
 					highestAccuracy = Math
-							.min(highestAccuracy,
-									Integer.parseInt(configuration
-											.getString(ACCURACY)));
+							.min(highestAccuracy,configuration.getInt(ACCURACY));
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,

@@ -96,11 +96,20 @@ public class EvaluationEngineService extends Service {
 					if (head.getDeferUntil() <= System.currentTimeMillis()) {
 						// evaluate now
 						try {
+							//System.out.println("DeferUntil: " + head.getDeferUntil());
+							
+							long evaluationDelay;
+							if(head.getDeferUntil() != 0) {
+								evaluationDelay = System.currentTimeMillis() - head.getDeferUntil();
+							}else{
+								evaluationDelay = 0;
+							}
+							
 							long start = System.currentTimeMillis();
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
-							head.evaluated(System.currentTimeMillis() - start);
+							head.evaluated((System.currentTimeMillis() - start), evaluationDelay);
 							
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
