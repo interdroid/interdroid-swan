@@ -40,7 +40,7 @@ public class TemperatureSensor extends AbstractMemorySensor {
 
 	public static final String TEMPERATURE_FIELD = "temperature";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 300;
 
 	private Sensor temperatureSensor;
 	private SensorManager sensorManager;

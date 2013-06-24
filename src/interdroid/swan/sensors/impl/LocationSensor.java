@@ -1,14 +1,11 @@
 package interdroid.swan.sensors.impl;
 
-import java.lang.reflect.Field;
-
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.reflect.Field;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,6 +15,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * A sensor for location.
@@ -26,11 +24,8 @@ import android.os.Looper;
  * 
  */
 public class LocationSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LocationSensor.class);
+
+	private static final String TAG = "Location Sensor";
 
 	/**
 	 * The configuration activity for this sensor.
@@ -133,8 +128,9 @@ public class LocationSensor extends AbstractVdbSensor {
 			long now = System.currentTimeMillis();
 
 			ContentValues values = new ContentValues();
-			LOG.debug("Location: {} {}", location.getLatitude(),
-					location.getLongitude());
+			Log.d(TAG,
+					"Location: " + location.getLatitude() + ", "
+							+ location.getLongitude());
 			values.put(LATITUDE_FIELD, location.getLatitude());
 			values.put(LONGITUDE_FIELD, location.getLongitude());
 			values.put(ALTITUDE_FIELD, location.getAltitude());
@@ -144,22 +140,23 @@ public class LocationSensor extends AbstractVdbSensor {
 		}
 
 		public void onProviderDisabled(final String provider) {
-			LOG.debug("provider disabled: {}. I am using: {}", provider,
-					currentProvider);
+			Log.d(TAG, "provider disabled: " + provider + ". I am using: "
+					+ currentProvider);
 			if (provider.equals(currentProvider)) {
-				LOG.warn("location sensor disabled due to lack of provider");
+				Log.w(TAG, "location sensor disabled due to lack of provider");
 			}
 		}
 
 		public void onProviderEnabled(final String provider) {
-			LOG.debug("provider enabled: {}", provider);
+			Log.d(TAG, "provider enabled: " + provider);
 		}
 
 		public void onStatusChanged(final String provider, final int status,
 				final Bundle extras) {
 			if (provider.equals(currentProvider)
 					&& status != LocationProvider.AVAILABLE) {
-				LOG.warn("location sensor disabled because sensor unavailable");
+				Log.w(TAG,
+						"location sensor disabled because sensor unavailable");
 			}
 
 		}
@@ -210,7 +207,7 @@ public class LocationSensor extends AbstractVdbSensor {
 			passiveProvider = (String) passive.get(null);
 			mostAccurateProvider = passiveProvider;
 		} catch (Exception e) {
-			LOG.warn("Caught exception checking for PASSIVE_PROVIDER.");
+			Log.w(TAG, "Caught exception checking for PASSIVE_PROVIDER.", e);
 			mostAccurateProvider = LocationManager.NETWORK_PROVIDER;
 		}
 

@@ -4,10 +4,6 @@ import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,22 +13,18 @@ import android.os.Bundle;
 
 /**
  * A sensor for if the screen is on or off.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public class ScreenSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ScreenSensor.class);
+
 
 	/**
 	 * The configuration activity for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class ConfigurationActivity extends
 			AbstractConfigurationActivity {
@@ -67,9 +59,9 @@ public class ScreenSensor extends AbstractVdbSensor {
 
 	/**
 	 * The provider for this sensor.
-	 *
+	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
-	 *
+	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
 
@@ -129,7 +121,6 @@ public class ScreenSensor extends AbstractVdbSensor {
 
 	@Override
 	public final void onConnected() {
-		LOG.debug("screen sensor connected");
 	}
 
 	@Override

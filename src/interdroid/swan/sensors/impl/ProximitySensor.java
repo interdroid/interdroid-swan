@@ -39,7 +39,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 
 	public static final String DISTANCE_FIELD = "distance";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 300;
 
 	private Sensor proximitySensor;
 	private SensorManager sensorManager;

@@ -1,8 +1,8 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.HistoryReductionMode;
-import interdroid.swan.swansong.TypedValueExpression;
+import interdroid.swan.swansong.SensorValueExpression;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -198,15 +198,16 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		long timespan = Long.parseLong(map.remove("history_window").toString());
 		String entityId = getIntent().getStringExtra("entityId");
 
-		Map<String, String> stringMap = new HashMap<String, String>();
+		Bundle configuration = new Bundle();
 		for (String key : keys) {
 			if (map.containsKey(key)) {
-				stringMap.put(key, map.get(key).toString());
+				configuration.putString(key, map.get(key).toString());
 			}
 		}
 
-		ContextTypedValue sensor = new ContextTypedValue(entityId, path,
-				stringMap, mode, timespan);
+		SensorValueExpression sensor = new SensorValueExpression(
+				Expression.LOCATION_SELF, entityId, path, configuration, mode,
+				timespan);
 
 		return sensor.toParseString();
 	}

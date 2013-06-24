@@ -1,207 +1,120 @@
 package interdroid.swan.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import interdroid.swan.SwanException;
-import interdroid.swan.ContextManager;
+import interdroid.swan.ExpressionListener;
+import interdroid.swan.ExpressionManager;
 import interdroid.swan.R;
-import interdroid.swan.swansong.ContextTypedValue;
+import interdroid.swan.SwanException;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionFactory;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.TimestampedValue;
+import interdroid.swan.swansong.TriState;
+
+import java.util.Arrays;
+import java.util.Date;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class TestActivity extends Activity {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TestActivity.class);
-
-	private ContextManager contextManager;
-
-	@Override
-	protected void onResume() {
-		contextManager.start();
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		LOG.debug("unbind context service from app: " + getClass());
-		contextManager.stop();
-		super.onPause();
-	}
-
-	@Override
-	protected void onDestroy() {
-		try {
-			contextManager.destroy();
-		} catch (SwanException e) {
-			e.printStackTrace();
-		}
-		super.onDestroy();
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
+
+		Expression parsedExpression;
 		try {
-			final ContextTypedValue left = new ContextTypedValue(
-					"smart_location:vicinity?latitude=52.152962&longitude=5.367988&provider=gps");
-			// "cuckootrain/departure_time?from_station=Amsterdam+Zuid&to_station=Amersfoort&departure_time=17:28");
-			final String valueName = "custom_value";
-			contextManager = new ContextManager(TestActivity.this);
-
-			findViewById(R.id.register).setOnClickListener(
-					new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							LOG.debug("registering expression");
-							try {
-								contextManager.registerContextTypedValue(
-										valueName, left, null);
-							} catch (SwanException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-
-			findViewById(R.id.unregister).setOnClickListener(
-					new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							LOG.debug("unregistering expression");
-							try {
-								contextManager
-										.unregisterContextTypedValue(valueName);
-							} catch (SwanException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-			findViewById(R.id.shutdown).setOnClickListener(
-					new View.OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							contextManager.shutdown();
-						}
-					});
-		} catch (SwanException e) {
-			e.printStackTrace();
+			parsedExpression = ExpressionFactory
+			// .parse("Roelof@movement:total{MAX,5000}>15.0");
+			// .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
+					.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+		} catch (ExpressionParseException e1) {
+			e1.printStackTrace(System.out);
+			finish();
+			parsedExpression = null;
 		}
+		final Expression expression = parsedExpression;
+		findViewById(R.id.register).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						try {
+							ExpressionManager.registerExpression(
+									TestActivity.this, "bla", expression,
+									new ExpressionListener() {
+
+										@Override
+										public void onNewState(final String id,
+												final long timestamp,
+												final TriState newState) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													((TextView) findViewById(R.id.text))
+															.setText(new Date(
+																	timestamp)
+																	+ ": "
+																	+ newState);
+													Toast.makeText(
+															TestActivity.this,
+															id + ": "
+																	+ newState,
+															Toast.LENGTH_LONG)
+															.show();
+												}
+											});
+											System.out.println(id + ": "
+													+ newState);
+										}
+
+										@Override
+										public void onNewValues(
+												String id,
+												final TimestampedValue[] newValues) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													if (newValues == null
+															|| newValues.length == 0) {
+														((TextView) findViewById(R.id.text))
+																.setText("n.a.");
+													} else {
+														((TextView) findViewById(R.id.text))
+																.setText(new Date(
+																		newValues[0]
+																				.getTimestamp())
+																		+ ": "
+																		+ newValues[0]
+																				.getValue());
+													}
+												}
+											});
+
+											// System.out.println(id
+											// + ": "
+											// + Arrays.toString(newValues));
+										}
+
+									});
+						} catch (SwanException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+
+		findViewById(R.id.unregister).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						ExpressionManager.unregisterExpression(
+								TestActivity.this, "bla");
+					}
+				});
 
 	}
 
-	// public static void main(String[] args) throws SwanException {
-	//
-	// // ContextManager cm = new ContextManager(null /* context */);
-	// // cm.start();
-	// //
-	// // // several expressions and how you write them down
-	// //
-	// // // simple: MAX(sound.level, 1000) > 5.0
-	// // TypedValue left = new ContextTypedValue("sound/level",
-	// // HistoryReductionMode.MAX, 1000);
-	// // TypedValue right = new ConstantTypedValue(5.0);
-	// // Expression simpleExpression = new Expression(left, ">", right);
-	// //
-	// // cm.registerContextExpression("simple", simpleExpression,
-	// // expressionListener);
-	// // cm.unregisterContextExpression("simple");
-	// //
-	// // // multiple expressions: (MAX(sound.level, 1000) > 5.0) &&
-	// // // (time.dayofweek == "sunday")
-	// // TypedValue soundLeft = new ContextTypedValue("sound.level",
-	// // HistoryReductionMode.MAX, 1000);
-	// // TypedValue soundRight = new ConstantTypedValue(5.0);
-	// // Expression soundExpression = new Expression(soundLeft, ">",
-	// // soundRight);
-	// //
-	// // TypedValue timeLeft = new ContextTypedValue("time.dayofweek");
-	// // TypedValue timeRight = new ConstantTypedValue("sunday");
-	// // Expression timeExpression = new Expression(timeLeft, "==",
-	// // timeRight);
-	// //
-	// // Expression totalExpression = new Expression(soundExpression, "&&",
-	// // timeExpression);
-	// //
-	// // // complex expressions: (MIN(sound.level, 1000) + ((MAX(sound.level,
-	// // // 1000) - MIN(sound.level, 1000)) / 2)) > (MEAN(sound.level, 1000)
-	// // TypedValue minSound = new ContextTypedValue("sound.level",
-	// // HistoryReductionMode.MIN, 1000);
-	// // TypedValue maxSound = new ContextTypedValue("sound.level",
-	// // HistoryReductionMode.MAX, 1000);
-	// // TypedValue meanSound = new ContextTypedValue("sound.level",
-	// // HistoryReductionMode.MEAN, 1000);
-	// //
-	// // Expression complexExpression = new Expression(
-	// // new CombinedTypedValue(minSound, "+", new CombinedTypedValue(
-	// // maxSound, "-", minSound)), ">", meanSound);
-	// //
-	// // // look whether there exists a situation where all the readings of
-	// // the
-	// // // soundlevel of the last half a second are greater than the mean of
-	// // the
-	// // // readings of the last whole second
-	// //
-	// // // something with the ALL, ANY modifiers: NONE(sound.level, 500)
-	// // // >(ALL) MEAN(sound.level, 1000)
-	// //
-	// // TypedValue sound = new ContextTypedValue(
-	// // "sound.level?timespan=500&history_mode=none",
-	// // HistoryReductionMode.NONE, 500);
-	// // // use the mean sound from previous example
-	// // Expression allExpression = new Expression(sound,
-	// // ExpressionComparators.ALL_GREATER_THAN, meanSound);
-	// //
-	// // Bundle configuration = new Bundle();
-	// // configuration.putString("source", "Amsterdam+Centraal");
-	// // configuration.putString("destination", "Utrecht+Centraal");
-	// // configuration.putString("time", "21:30");
-	// // // TypedValue actualDepartureTime = new ContextTypedValue("train",
-	// // // configuration, HistoryReductionMode.NONE, 0);
-	// // // TypedValue regularDepartureTime = new ConstantTypedValue(new
-	// // // DateTime(
-	// // // "21:30"));
-	// // // TypedValue maxDelay = new ConstantTypedValue(15);
-	// // //
-	// // // Expression trainExpression = new Expression(new
-	// // // CombinedTypedValue<T>(
-	// // // actualDepartureTime, "-", regularDepartureTime), ">=", maxDelay);
-	// //
-	// // // Is my train going to be more than 15 minutes late.
-	// // //
-	// //
-	// train/departure?source=Amsterdam+Central&destination=Utrecht+Centraal&departure_time=21:30
-	// // // - 21:30 >= 15
-	// //
-	// // // Is my train delayed
-	// // //
-	// //
-	// train/delay?source=Amsterdam+Central&destination=Utrecht+Centraal&time=21:30
-	// // // >= 15
-	// //
-	// // // Alert me when I need to leave in order to arrive by 21:30
-	// // //
-	// //
-	// train/departure?source=Amsterdam+Central&destination=Utrecht+Centraal&arrival_time=21:30
-	// // // - 5 > currentTime?
-	// //
-	// // // WIFI Problem?
-	// //
-	// // // Have I seen the same network for 5 minutes
-	// // // wifi/?SSID=MyNetwork == true && wifi/?SSID=AnotherNetwork == true
-	// //
-	// // // Do I see a single bluetooth device with name=x and address=y
-	// // // bluetooth/name == x && bluetooth/address = y
-	// //
-	// // // bluetooth/name?address=y == x
-	// // // bluetooth/address?name=x == y
-	//
-	// }
 }

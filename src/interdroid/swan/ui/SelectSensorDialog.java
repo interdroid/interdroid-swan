@@ -1,8 +1,8 @@
 package interdroid.swan.ui;
 
-import interdroid.swan.ContextManager;
+import interdroid.swan.ExpressionManager;
 import interdroid.swan.R;
-import interdroid.swan.SensorServiceInfo;
+import interdroid.swan.SensorInfo;
 
 import java.util.List;
 
@@ -17,19 +17,19 @@ import android.widget.ListView;
 
 public class SelectSensorDialog extends Activity {
 
-	List<SensorServiceInfo> sensors;
+	List<SensorInfo> sensors;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED);
 
-		sensors = ContextManager.getSensors(this);
+		sensors = ExpressionManager.getSensors(this);
 
 		setContentView(R.layout.expression_builder_select_sensor_dialog);
 
 		((ListView) findViewById(R.id.sensor_list))
-				.setAdapter(new ArrayAdapter<SensorServiceInfo>(this,
+				.setAdapter(new ArrayAdapter<SensorInfo>(this,
 						android.R.layout.simple_list_item_1, sensors));
 
 		((ListView) findViewById(R.id.sensor_list))

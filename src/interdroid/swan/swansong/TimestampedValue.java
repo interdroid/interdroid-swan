@@ -1,7 +1,8 @@
 package interdroid.swan.swansong;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,7 +10,7 @@ import android.os.Parcelable;
 /**
  * A tuple containing a value, a timestamp. Also includes static methods for
  * some calculations on lists of TimestampedValues
- *
+ * 
  * @author roelof &lt;rkemp@cs.vu.nl&gt;
  * @author nick &lt;palmer@cs.vu.nl&gt;
  */
@@ -29,7 +30,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Construct from a parcel.
-	 *
+	 * 
 	 * @param saved
 	 *            read from a parcel
 	 */
@@ -39,7 +40,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Instantiates a new timestamped value.
-	 *
+	 * 
 	 * @param value
 	 *            the value
 	 */
@@ -49,7 +50,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Instantiates a new timestamped value.
-	 *
+	 * 
 	 * @param value
 	 *            the value
 	 * @param timestamp
@@ -76,7 +77,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -85,30 +86,64 @@ public class TimestampedValue implements Serializable, Parcelable,
 	}
 
 	/**
+	 * Applies the reduction mode to the values.
+	 * 
+	 * @param values
+	 *            the value to reduce
+	 * @return the reduced values.
+	 */
+	public static TimestampedValue[] applyMode(
+			final List<TimestampedValue> values, HistoryReductionMode mode) {
+		switch (mode) {
+		case MAX:
+			return new TimestampedValue[] { TimestampedValue
+					.findMaxValue(values) };
+		case MIN:
+			return new TimestampedValue[] { TimestampedValue
+					.findMinValue(values) };
+		case MEAN:
+			return new TimestampedValue[] { TimestampedValue
+					.calculateMean(values) };
+		case MEDIAN:
+			return new TimestampedValue[] { TimestampedValue
+					.calculateMedian(values) };
+		case ALL:
+		case ANY:
+		default:
+			return values.toArray(new TimestampedValue[values.size()]);
+		}
+	}
+
+	/**
 	 * Calculate mean over array of values.
-	 *
+	 * 
 	 * @param values
 	 *            an array of timestamped values (double or castable to double)
-	 *
-	 * @return the mean value, with the latest timestamp
+	 * 
+	 * @return the mean value, with the oldest timestamp of all values (it will
+	 *         be invalid when this timestamp is no longer in the history
+	 *         window)
 	 */
-	public static TimestampedValue calculateMean(final TimestampedValue[] values) {
+	public static TimestampedValue calculateMean(
+			final List<TimestampedValue> values) {
 		double sumValues = 0.0;
 
-		for (int i = 0; i < values.length; i++) {
-			sumValues += (Double) values[i].mValue;
+		for (TimestampedValue value : values) {
+			sumValues += (Double) value.mValue;
 		}
-		return new TimestampedValue(sumValues / values.length,
-				values[values.length - 1].mTimestamp);
+		return new TimestampedValue(sumValues / values.size(),
+				values.get(0).mTimestamp);
 	}
 
 	/**
 	 * Calculate a time weighted mean over array of values.
-	 *
+	 * 
 	 * @param values
 	 *            an array of timestamped values (double or castable to double)
-	 *
-	 * @return the time weighted mean value, with the latest timestamp
+	 * 
+	 * @return the time weighted mean value, with the oldest timestamp of all
+	 *         values (it will be invalid when this timestamp is no longer in
+	 *         the history window)
 	 */
 	public static TimestampedValue calculateTimeWeightedMean(
 			final TimestampedValue[] values) {
@@ -118,25 +153,30 @@ public class TimestampedValue implements Serializable, Parcelable,
 	/**
 	 * @param values
 	 *            the values to search for the median in
-	 * @return the median value
+	 * @return the median value, with the oldest timestamp of all values (it
+	 *         will be invalid when this timestamp is no longer in the history
+	 *         window)
 	 */
 	public static final TimestampedValue calculateMedian(
-			final TimestampedValue[] values) {
-		TimestampedValue[] sorted = values.clone();
-		Arrays.sort(sorted);
-		return sorted[sorted.length / 2];
+			final List<TimestampedValue> values) {
+		long timestamp = values.get(0).getTimestamp();
+		Collections.sort(values);
+		TimestampedValue result = values.get(values.size() / 2);
+		result.mTimestamp = timestamp;
+		return result;
 	}
 
 	/**
 	 * Find maximum value.
-	 *
+	 * 
 	 * @param values
 	 *            an array of timestamped values
-	 *
+	 * 
 	 * @return the timestamped maximum value
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static TimestampedValue findMaxValue(final TimestampedValue[] values) {
+	public static TimestampedValue findMaxValue(
+			final List<TimestampedValue> values) {
 		TimestampedValue maxValue = null;
 		for (TimestampedValue value : values) {
 			if (maxValue == null) {
@@ -150,14 +190,15 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Find mininimum value.
-	 *
+	 * 
 	 * @param values
 	 *            an array of timestamped values
-	 *
+	 * 
 	 * @return the timestamped minimum value
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static TimestampedValue findMinValue(final TimestampedValue[] values) {
+	public static TimestampedValue findMinValue(
+			final List<TimestampedValue> values) {
 		TimestampedValue minValue = null;
 		for (TimestampedValue value : values) {
 			if (minValue == null) {
@@ -182,7 +223,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 	/**
 	 * Read from parcel.
-	 *
+	 * 
 	 * @param in
 	 *            the in
 	 */
@@ -196,8 +237,7 @@ public class TimestampedValue implements Serializable, Parcelable,
 
 		@Override
 		public TimestampedValue createFromParcel(final Parcel source) {
-			TimestampedValue t = new TimestampedValue(source);
-			return t;
+			return new TimestampedValue(source);
 		}
 
 		@Override
@@ -209,7 +249,29 @@ public class TimestampedValue implements Serializable, Parcelable,
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public final int compareTo(final TimestampedValue another) {
-		return ((Comparable) mValue).compareTo(another);
+		return ((Comparable) mValue)
+				.compareTo(((TimestampedValue) another).mValue);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		if (o instanceof TimestampedValue) {
+			if (mTimestamp != ((TimestampedValue) o).mTimestamp) {
+				return false;
+			}
+			if (mValue instanceof Comparable<?>
+					&& ((TimestampedValue) o).mValue instanceof Comparable<?>) {
+				if (((Comparable) mValue)
+						.compareTo((Comparable) ((TimestampedValue) o).mValue) == 0) {
+					return true;
+				}
+			}
+		}
+		return super.equals(o);
 	}
 
 }
