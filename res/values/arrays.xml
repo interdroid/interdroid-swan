@@ -149,11 +149,13 @@
 
     <!-- location sensor -->
     <string-array name="location_valuepaths">
+        <item>location</item>
         <item>latitude</item>
         <item>longitude</item>
         <item>altitude</item>
         <item>speed</item>
-        <item>location</item>
+        <item>bearing</item>
+        <item>accuracy</item>
     </string-array>
     <string-array name="location_provider">
         <item>gps</item>

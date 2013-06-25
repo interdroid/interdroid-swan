@@ -7,6 +7,7 @@
             android:dialogTitle="Enter History Window"
             android:key="history_window"
             android:summary="Set History Window"
+            android:defaultValue="0"
             android:title="History Window" />
 
         <ListPreference
@@ -14,6 +15,7 @@
             android:entryValues="@array/history_reduction_modes"
             android:key="history_reduction_mode"
             android:summary="Select a History Reduction Mode"
+            android:defaultValue="ANY"
             android:title="History Reduction Mode" />
     </PreferenceCategory>
 
