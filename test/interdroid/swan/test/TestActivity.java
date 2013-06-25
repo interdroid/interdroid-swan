@@ -15,9 +15,11 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 public class TestActivity extends Activity {
 
@@ -69,6 +71,19 @@ public class TestActivity extends Activity {
 									if (newValues.length > 0) {
 										System.out.println("got new values: "
 												+ newValues[0]);
+										if (newValues[0].getValue() instanceof Location) {
+											System.out
+													.println("It's a location object!");
+											runOnUiThread(new Runnable() {
+												public void run() {
+													Toast.makeText(
+															TestActivity.this,
+															"LOCATION!",
+															Toast.LENGTH_LONG)
+															.show();
+												}
+											});
+										}
 									}
 								}
 
@@ -84,5 +99,4 @@ public class TestActivity extends Activity {
 
 		}
 	}
-
 }
