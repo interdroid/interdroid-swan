@@ -399,7 +399,7 @@
                 android:value="interdroid.context.sensor.polar_hrm" />
             <meta-data
                 android:name="units"
-                android:value="bpm,status,index,rri," />
+                android:value="bpm,,index,rri," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -426,7 +426,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value="Gi,Gi,Gi,Gi" />
+                android:value=",,," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -470,7 +470,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value="Degrees,Degrees,Degrees" />
+                android:value=",," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -555,7 +555,7 @@
                 android:value="interdroid.context.sensor.bluetooth" />
             <meta-data
                 android:name="units"
-                android:value="name,address,bond_state,class,major_class" />
+                android:value=",,,," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -582,7 +582,7 @@
                 android:value="interdroid.context.sensor.signal" />
             <meta-data
                 android:name="units"
-                android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
+                android:value=",signal_strength,bit_error_rate,dbm,ecio,dbm,ecio,snr" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -609,7 +609,7 @@
                 android:value="interdroid.context.sensor.screen" />
             <meta-data
                 android:name="units"
-                android:value="ScreenState" />
+                android:value="" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -645,7 +645,7 @@
                 android:value="interdroid.context.sensor.location" />
             <meta-data
                 android:name="units"
-                android:value=",lat,long,alt,kmh,degrees,meter" />
+                android:value=",lat,long,m,km/h,degrees,meter" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -687,7 +687,7 @@
                 android:value="interdroid.context.sensor.smartlocation" />
             <meta-data
                 android:name="units"
-                android:value="vicinity,within" />
+                android:value="," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -717,7 +717,7 @@
                 android:value="interdroid.context.sensor.call" />
             <meta-data
                 android:name="units"
-                android:value="call_state,number" />
+                android:value=",number" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -789,7 +789,7 @@
                 android:value="null" />
             <meta-data
                 android:name="units"
-                android:value="departure_time,arrival_time" />
+                android:value="," />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -820,7 +820,7 @@
                 android:value="true" />
             <meta-data
                 android:name="units"
-                android:value="start_time_next_event" />
+                android:value="" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -842,7 +842,7 @@
                 android:value="*:I" />
             <meta-data
                 android:name="units"
-                android:value="log" />
+                android:value="" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
@@ -861,7 +861,7 @@
                 android:value="started" />
             <meta-data
                 android:name="units"
-                android:value="started" />
+                android:value="" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />

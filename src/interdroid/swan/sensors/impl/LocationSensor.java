@@ -157,6 +157,7 @@ public class LocationSensor extends AbstractVdbSensor {
 			values.put(SPEED_FIELD, location.getSpeed());
 			values.put(BEARING_FIELD, location.getBearing());
 			values.put(ACCURACY_FIELD, location.getAccuracy());
+			
 
 			putValues(values, now);
 		}
@@ -307,6 +308,7 @@ public class LocationSensor extends AbstractVdbSensor {
 				location.setAltitude((Double) altitudes.get(i).getValue());
 				location.setBearing((Float) bearings.get(i).getValue());
 				location.setAccuracy((Float) accuracies.get(i).getValue());
+				location.setTime(System.currentTimeMillis());
 
 				latitudes.set(i, new TimestampedValue(location, latitudes
 						.get(i).getTimestamp()));
