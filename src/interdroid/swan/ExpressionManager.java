@@ -83,6 +83,8 @@ public class ExpressionManager {
 
 	private static Map<String, ExpressionListener> sListeners = new HashMap<String, ExpressionListener>();
 
+	private static boolean sReceiverRegistered = false;
+
 	private static BroadcastReceiver sReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -275,6 +277,7 @@ public class ExpressionManager {
 		} else {
 			if (expressionListener != null) {
 				if (sListeners.size() == 0) {
+					sReceiverRegistered = true;
 					registerReceiver(context);
 				}
 				sListeners.put(id, expressionListener);
@@ -296,7 +299,8 @@ public class ExpressionManager {
 	 */
 	public static void unregisterExpression(Context context, String id) {
 		sListeners.remove(id);
-		if (sListeners.size() == 0) {
+		if (sListeners.size() == 0 && sReceiverRegistered) {
+			sReceiverRegistered = false;
 			unregisterReceiver(context);
 		}
 		Intent intent = new Intent(ACTION_UNREGISTER);
