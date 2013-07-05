@@ -78,6 +78,7 @@ public class MergeExpressionDialog extends Activity {
 							.getCheckedRadioButtonId() == R.id.and ? BinaryLogicOperator.AND
 							: BinaryLogicOperator.OR;
 					Expression newExpression = new LogicExpression(
+							Expression.LOCATION_INFER,
 							(TriStateExpression) left, logicOperator,
 							(TriStateExpression) right);
 					expressions.add(newExpression.toParseString());

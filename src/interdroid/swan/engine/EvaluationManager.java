@@ -34,6 +34,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -66,13 +67,51 @@ public class EvaluationManager {
 		mCachedResults.put(id, result);
 	}
 
+	public void resolveLocation(Expression expression) {
+		if (!Expression.LOCATION_INFER.equals(expression.getLocation())) {
+			return;
+		}
+		String left = null;
+		String right = null;
+		if (expression instanceof LogicExpression) {
+			resolveLocation(((LogicExpression) expression).getLeft());
+			left = ((LogicExpression) expression).getLeft().getLocation();
+			resolveLocation(((LogicExpression) expression).getRight());
+			right = ((LogicExpression) expression).getRight().getLocation();
+		} else if (expression instanceof ComparisonExpression) {
+			resolveLocation(((ComparisonExpression) expression).getLeft());
+			left = ((ComparisonExpression) expression).getLeft().getLocation();
+			resolveLocation(((ComparisonExpression) expression).getRight());
+			right = ((ComparisonExpression) expression).getRight()
+					.getLocation();
+		} else if (expression instanceof MathValueExpression) {
+			resolveLocation(((MathValueExpression) expression).getLeft());
+			left = ((MathValueExpression) expression).getLeft().getLocation();
+			resolveLocation(((MathValueExpression) expression).getRight());
+			right = ((MathValueExpression) expression).getRight().getLocation();
+		}
+		if (left.equals(right)) {
+			expression.setInferredLocation(left);
+		} else if (left.equals(Expression.LOCATION_INDEPENDENT)) {
+			expression.setInferredLocation(right);
+		} else if (right.equals(Expression.LOCATION_INDEPENDENT)) {
+			expression.setInferredLocation(left);
+		} else if (left.equals(Expression.LOCATION_SELF)
+				|| right.equals(Expression.LOCATION_SELF)) {
+			expression.setInferredLocation(Expression.LOCATION_SELF);
+		} else {
+			expression.setInferredLocation(left);
+		}
+	}
+
 	public void initialize(String id, Expression expression)
 			throws SensorConfigurationException, SensorSetupFailedException {
 		// should get the sensors start producing data.
+		resolveLocation(expression);
 		String location = expression.getLocation();
 		if (!location.equals(Expression.LOCATION_SELF)
 				&& !location.equals(Expression.LOCATION_INDEPENDENT)) {
-			initializeRemote(id, expression);
+			initializeRemote(id, expression, location);
 		} else if (expression instanceof LogicExpression) {
 			initialize(id + Expression.LEFT_SUFFIX,
 					((LogicExpression) expression).getLeft());
@@ -171,8 +210,8 @@ public class EvaluationManager {
 		return result;
 	}
 
-	private void initializeRemote(String id, Expression expression)
-			throws SensorSetupFailedException {
+	private void initializeRemote(String id, Expression expression,
+			String resolvedLocation) throws SensorSetupFailedException {
 		// send a push message with 'register' instead of 'initialize',
 		// disadvantage is that we will only later on get exceptions
 		String fromRegistrationId = Registry.get(mContext,
@@ -181,23 +220,94 @@ public class EvaluationManager {
 			throw new SensorSetupFailedException(
 					"Device not registered with Google Cloud Messaging, unable to use remote sensors.");
 		}
-		String toRegistrationId = Registry.get(mContext,
-				expression.getLocation());
+		String toRegistrationId = Registry.get(mContext, resolvedLocation);
 		if (toRegistrationId == null) {
 			throw new SensorSetupFailedException(
 					"No registration id known for location: "
-							+ expression.getLocation());
+							+ resolvedLocation);
 		}
 		// resolve all remote locations in the expression with respect to the
 		// new location.
-		Pusher.push(
-				fromRegistrationId,
-				toRegistrationId,
-				id,
+		Pusher.push(fromRegistrationId, toRegistrationId, id,
 				EvaluationEngineService.ACTION_REGISTER_REMOTE,
-				expression.toCrossDeviceString(mContext,
-						expression.getLocation()));
+				toCrossDeviceString(expression, toRegistrationId));
+		// expression.toCrossDeviceString(mContext,
+		// expression.getLocation()));
 
+	}
+
+	private String toCrossDeviceString(Expression expression,
+			String toRegistrationId) {
+		String registrationId = Registry
+				.get(mContext, expression.getLocation());
+		if (expression instanceof SensorValueExpression) {
+			String result = ((registrationId.equals(toRegistrationId)) ? Expression.LOCATION_SELF
+					: registrationId)
+					+ "@"
+					+ ((SensorValueExpression) expression).getEntity()
+					+ ":" + ((SensorValueExpression) expression).getValuePath();
+			Bundle config = ((SensorValueExpression) expression)
+					.getConfiguration();
+			if (config != null && config.size() > 0) {
+				boolean first = true;
+				for (String key : config.keySet()) {
+					result += (first ? "?" : "&") + key + "="
+							+ config.getString(key);
+					first = false;
+				}
+			}
+			result += "{"
+					+ ((SensorValueExpression) expression)
+							.getHistoryReductionMode().toParseString() + ","
+					+ ((SensorValueExpression) expression).getHistoryLength()
+					+ "}";
+			return result;
+		} else if (expression instanceof LogicExpression) {
+			if (((LogicExpression) expression).getRight() == null) {
+				return ((LogicExpression) expression).getOperator()
+						+ " "
+						+ toCrossDeviceString(
+								((LogicExpression) expression).getLeft(),
+								toRegistrationId);
+			}
+			return "("
+					+ toCrossDeviceString(
+							((LogicExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((LogicExpression) expression).getOperator()
+					+ " "
+					+ toCrossDeviceString(
+							((LogicExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof ComparisonExpression) {
+			return "("
+					+ toCrossDeviceString(
+							((ComparisonExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((ComparisonExpression) expression).getComparator()
+							.toParseString()
+					+ " "
+					+ toCrossDeviceString(
+							((ComparisonExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof MathValueExpression) {
+			return "("
+					+ toCrossDeviceString(
+							((MathValueExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((MathValueExpression) expression).getOperator()
+							.toParseString()
+					+ " "
+					+ toCrossDeviceString(
+							((MathValueExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof ConstantValueExpression) {
+			return ((ConstantValueExpression) expression).toParseString();
+		}
+		throw new RuntimeException("Unknown expression type: " + expression);
 	}
 
 	private void stopRemote(String id, Expression expression) {
@@ -212,13 +322,9 @@ public class EvaluationManager {
 		}
 		// resolve all remote locations in the expression with respect to the
 		// new location.
-		Pusher.push(
-				null,
-				toRegistrationId,
-				id,
+		Pusher.push(null, toRegistrationId, id,
 				EvaluationEngineService.ACTION_UNREGISTER_REMOTE,
-				expression.toCrossDeviceString(mContext,
-						expression.getLocation()));
+				toCrossDeviceString(expression, toRegistrationId));
 	}
 
 	private boolean bindToSensor(final String id,

@@ -1,18 +1,19 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.HistoryReductionMode;
 import interdroid.swan.swansong.SensorValueExpression;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -45,6 +46,20 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 	private List<String> keys = new ArrayList<String>();
 
+	private BroadcastReceiver mNameReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			List<String> names = intent.getStringArrayListExtra("names");
+			names.add(0, "self");
+			((ListPreference) findPreference("swan_location")).setEntries(names
+					.toArray(new String[names.size()]));
+			((ListPreference) findPreference("swan_location"))
+					.setEntryValues(names.toArray(new String[names.size()]));
+		}
+
+	};
+
 	// Android includes lifecycle checks ensuring super.onCreate() was called.
 	// CHECKSTYLE:OFF
 	@Override
@@ -57,6 +72,20 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
 		setResult(RESULT_CANCELED);
+	}
+
+	@Override
+	protected void onResume() {
+		registerReceiver(mNameReceiver, new IntentFilter(
+				"interdroid.swan.NAMES"));
+		sendBroadcast(new Intent("interdroid.swan.GET_NAMES"));
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		unregisterReceiver(mNameReceiver);
+		super.onPause();
 	}
 
 	private void reAddPrefs(PreferenceGroup group) {
@@ -147,6 +176,8 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 			preference.setOnPreferenceChangeListener(this);
 			// set the summary
 			String summary = null;
+
+			// setup location pref
 			if (preference instanceof ListPreference) {
 				try {
 					summary = ((ListPreference) preference).getValue()
@@ -162,6 +193,9 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 			}
 
 			if (preference instanceof ListPreference) {
+				if (((ListPreference) preference).getEntries() == null) {
+					return;
+				}
 				if (((ListPreference) preference).getEntries().length == 1) {
 					preference.setEnabled(false);
 				}
@@ -191,7 +225,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	private String prefsToConfigurationString() {
 		Map<String, ?> map = PreferenceManager.getDefaultSharedPreferences(
 				getBaseContext()).getAll();
-
+		String location = map.remove("swan_location").toString();
 		String path = map.remove("valuepath").toString();
 		HistoryReductionMode mode = HistoryReductionMode.parse(map.remove(
 				"history_reduction_mode").toString());
@@ -205,9 +239,8 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 			}
 		}
 
-		SensorValueExpression sensor = new SensorValueExpression(
-				Expression.LOCATION_SELF, entityId, path, configuration, mode,
-				timespan);
+		SensorValueExpression sensor = new SensorValueExpression(location,
+				entityId, path, configuration, mode, timespan);
 
 		return sensor.toParseString();
 	}

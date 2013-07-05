@@ -9,6 +9,7 @@ public class MonitorThread extends Thread {
 	private AbstractCuckooSensor sensor;
 	private String valuePath;
 	private Map<String, Object> configuration;
+	volatile boolean shouldStop = false;
 
 	public MonitorThread(AbstractCuckooSensor sensor, final String valuePath,
 			final Map<String, Object> configuration) {
@@ -19,7 +20,7 @@ public class MonitorThread extends Thread {
 
 	public void run() {
 		Map<String, Object> previous = null;
-		while (!interrupted()) {
+		while (!shouldStop) {
 			Map<String, Object> values = sensor.getPoller().poll(valuePath,
 					configuration);
 			if (changed(previous, values)) {

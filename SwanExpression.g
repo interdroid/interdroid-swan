@@ -182,18 +182,19 @@ multiplicativeExpression returns [ValueExpression expression]
 @init {
     Stack<ValueExpression> rightStack = new Stack<ValueExpression>();
     Stack<MathOperator> opStack = new Stack<MathOperator>();
+    Stack<String> locationStack = new Stack<String>();
 }
     : left=parentheticalExpression
-    (WS* op=multiplicative_math_operator WS* right=parentheticalExpression 
-        {opStack.push(op /* .math_operator */ ); rightStack.push((ValueExpression) right /* .expression */ );}
+    (WS* (location=ID '@')? op=multiplicative_math_operator WS* right=parentheticalExpression 
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); opStack.push(op /* .math_operator */ ); rightStack.push((ValueExpression) right /* .expression */ );}
     )*
 {
     while(rightStack.size() > 1) {
         ValueExpression temp = rightStack.pop();
-        rightStack.push(new MathValueExpression(rightStack.pop(), opStack.pop(), temp, HistoryReductionMode.DEFAULT_MODE));
+        rightStack.push(new MathValueExpression(locationStack.pop(), rightStack.pop(), opStack.pop(), temp, HistoryReductionMode.DEFAULT_MODE));
     }
     if (rightStack.size() > 0) {
-        $expression = new MathValueExpression((ValueExpression) left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
+        $expression = new MathValueExpression(locationStack.pop(), (ValueExpression) left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
     } else {
         $expression = (ValueExpression) left /* .expression */ ;
     }
@@ -204,18 +205,19 @@ additiveExpression returns [ValueExpression expression]
 @init {
     Stack<ValueExpression> rightStack = new Stack<ValueExpression>();
     Stack<MathOperator> opStack = new Stack<MathOperator>();
+    Stack<String> locationStack = new Stack<String>();
 }
     : left=multiplicativeExpression
-    (op=additive_math_operator right=multiplicativeExpression 
-        {opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
+    ((location=ID '@')? op=additive_math_operator right=multiplicativeExpression 
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
     )*
 {
     while(rightStack.size() > 1) {
         ValueExpression temp = rightStack.pop();
-        rightStack.push(new MathValueExpression(rightStack.pop(), opStack.pop(), temp, HistoryReductionMode.DEFAULT_MODE));
+        rightStack.push(new MathValueExpression(locationStack.pop(), rightStack.pop(), opStack.pop(), temp, HistoryReductionMode.DEFAULT_MODE));
     }
     if (rightStack.size() > 0) {
-        $expression = new MathValueExpression(left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
+        $expression = new MathValueExpression(locationStack.pop(), left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
     } else {
         $expression = left /* .expression */ ;
     }
@@ -226,18 +228,19 @@ comparativeExpression returns [Expression expression]
 @init {
     Stack<Expression> rightStack = new Stack<Expression>();
     Stack<Comparator> compareStack = new Stack<Comparator>();
+    Stack<String> locationStack = new Stack<String>();
 }
     : left=additiveExpression
-    (WS* c=comparator WS* right=additiveExpression 
-        {compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
+    (WS* ((location=ID)? c=comparator) WS* right=additiveExpression 
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); compareStack.push(c /* .comparator */ ); rightStack.push(right /* .expression */ );}
     )?
 {
     while(rightStack.size() > 1) {
         Expression temp = rightStack.pop();
-        rightStack.push(new ComparisonExpression((ValueExpression) rightStack.pop(), compareStack.pop(), (ValueExpression) temp));
+        rightStack.push(new ComparisonExpression(locationStack.pop(), (ValueExpression) rightStack.pop(), compareStack.pop(), (ValueExpression) temp));
     }
     if (rightStack.size() > 0) {
-        $expression = new ComparisonExpression((ValueExpression) left /* .expression */ , compareStack.pop(), (ValueExpression) rightStack.pop());
+        $expression = new ComparisonExpression(locationStack.pop(), (ValueExpression) left /* .expression */ , compareStack.pop(), (ValueExpression) rightStack.pop());
     } else {
         $expression = left /* .expression */ ;
     }
@@ -245,8 +248,8 @@ comparativeExpression returns [Expression expression]
     ;
 
 unaryExpression returns [Expression expression]
-    : op=unary_logic_operator exp=comparativeExpression 
-        {$expression = new LogicExpression(op /* .logic_operator */ , (TriStateExpression) exp /* .expression */ );}
+    : (location=ID)? NOT exp=comparativeExpression 
+        {$expression = new LogicExpression(location == null ? Expression.LOCATION_INFER : location.getText(), UnaryLogicOperator.NOT /* .logic_operator */ , (TriStateExpression) exp /* .expression */ );}
     | exp=comparativeExpression 
         {$expression = exp /* .expression */ ;}
     ;
@@ -254,18 +257,19 @@ unaryExpression returns [Expression expression]
 andExpression returns [Expression expression]
 @init {
     Stack<Expression> rightStack = new Stack<Expression>();
+    Stack<String> locationStack = new Stack<String>();
 }
     : left=unaryExpression
-    (AND right=unaryExpression 
-        {rightStack.push(right /* .expression */ );}
+    ((location=ID '@')? AND right=unaryExpression 
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); rightStack.push(right /* .expression */ );}
     )*
 {
     while(rightStack.size() > 1) {
         Expression temp = rightStack.pop();
-        rightStack.push(new LogicExpression((TriStateExpression) rightStack.pop(), BinaryLogicOperator.AND, (TriStateExpression) temp));
+        rightStack.push(new LogicExpression(locationStack.pop(), (TriStateExpression) rightStack.pop(), BinaryLogicOperator.AND, (TriStateExpression) temp));
     }
     if (rightStack.size() > 0) {
-        $expression = new LogicExpression((TriStateExpression) left /* .expression */ , BinaryLogicOperator.AND, (TriStateExpression) rightStack.pop());
+        $expression = new LogicExpression(locationStack.pop(), (TriStateExpression) left /* .expression */ , BinaryLogicOperator.AND, (TriStateExpression) rightStack.pop());
     } else {
         $expression = left /* .expression */ ;
     }
@@ -275,18 +279,19 @@ andExpression returns [Expression expression]
 orExpression returns [Expression expression]
 @init {
     Stack<Expression> rightStack = new Stack<Expression>();
+    Stack<String> locationStack = new Stack<String>();
 }
     : left=andExpression
-    (OR right=andExpression 
-        {rightStack.push(right /* .expression */ );}
+    ((location=ID '@')? OR right=andExpression 
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); rightStack.push(right /* .expression */ );}
     )*
 {
     while(rightStack.size() > 1) {
         Expression temp = rightStack.pop();
-        rightStack.push(new LogicExpression((TriStateExpression) rightStack.pop(), BinaryLogicOperator.OR, (TriStateExpression) temp));
+        rightStack.push(new LogicExpression(locationStack.pop(), (TriStateExpression) rightStack.pop(), BinaryLogicOperator.OR, (TriStateExpression) temp));
     }
     if (rightStack.size() > 0) {
-        $expression = new LogicExpression((TriStateExpression) left /* .expression */ , BinaryLogicOperator.OR, (TriStateExpression) rightStack.pop());
+        $expression = new LogicExpression(locationStack.pop(), (TriStateExpression) left /* .expression */ , BinaryLogicOperator.OR, (TriStateExpression) rightStack.pop());
     } else {
         $expression = left /* .expression */ ;
     }

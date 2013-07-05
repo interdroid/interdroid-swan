@@ -30,6 +30,11 @@
                 <category android:name="interdroid.swan" />
             </intent-filter>
         </receiver>
+        <receiver android:name="interdroid.swan.crossdevice.Registry$Receiver" >
+            <intent-filter>
+                <action android:name="interdroid.swan.GET_NAMES" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name="interdroid.swan.crossdevice.SwanLakeActivity"
@@ -40,7 +45,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />

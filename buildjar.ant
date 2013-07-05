@@ -9,9 +9,12 @@
 				<include name="antlr*.jar" />
 			</fileset>
 		</copy>
-		<jar destfile="swan-in-your-app/swan.jar" includes="**/swan/*.class,**/swansong/*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
+		<jar destfile="swan-in-your-app/swan.jar" includes="**/swan/*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
+		<jar destfile="swan-in-your-app/swan-song.jar" includes="**/swansong/*.class" basedir="bin/classes" />
 	</target>
 	<target name="sensor-jar">
-		<jar destfile="swan-sensor.jar" includes="**/*.class," excludes="com/**,**/sensors/impl/*.class,interdroid/vdb/**/*.class" basedir="bin/classes" />
+		<mkdir dir="swan-sensor-in-your-app" />
+		<jar destfile="swan-sensor-in-your-app/swan-sensor.jar" includes="**/swan/sensors/*.class" basedir="bin/classes" />
+		<jar destfile="swan-sensor-in-your-app/swan-song.jar" includes="**/swansong/*.class" basedir="bin/classes" />
 	</target>
 </project>

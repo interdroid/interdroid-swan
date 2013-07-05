@@ -15,7 +15,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,10 +22,21 @@ import android.widget.Toast;
 
 public class TestActivity extends Activity {
 
+	private void toast(final String text) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(TestActivity.this, text, Toast.LENGTH_LONG)
+						.show();
+			}
+		});
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
+
 		findViewById(R.id.register).setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -34,10 +44,9 @@ public class TestActivity extends Activity {
 				List<SensorInfo> sensors = ExpressionManager
 						.getSensors(TestActivity.this);
 				for (SensorInfo sensor : sensors) {
-					if (sensor.getEntity().equals("location")) {
+					if (sensor.getEntity().equals("news")) {
 						startActivityForResult(sensor.getConfigurationIntent(),
 								1234);
-						break;
 					}
 				}
 			}
@@ -71,23 +80,11 @@ public class TestActivity extends Activity {
 									if (newValues.length > 0) {
 										System.out.println("got new values: "
 												+ newValues[0]);
-										if (newValues[0].getValue() instanceof Location) {
-											System.out
-													.println("It's a location object!");
-											runOnUiThread(new Runnable() {
-												public void run() {
-													Toast.makeText(
-															TestActivity.this,
-															"LOCATION!",
-															Toast.LENGTH_LONG)
-															.show();
-												}
-											});
-										}
 									}
 								}
 
 							});
+					toast("registered expression!");
 				} catch (ExpressionParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

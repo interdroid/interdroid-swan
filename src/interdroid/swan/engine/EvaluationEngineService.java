@@ -101,7 +101,7 @@ public class EvaluationEngineService extends Service {
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
 							head.evaluated(System.currentTimeMillis() - start);
-							
+
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
 								sendUpdate(head.getId(), result);
@@ -138,8 +138,6 @@ public class EvaluationEngineService extends Service {
 	NotificationManager mNotificationManager;
 	Notification mNotification;
 	EvaluationManager mEvaluationManager;
-	
-	
 
 	/**
 	 * @return all expressions saved in the database.
@@ -258,13 +256,17 @@ public class EvaluationEngineService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// we can get several actions here, both from the API and from the
 		// Sensors as well as from the Boot event
+		if (intent == null) {
+			throw new RuntimeException(
+					"huh? intent is null! This should never happen!!");
+		}
 		String action = intent.getAction();
 		if (ExpressionManager.ACTION_REGISTER.equals(action)) {
 			String id = intent.getStringExtra("expressionId");
 			try {
 				Expression expression = ExpressionFactory.parse(intent
 						.getStringExtra("expression"));
-				
+
 				doRegister(id, expression);
 			} catch (Throwable t) {
 				Log.d(TAG,
@@ -331,17 +333,22 @@ public class EvaluationEngineService extends Service {
 
 	private void doRegister(final String id, final Expression expression) {
 		// handle registration
+		Log.d(TAG, "registring id: " + id + ", expression: " + expression);
 		if (mRegisteredExpressions.containsKey(id)) {
 			// FAIL!
+			Log.d(TAG, "failed to register, already contains id!");
+			return;
 		}
 		try {
 			mEvaluationManager.initialize(id, expression);
 		} catch (SensorConfigurationException e) {
 			// FAIL!
 			e.printStackTrace();
+			return;
 		} catch (SensorSetupFailedException e) {
 			// FAIL!
 			e.printStackTrace();
+			return;
 		}
 		synchronized (mEvaluationThread) {
 			// add this expression to our registered expression, the queue and
@@ -372,6 +379,8 @@ public class EvaluationEngineService extends Service {
 		QueuedExpression expression = mRegisteredExpressions.get(id);
 		if (expression == null) {
 			// FAIL!
+			Log.d(TAG, "Got spurious unregister for id: " + id);
+			return;
 		}
 		// first stop evaluating
 		synchronized (mEvaluationThread) {
@@ -453,6 +462,15 @@ public class EvaluationEngineService extends Service {
 				ExpressionViewerActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
+		boolean hasRemote = false;
+		for (String id : mRegisteredExpressions.keySet()) {
+			if (id.contains(Expression.SEPARATOR)) {
+				hasRemote = true;
+				break;
+			}
+		}
+		mNotification.icon = hasRemote ? R.drawable.ic_stat_swan_warning
+				: R.drawable.ic_stat_swan;
 		mNotification.setLatestEventInfo(this, "Swan",
 				"number of expressions: " + mRegisteredExpressions.size(),
 				contentIntent);

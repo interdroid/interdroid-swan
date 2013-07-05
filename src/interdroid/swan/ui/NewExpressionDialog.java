@@ -81,8 +81,8 @@ public class NewExpressionDialog extends Activity {
 					// String name = ((EditText) findViewById(R.id.name))
 					// .getText().toString();
 					Expression newExpression = new ComparisonExpression(
-							(ValueExpression) left, comparator,
-							(ValueExpression) right);
+							Expression.LOCATION_INFER, (ValueExpression) left,
+							comparator, (ValueExpression) right);
 					Intent result = new Intent();
 					result.putExtra("Expression", newExpression.toParseString());
 					// if (name != null && !name.equals("")) {

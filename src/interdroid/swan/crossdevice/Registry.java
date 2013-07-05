@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
@@ -89,6 +91,12 @@ public class Registry {
 		if (getDirty(context)) {
 			update(context);
 		}
+		if (names.size() == 0) {
+			names.add("John");
+			names.add("Jane");
+			names.add("Bob");
+			names.add("Alice");
+		}
 		return names;
 	}
 
@@ -158,6 +166,17 @@ public class Registry {
 					new String[] { name });
 		} finally {
 			closeDb(db);
+		}
+	}
+
+	public static class Receiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Intent result = new Intent("interdroid.swan.NAMES");
+			result.putStringArrayListExtra("names",
+					(ArrayList<String>) getNames(context));
+			context.sendBroadcast(result);
 		}
 	}
 

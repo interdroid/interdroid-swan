@@ -58,6 +58,12 @@ public class SensorValueExpression implements ValueExpression {
 		return mEntity;
 	}
 
+	@Override
+	public void setInferredLocation(String location) {
+		throw new RuntimeException(
+				"Please don't use this method. For internal use only.");
+	}
+
 	public String getValuePath() {
 		return mValuePath;
 	}
@@ -68,24 +74,6 @@ public class SensorValueExpression implements ValueExpression {
 
 	public Bundle getConfiguration() {
 		return mConfig;
-	}
-
-	@Override
-	public String toCrossDeviceString(Context context, String location) {
-		String result = ((location.equals(mLocation)) ? Expression.LOCATION_SELF
-				: Registry.get(context, mLocation))
-				+ "@" + mEntity + ":" + mValuePath;
-		if (mConfig != null && mConfig.size() > 0) {
-			boolean first = true;
-			for (String key : mConfig.keySet()) {
-				result += (first ? "?" : "&") + key + "="
-						+ mConfig.getString(key);
-				first = false;
-			}
-		}
-		result += "{" + mMode.toParseString() + "," + mHistoryLength + "}";
-		return result;
-
 	}
 
 }

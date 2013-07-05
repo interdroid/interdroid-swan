@@ -1,6 +1,5 @@
 package interdroid.swan.swansong;
 
-import android.content.Context;
 
 public interface Expression extends Parseable<Expression> {
 
@@ -20,11 +19,11 @@ public interface Expression extends Parseable<Expression> {
 	// independent (doesn't matter where)
 	public static final String LOCATION_SELF = "self";
 	public static final String LOCATION_INDEPENDENT = "independent";
-	public static final String LOCATION_DYNAMIC = "dynamic";
+	public static final String LOCATION_INFER = "infer";
 	public static final String REGID_PREFIX = "regid:";
 
-	public String getLocation();
+	public void setInferredLocation(String location);
 
-	public String toCrossDeviceString(Context context, String location);
+	public String getLocation();
 
 }
