@@ -470,7 +470,7 @@
                 android:value="3" />
             <meta-data
                 android:name="units"
-                android:value=",," />
+                android:value="rad/s,rad/s,rad/s" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />

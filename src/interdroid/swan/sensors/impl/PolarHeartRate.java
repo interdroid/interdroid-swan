@@ -247,8 +247,12 @@ public class PolarHeartRate extends AbstractVdbSensor {
 		switch(status){
 		case 241:
 			return "Connected - Active reading HR";
+		case 209:
+			return "Connected - Active reading HR";
 		case 251:
 			return "Connected - Problem reading HR";
+		case 193:
+			return "Disconnected";
 		default:
 			return "Unknown: " + status;
 		}
