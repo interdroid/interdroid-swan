@@ -5,23 +5,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Stores and keeps tracks of sensor service information.
  */
 public class SensorInfo {
-	/**
-	 * Access to logger.
-	 */
 
-	private static final Logger LOG = LoggerFactory.getLogger(SensorInfo.class);
+	private static final String TAG = "Sensor Info";
 
 	/**
 	 * The name of the component the sensor runs in..
@@ -67,7 +62,8 @@ public class SensorInfo {
 	 * @param metaData
 	 *            metadata bundle for the service from the package manager
 	 */
-	public SensorInfo(final ComponentName sensorComponent, final Bundle metaData, Drawable icon) {
+	public SensorInfo(final ComponentName sensorComponent,
+			final Bundle metaData, Drawable icon) {
 		this.component = sensorComponent;
 		this.icon = icon;
 		// strip out the entityId
@@ -103,7 +99,7 @@ public class SensorInfo {
 					metaData.remove(key);
 					metaData.putLong(key, longValue);
 				} catch (NumberFormatException e) {
-					LOG.debug("Can't convert number. Using string.");
+					Log.d(TAG, "Can't convert number. Using string.");
 				}
 			}
 			if (metaData.get(key).toString().endsWith("D")) {
@@ -114,7 +110,7 @@ public class SensorInfo {
 					metaData.remove(key);
 					metaData.putDouble(key, doubleValue);
 				} catch (NumberFormatException e) {
-					LOG.debug("Can't convert number. Using string.");
+					Log.d(TAG, "Can't convert number. Using string.");
 				}
 			}
 		}

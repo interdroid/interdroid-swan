@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string-array name="timelength_units">
+        <item>ms</item>
+        <item>sec</item>
+        <item>min</item>
+        <item>hrs</item>
+        <item>days</item>
+    </string-array>
+
     <!-- history_reduction_modes -->
     <string-array name="history_reduction_modes">
         <item>ANY</item>
@@ -71,7 +79,8 @@
 
     <!-- sound sensor -->
     <string-array name="sound_valuepaths">
-        <item>dB</item>
+        <item>rms</item>
+        <item>db</item>
     </string-array>
     <string-array name="sound_audio_source">
         <item>Default</item>

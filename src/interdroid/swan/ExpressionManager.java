@@ -151,6 +151,16 @@ public class ExpressionManager {
 		return result;
 	}
 
+	public static SensorInfo getSensor(Context context, String name)
+			throws SwanException {
+		for (SensorInfo sensorInfo : getSensors(context)) {
+			if (sensorInfo.getEntity().equals(name)) {
+				return sensorInfo;
+			}
+		}
+		throw new SwanException("Sensor '" + name + "' not installed.");
+	}
+
 	/**
 	 * Registers a {@link TriStateExpression} for evaluation.
 	 * 

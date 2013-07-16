@@ -41,13 +41,13 @@ public class TestActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				List<SensorInfo> sensors = ExpressionManager
-						.getSensors(TestActivity.this);
-				for (SensorInfo sensor : sensors) {
-					if (sensor.getEntity().equals("news")) {
-						startActivityForResult(sensor.getConfigurationIntent(),
-								1234);
-					}
+				try {
+					startActivityForResult(
+							ExpressionManager.getSensor(TestActivity.this,
+									"sound").getConfigurationIntent(), 1234);
+				} catch (SwanException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});

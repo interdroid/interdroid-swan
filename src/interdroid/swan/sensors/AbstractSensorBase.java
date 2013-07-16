@@ -3,6 +3,7 @@ package interdroid.swan.sensors;
 import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,6 +218,7 @@ public abstract class AbstractSensorBase extends Service implements
 	protected final void notifyDataChangedForId(final String... ids) {
 		Intent notifyIntent = new Intent(ACTION_NOTIFY);
 		notifyIntent.putExtra("expressionIds", ids);
+		System.out.println("sending data changed for: " + Arrays.toString(ids));
 		sendBroadcast(notifyIntent);
 	}
 

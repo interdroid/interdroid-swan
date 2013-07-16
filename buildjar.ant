@@ -9,7 +9,7 @@
 				<include name="antlr*.jar" />
 			</fileset>
 		</copy>
-		<jar destfile="swan-in-your-app/swan.jar" includes="**/swan/*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
+		<jar destfile="swan-in-your-app/swan.jar" includes="**/swan/*.class,**/swan/util/*.class" excludes="**/R.class,**/BuildConfig.class" basedir="bin/classes" />
 		<jar destfile="swan-in-your-app/swan-song.jar" includes="**/swansong/*.class" basedir="bin/classes" />
 	</target>
 	<target name="sensor-jar">

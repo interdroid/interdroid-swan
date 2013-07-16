@@ -512,13 +512,10 @@
                 android:value="sound" />
             <meta-data
                 android:name="valuePaths"
-                android:value="dB" />
+                android:value="rms,db" />
             <meta-data
                 android:name="sample_interval"
                 android:value="10000" />
-            <meta-data
-                android:name="sample_length"
-                android:value="1024" />
             <meta-data
                 android:name="sample_rate"
                 android:value="8000" />
@@ -532,8 +529,11 @@
                 android:name="channel_config"
                 android:value="2" />
             <meta-data
+                android:name="peak_db"
+                android:value="70.0" />
+            <meta-data
                 android:name="units"
-                android:value="dB" />
+                android:value=",dB" />
 
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />

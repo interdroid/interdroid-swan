@@ -563,7 +563,7 @@ public class EvaluationManager {
 		for (l = 0; l < left.getValues().length; l++) {
 			comparatorResult.startInnerLoop();
 			for (r = 0; r < right.getValues().length; r++) {
-				if (comparatorResult.innerResult(evaluatePair(
+				if (comparatorResult.innerResult(comparePair(
 						expression.getComparator(),
 						left.getValues()[l].getValue(),
 						right.getValues()[r].getValue()))) {
@@ -582,10 +582,12 @@ public class EvaluationManager {
 		// find out how long this result will remain valid and defer
 		// evaluation to that moment
 		long leftRemainsValidUntil = remainsValidUntil(expression.getLeft(),
-				left.getValues()[l].getTimestamp(), expression.getComparator(),
+				left.getValues()[l].getTimestamp(),
+				left.getValues()[0].getTimestamp(), expression.getComparator(),
 				comparatorResult.getTriState(), true);
 		long rightRemainsValidUntil = remainsValidUntil(expression.getRight(),
 				right.getValues()[r].getTimestamp(),
+				right.getValues()[0].getTimestamp(),
 				expression.getComparator(), comparatorResult.getTriState(),
 				false);
 		comparatorResult.setDeferUntil(Math.min(leftRemainsValidUntil,
@@ -600,8 +602,11 @@ public class EvaluationManager {
 				expression.getLeft(), now);
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
 				expression.getRight(), now);
-
-		if (left.getValues().length == 1 || right.getValues().length == 1) {
+		if (left.getValues().length == 0 || right.getValues().length == 0) {
+			Result result = new Result(left.getValues());
+			return result;
+		} else if (left.getValues().length == 1
+				|| right.getValues().length == 1) {
 			TimestampedValue[] values = new TimestampedValue[left.getValues().length
 					* right.getValues().length];
 			int index = 0;
@@ -682,26 +687,27 @@ public class EvaluationManager {
 	}
 
 	private long remainsValidUntil(ValueExpression expression,
-			long determiningValueTimestamp, Comparator comparator,
-			TriState triState, boolean left) {
+			long determiningValueTimestamp, long oldestValueTimestamp,
+			Comparator comparator, TriState triState, boolean left) {
 		if (expression instanceof MathValueExpression) {
 			// math value is valid as long both of its children are valid
 			return Math.min(
 					remainsValidUntil(
 							((MathValueExpression) expression).getLeft(),
-							determiningValueTimestamp, comparator, triState,
-							left),
+							determiningValueTimestamp, oldestValueTimestamp,
+							comparator, triState, left),
 					remainsValidUntil(
 							((MathValueExpression) expression).getRight(),
-							determiningValueTimestamp, comparator, triState,
-							left));
+							determiningValueTimestamp, oldestValueTimestamp,
+							comparator, triState, left));
 		} else if (expression instanceof ConstantValueExpression) {
 			return Long.MAX_VALUE;
 		} else if (expression instanceof SensorValueExpression) {
 			HistoryReductionMode mode = ((SensorValueExpression) expression)
 					.getHistoryReductionMode();
-			long deferTime = determiningValueTimestamp
-					+ ((SensorValueExpression) expression).getHistoryLength();
+			long historyLength = ((SensorValueExpression) expression)
+					.getHistoryLength();
+			long deferTime = determiningValueTimestamp + historyLength;
 			// here we need the big table, see thesis
 
 			// symmetric (left or right doesn't matter)
@@ -787,8 +793,12 @@ public class EvaluationManager {
 					}
 				}
 			}
+			// otherwise we defer based on the oldest timestamp
+			deferTime = historyLength == 0 ? Long.MAX_VALUE
+					: (oldestValueTimestamp + historyLength);
+			return deferTime;
 		}
-		return 0;
+		return 0; // should not happen!
 	}
 
 	private void sleepAndBeReady(final String id, final Expression expression,
@@ -879,6 +889,16 @@ public class EvaluationManager {
 		return false;
 	}
 
+	private Object promote(Object object) {
+		if (object instanceof Integer) {
+			return Long.valueOf((Integer) object);
+		}
+		if (object instanceof Float) {
+			return Double.valueOf((Float) object);
+		}
+		return object;
+	}
+
 	/**
 	 * Evaluates a leaf item performing the comparison.
 	 * 
@@ -889,9 +909,13 @@ public class EvaluationManager {
 	 * @return Result.FALSE or Result.TRUE
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private TriState evaluatePair(final Comparator comparator,
-			final Object left, final Object right) {
+	private TriState comparePair(final Comparator comparator, Object left,
+			Object right) {
 		TriState result = TriState.FALSE;
+		// promote types
+		left = promote(left);
+		right = promote(right);
+
 		switch (comparator) {
 		case LESS_THAN:
 			if (((Comparable) left).compareTo(right) < 0) {

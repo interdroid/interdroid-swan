@@ -257,8 +257,10 @@ public class EvaluationEngineService extends Service {
 		// we can get several actions here, both from the API and from the
 		// Sensors as well as from the Boot event
 		if (intent == null) {
-			throw new RuntimeException(
-					"huh? intent is null! This should never happen!!");
+			Log.d(TAG,
+					"huh? intent is null! This should never happen!! We will try to restore...");
+			restoreAfterBoot();
+			return START_STICKY;
 		}
 		String action = intent.getAction();
 		if (ExpressionManager.ACTION_REGISTER.equals(action)) {

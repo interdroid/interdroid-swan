@@ -11,6 +11,7 @@
         <EditTextPreference
             android:defaultValue="0"
             android:dialogTitle="Enter History Window"
+            android:inputType="number"
             android:key="history_window"
             android:summary="Set History Window"
             android:title="History Window" />

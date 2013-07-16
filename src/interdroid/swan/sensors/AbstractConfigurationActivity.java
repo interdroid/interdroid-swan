@@ -22,6 +22,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 
 /**
  * Base for ConfigurationActivities for configuring sensors.
@@ -65,7 +66,6 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// addPreferencesFromResource(R.xml.default_preferences);
 		addPreferencesFromIntent(new Intent(
 				"interdroid.swan.DEFAULT_PREFERENCES"));
 		reAddPrefs(getPreferenceScreen());
@@ -103,6 +103,8 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 				oldPrefs.add(preference);
 				EditTextPreference oldPref = (EditTextPreference) preference;
 				EditTextPreference newPref = new EditTextPreference(this);
+				newPref.getEditText().setInputType(
+						oldPref.getEditText().getInputType());
 				newPref.setDialogMessage(oldPref.getDialogMessage());
 				newPref.setDialogIcon(oldPref.getDialogIcon());
 				newPref.setDependency(oldPref.getDependency());
@@ -154,7 +156,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	 * Sets up this activity.
 	 */
 	private void setupPrefs() {
-		setupPref(getPreferenceScreen());
+		setupPref(null, getPreferenceScreen());
 	}
 
 	/**
@@ -163,12 +165,19 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	 * @param preference
 	 *            the preferences for the sensor.
 	 */
-	private void setupPref(final Preference preference) {
+	private void setupPref(final PreferenceGroup parent,
+			final Preference preference) {
 		if (preference instanceof PreferenceGroup) {
-			for (int i = 0; i < ((PreferenceGroup) preference)
-					.getPreferenceCount(); i++) {
+			int nrPrefs = ((PreferenceGroup) preference).getPreferenceCount();
+			for (int i = nrPrefs - 1; i >= 0; i--) {
 				// setup all sub prefs
-				setupPref(((PreferenceGroup) preference).getPreference(i));
+				setupPref(((PreferenceGroup) preference),
+						((PreferenceGroup) preference).getPreference(i));
+			}
+			// update nr prefs
+			nrPrefs = ((PreferenceGroup) preference).getPreferenceCount();
+			if (nrPrefs == 0) {
+				parent.removePreference(preference);
 			}
 		} else {
 			keys.add(preference.getKey());
@@ -204,6 +213,20 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 								.getEntryValues()[0].toString());
 				preference.setSummary(((ListPreference) preference)
 						.getEntries()[0]);
+			}
+			if (getIntent().hasExtra(preference.getKey())) {
+				PreferenceManager
+						.getDefaultSharedPreferences(getBaseContext())
+						.edit()
+						.putString(
+								preference.getKey(),
+								""
+										+ getIntent().getExtras().get(
+												preference.getKey())).commit();
+
+				// hide the pref.
+				// parent.removePreference(preference);
+				preference.setEnabled(false);
 			}
 
 		}
