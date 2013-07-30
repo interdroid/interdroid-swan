@@ -133,12 +133,13 @@ public class ExpressionManager {
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
 			try {
 				Drawable icon = new BitmapDrawable(
-						BitmapFactory.decodeResource(pm
-								.getResourcesForApplication("interdroid.swan"),
-								discoveredSensor.getIconResource()));
+						BitmapFactory.decodeResource(
+								pm.getResourcesForApplication(discoveredSensor.serviceInfo.packageName),
+								discoveredSensor.serviceInfo.icon));
 				Log.d(TAG, "\tDiscovered sensor: "
 						+ discoveredSensor.serviceInfo.packageName + " "
-						+ discoveredSensor.serviceInfo.name);
+						+ discoveredSensor.serviceInfo.name + " "
+						+ discoveredSensor.serviceInfo.icon);
 				result.add(new SensorInfo(new ComponentName(
 						discoveredSensor.serviceInfo.packageName,
 						discoveredSensor.serviceInfo.name),
