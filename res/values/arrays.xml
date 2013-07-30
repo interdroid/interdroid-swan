@@ -15,8 +15,8 @@
         <item>ALL</item>
         <item>MAX</item>
         <item>MIN</item>
-        <item>AVG</item>
-        <item>MED</item>
+        <item>MEAN</item>
+        <item>MEDIAN</item>
     </string-array>
 
     <!-- battery sensor -->
