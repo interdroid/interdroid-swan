@@ -134,4 +134,9 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return temperatureSensor.getPower();
+	}
 }

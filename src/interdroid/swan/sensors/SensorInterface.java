@@ -80,5 +80,7 @@ public interface SensorInterface {
 	 * @return
 	 */
 	long getStartUpTime(String id);
-
+	
+	
+	double getAverageSensingRate();
 }

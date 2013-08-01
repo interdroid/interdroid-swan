@@ -8,6 +8,8 @@ import interdroid.swan.swansong.ValueExpression;
 
 import java.util.Date;
 
+import android.os.Bundle;
+
 public class QueuedExpression implements Comparable<QueuedExpression> {
 
 	private Expression mExpression;
@@ -18,8 +20,8 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	private long mTotalEvaluationTime; // total time spent on evaluations so far
 	private long mMinEvaluationTime = Long.MAX_VALUE;
 	private long mMaxEvaluationTime = Long.MIN_VALUE;
-	private long mTotalEvaluationDelay;
-	private long mEvaluationsDelay; //number of evaluations with delay
+	private long mTotalEvaluationDelay; //total delay
+	private long mNumEvaluationsDelay; // number of evaluations with delay
 
 	public QueuedExpression(String id, Expression expression) {
 		mId = id;
@@ -96,26 +98,23 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		if (mId.contains(Expression.SEPARATOR)) {
 			id = "<remote> " + mId.split(Expression.SEPARATOR, 2)[1];
 		}
-		return id
-				+ "\n"
-				+ mCurrentResult
-				+ "\n"
-				+ mExpression.toParseString()
-				+ "\nStart time: "
-				+ new Date(mStartTime)
-				+ "\nEvaluation Rate: "
-				+ (mEvaluations / ((System.currentTimeMillis() - mStartTime) / 60000.0))
-				+ " per minute"
-				+ "\nAvg Evaluation Time: "
-				+ (mTotalEvaluationTime / Math.max(mEvaluations, 1))
-				+ "\nMin Evaluation Time: "
-				+ mMinEvaluationTime
-				+ "\nMax Evaluation Time: "
-				+ mMaxEvaluationTime
-				+ "\nEvaluation Percentage: "
-				+ ((mTotalEvaluationTime * 100) / (float) (System
-						.currentTimeMillis() - mStartTime))
-				+ "\nAvg Evaluation Delay: " + (mTotalEvaluationDelay/Math.max(mEvaluationsDelay, 1));
+		/*
+		 * return id + "\n" + mCurrentResult + "\n" +
+		 * mExpression.toParseString() + "\nStart time: " + new Date(mStartTime)
+		 * + "\nEvaluation Rate: " + (mEvaluations /
+		 * ((System.currentTimeMillis() - mStartTime) / 60000.0)) +
+		 * " per minute" + "\nAvg Evaluation Time: " + (mTotalEvaluationTime /
+		 * Math.max(mEvaluations, 1)) + "\nMin Evaluation Time: " +
+		 * mMinEvaluationTime + "\nMax Evaluation Time: " + mMaxEvaluationTime +
+		 * "\nEvaluation Percentage: " + ((mTotalEvaluationTime * 100) / (float)
+		 * (System .currentTimeMillis() - mStartTime)) +
+		 * "\nAvg Evaluation Delay: " +
+		 * (mTotalEvaluationDelay/Math.max(mEvaluationsDelay, 1));
+		 */
+		return id // position 0
+				+ "\n" + "Evaluation Percentage" // position 1
+				+ "\n" + ((mTotalEvaluationTime * 100) / (float) (System // position 2
+						.currentTimeMillis() - mStartTime)) + "\n";
 	}
 
 	public void evaluated(long currentEvalutionTime, long evalDelay) {
@@ -123,11 +122,24 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		mTotalEvaluationTime += currentEvalutionTime;
 		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
 		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
-		if(evalDelay != 0 ){
+		if (evalDelay != 0) {
 			mTotalEvaluationDelay += evalDelay;
-			mEvaluationsDelay += 1;
-			System.out.println("Added Delay: " + evalDelay +  " Total Delay: " + mTotalEvaluationDelay);
+			mNumEvaluationsDelay += 1;
 		}
+	}
+
+	public Bundle toBundle() {
+		Bundle bundle = new Bundle();
+		bundle.putLong("start-time", mStartTime);
+		bundle.putString("name", mId);
+		bundle.putString("result", mCurrentResult.toString());
+		bundle.putDouble("evaluation-rate", (mEvaluations / ((System.currentTimeMillis() - mStartTime) / 1000.0)));
+		bundle.putLong("min-evaluation-time", mMinEvaluationTime);
+		bundle.putLong("max-evaluation-time", mMaxEvaluationTime);
+		bundle.putLong("avg-evaluation-time", (mTotalEvaluationTime / Math.max(mEvaluations, 1)));
+		bundle.putFloat("evaluation-percentage", ((mTotalEvaluationTime * 100) / (float)(System .currentTimeMillis() - mStartTime)));
+		bundle.putLong("avg-evaluation-delay", (mTotalEvaluationDelay/Math.max(mNumEvaluationsDelay, 1)));
+		return bundle;
 	}
 
 }

@@ -150,4 +150,10 @@ public class MagnetometerSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return magnetometer.getPower();
+	}
+	
 }

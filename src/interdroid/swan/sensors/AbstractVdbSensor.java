@@ -1,5 +1,6 @@
 package interdroid.swan.sensors;
 
+import interdroid.swan.sensors.impl.MovementSensor;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.vdb.content.EntityUriBuilder;
 
@@ -16,6 +17,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 
 /**
@@ -31,6 +33,9 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AbstractVdbSensor.class);
+
+	private long mReadings = 0;
+	private long mLastReadingTimestamp = 0;
 
 	/**
 	 * Field which represents the timestamp for the reading.
@@ -102,6 +107,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	public final void putValues(final String id, final ContentValues values,
 			final long now) {
+		updateReadings(now);
 		notifyDataChangedForId(id);
 		values.put(EXPRESSION_ID, id);
 		putValues(getContentResolver(), uri, values, now);
@@ -117,9 +123,17 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 *            the timestamp
 	 */
 	public final void putValues(final ContentValues values, final long now) {
+		updateReadings(now);
 		putValues(getContentResolver(), uri, values, now);
 		for (Entry<String, Object> key : values.valueSet()) {
 			notifyDataChanged(key.getKey());
+		}
+	}
+
+	private void updateReadings(long now) {
+		if (now != mLastReadingTimestamp) {
+			mReadings++;
+			mLastReadingTimestamp = now;
 		}
 	}
 
@@ -281,5 +295,10 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 		}
 
 		return c;
+	}
+
+	@Override
+	public long getReadings() {
+		return mReadings;
 	}
 }

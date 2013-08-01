@@ -34,6 +34,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -995,6 +996,20 @@ public class EvaluationManager {
 					+ "' for type Location");
 		}
 		return ret;
+	}
+
+	public Bundle[] activeSensorsAsBundle() {
+		Bundle[] sensors = new Bundle[mSensors.size()];
+		int i = 0;
+		for (String key : mSensors.keySet()) {
+			try {
+				sensors[i] = mSensors.get(key).getInfo();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			i++;
+		}
+		return sensors;
 	}
 
 }

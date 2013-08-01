@@ -13,5 +13,7 @@ interface Sensor {
 	String getScheme();
 	
 	long getStartUpTime(in String id);
+	
+	Bundle getInfo();
 }
 

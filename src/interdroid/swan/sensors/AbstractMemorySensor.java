@@ -19,6 +19,9 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	 * The map of values for this sensor.
 	 */
 	private final Map<String, List<TimestampedValue>> values = new HashMap<String, List<TimestampedValue>>();
+	
+	private long mReadings = 0;
+	private long mLastReadingTimestamp = 0;
 
 	/**
 	 * @return the values
@@ -67,6 +70,7 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	protected final void putValueTrimSize(final String valuePath,
 			final String id, final long now, final Object value,
 			final int historySize) {
+		updateReadings(now);
 		getValues().get(valuePath).add(0, new TimestampedValue(value, now));
 		trimValues(historySize);
 		if (id != null) {
@@ -91,12 +95,20 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 	protected final void putValueTrimTime(final String valuePath,
 			final String id, final long now, final Object value,
 			final long historyLength) {
+		updateReadings(now);
 		getValues().get(valuePath).add(0, new TimestampedValue(value, now));
 		trimValueByTime(now - historyLength);
 		if (id != null) {
 			notifyDataChangedForId(id);
 		} else {
 			notifyDataChanged(valuePath);
+		}
+	}
+	
+	private void updateReadings(long now) {
+		if (now != mLastReadingTimestamp) {
+			mReadings++;
+			mLastReadingTimestamp = now;
 		}
 	}
 
@@ -122,5 +134,9 @@ public abstract class AbstractMemorySensor extends AbstractSensorBase {
 		return getValuesForTimeSpan(values.get(registeredValuePaths.get(id)),
 				now, timespan);
 	}
-
+	
+	@Override
+	public long getReadings() {
+		return mReadings;
+	}
 }

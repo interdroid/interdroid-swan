@@ -84,4 +84,8 @@ public class TimeSensor extends AbstractSensorBase {
 		// Nothing to do
 	}
 
+	@Override
+	public long getReadings() {
+		return 0;
+	}
 }

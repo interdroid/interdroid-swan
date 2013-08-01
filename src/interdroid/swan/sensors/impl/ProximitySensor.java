@@ -130,4 +130,10 @@ public class ProximitySensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return proximitySensor.getPower();
+	}
+	
 }

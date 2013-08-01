@@ -4,6 +4,7 @@ import interdroid.swan.ExpressionListener;
 import interdroid.swan.ExpressionManager;
 import interdroid.swan.R;
 import interdroid.swan.SwanException;
+import interdroid.swan.engine.BatteryUtil;
 import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.ExpressionFactory;
 import interdroid.swan.swansong.ExpressionParseException;
@@ -25,21 +26,36 @@ public class TestActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
+		
+		//BatteryUtil.readPowerProfile(this);
 
 		Expression parsedExpression;
+		Expression parsedExpression2 = null;
+		Expression parsedExpression3 = null;
+		
 		try {
 			parsedExpression = ExpressionFactory
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
-			// .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
+//			 .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
 			//.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
-			.parse("self@movement:total?accuracy=3{ANY,0}");
-			// .parse("self@proximity:distance?accuracy=0{ANY,0}");
+			//.parse("self@movement:total?accuracy=3{ANY,0}");
+			 .parse("self@proximity:distance?accuracy=0{ANY,0}");
+			
+			parsedExpression2 = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{ANY,0}");
+			
+			parsedExpression3 = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+			
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
 			finish();
 			parsedExpression = null;
 		}
 		final Expression expression = parsedExpression;
+		final Expression expression2 = parsedExpression2;
+		final Expression expression3 = parsedExpression3;
+		
 		findViewById(R.id.register).setOnClickListener(
 				new View.OnClickListener() {
 
@@ -48,6 +64,119 @@ public class TestActivity extends Activity {
 						try {
 							ExpressionManager.registerExpression(
 									TestActivity.this, "bla", expression,
+									new ExpressionListener() {
+
+										@Override
+										public void onNewState(final String id,
+												final long timestamp,
+												final TriState newState) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													((TextView) findViewById(R.id.text))
+															.setText(new Date(
+																	timestamp)
+																	+ ": "
+																	+ newState);
+													Toast.makeText(
+															TestActivity.this,
+															id + ": "
+																	+ newState,
+															Toast.LENGTH_LONG)
+															.show();
+												}
+											});
+											System.out.println(id + ": "
+													+ newState);
+										}
+
+										@Override
+										public void onNewValues(
+												String id,
+												final TimestampedValue[] newValues) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													if (newValues == null
+															|| newValues.length == 0) {
+														((TextView) findViewById(R.id.text))
+																.setText("n.a.");
+													} else {
+														((TextView) findViewById(R.id.text))
+																.setText(new Date(
+																		newValues[0]
+																				.getTimestamp())
+																		+ ": "
+																		+ newValues[0]
+																				.getValue());
+													}
+												}
+											});
+
+											// System.out.println(id
+											// + ": "
+											// + Arrays.toString(newValues));
+										}
+
+									});
+							
+							ExpressionManager.registerExpression(
+									TestActivity.this, "ala", expression2,
+									new ExpressionListener() {
+
+										@Override
+										public void onNewState(final String id,
+												final long timestamp,
+												final TriState newState) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													((TextView) findViewById(R.id.text))
+															.setText(new Date(
+																	timestamp)
+																	+ ": "
+																	+ newState);
+													Toast.makeText(
+															TestActivity.this,
+															id + ": "
+																	+ newState,
+															Toast.LENGTH_LONG)
+															.show();
+												}
+											});
+											System.out.println(id + ": "
+													+ newState);
+										}
+
+										@Override
+										public void onNewValues(
+												String id,
+												final TimestampedValue[] newValues) {
+											runOnUiThread(new Runnable() {
+												public void run() {
+													if (newValues == null
+															|| newValues.length == 0) {
+														((TextView) findViewById(R.id.text))
+																.setText("n.a.");
+													} else {
+														((TextView) findViewById(R.id.text))
+																.setText(new Date(
+																		newValues[0]
+																				.getTimestamp())
+																		+ ": "
+																		+ newValues[0]
+																				.getValue());
+													}
+												}
+											});
+
+											// System.out.println(id
+											// + ": "
+											// + Arrays.toString(newValues));
+										}
+
+									});
+							
+							
+							ExpressionManager.registerExpression(
+									TestActivity.this, "cla", expression3,
 									new ExpressionListener() {
 
 										@Override
@@ -114,6 +243,10 @@ public class TestActivity extends Activity {
 					public void onClick(View v) {
 						ExpressionManager.unregisterExpression(
 								TestActivity.this, "bla");
+						ExpressionManager.unregisterExpression(
+								TestActivity.this, "ala");
+						ExpressionManager.unregisterExpression(
+								TestActivity.this, "cla");
 					}
 				});
 
