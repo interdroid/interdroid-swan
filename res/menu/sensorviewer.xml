@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:showAsAction="always"
+        android:title="@string/action_refresh"
+        android:visible="true"/>
+    <item
+        android:id="@+id/expression_viewer"
+        android:showAsAction="always"
+        android:title="@string/expression_viewer"
+        android:visible="true"/>
+
+</menu>
