@@ -707,6 +707,10 @@ public class EvaluationManager {
 					.getHistoryReductionMode();
 			long historyLength = ((SensorValueExpression) expression)
 					.getHistoryLength();
+			if (historyLength == 0) {
+				return Long.MAX_VALUE;
+			}
+
 			long deferTime = determiningValueTimestamp + historyLength;
 			// here we need the big table, see thesis
 
@@ -794,9 +798,7 @@ public class EvaluationManager {
 				}
 			}
 			// otherwise we defer based on the oldest timestamp
-			deferTime = historyLength == 0 ? Long.MAX_VALUE
-					: (oldestValueTimestamp + historyLength);
-			return deferTime;
+			return oldestValueTimestamp + historyLength;
 		}
 		return 0; // should not happen!
 	}

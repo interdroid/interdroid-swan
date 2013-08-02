@@ -8,21 +8,33 @@ import interdroid.swan.swansong.ValueExpression;
 
 import java.util.Date;
 
+import android.content.Intent;
+
 public class QueuedExpression implements Comparable<QueuedExpression> {
 
 	private Expression mExpression;
 	private String mId;
 	private Result mCurrentResult;
+	private Intent mOnTrue;
+	private Intent mOnFalse;
+	private Intent mOnUndefined;
+	private Intent mOnNewValues;
+
 	private long mStartTime;
 	private int mEvaluations; // number of evaluations
 	private long mTotalEvaluationTime; // total time spent on evaluations so far
 	private long mMinEvaluationTime = Long.MAX_VALUE;
 	private long mMaxEvaluationTime = Long.MIN_VALUE;
 
-	public QueuedExpression(String id, Expression expression) {
+	public QueuedExpression(String id, Expression expression, Intent onTrue,
+			Intent onFalse, Intent onUndefined, Intent onNewValues) {
 		mId = id;
 		mExpression = expression;
 		mStartTime = System.currentTimeMillis();
+		mOnTrue = onTrue;
+		mOnFalse = onFalse;
+		mOnUndefined = onUndefined;
+		mOnNewValues = onNewValues;
 	}
 
 	public int compareTo(QueuedExpression another) {
@@ -61,6 +73,7 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 			return false;
 		}
 		mCurrentResult = result;
+		System.out.println("set current result to " + result);
 		return true;
 	}
 
@@ -120,6 +133,36 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		mTotalEvaluationTime += currentEvalutionTime;
 		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
 		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
+	}
+
+	public Intent getIntent(Result result) {
+		if (mExpression instanceof TriStateExpression) {
+			switch (result.getTriState()) {
+			case TRUE:
+				return mOnTrue;
+			case FALSE:
+				return mOnFalse;
+			case UNDEFINED:
+				return mOnUndefined;
+			}
+		}
+		return mOnNewValues;
+	}
+
+	public Intent getOnTrue() {
+		return mOnTrue;
+	}
+
+	public Intent getOnFalse() {
+		return mOnFalse;
+	}
+
+	public Intent getOnUndefined() {
+		return mOnUndefined;
+	}
+
+	public Intent getOnNewValues() {
+		return mOnNewValues;
 	}
 
 }

@@ -21,6 +21,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Parcelable;
 import android.util.Log;
 
@@ -80,6 +81,12 @@ public class ExpressionManager {
 	 * resulting in the {@link TriState} happened.
 	 */
 	public static final String EXTRA_NEW_TRISTATE_TIMESTAMP = "timestamp";
+
+	public static final String EXTRA_INTENT_TYPE = "intent_type";
+
+	public static final String INTENT_TYPE_BROADCAST = "broadcast";
+	public static final String INTENT_TYPE_ACTIVITY = "activity";
+	public static final String INTENT_TYPE_SERVICE = "service";
 
 	private static Map<String, ExpressionListener> sListeners = new HashMap<String, ExpressionListener>();
 
@@ -176,7 +183,7 @@ public class ExpressionManager {
 	 *            a {@link TriStateExpressionListener} that receives the
 	 *            evaluation results. It is also possible to listen for the
 	 *            results using a {@link BroadcastReceiver}. Filter on
-	 *            datascheme "swanexpression" and action
+	 *            datascheme "swan://<your.package.name>" and action
 	 *            {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
 	 *             if id is null or invalid
@@ -219,7 +226,8 @@ public class ExpressionManager {
 	 *            a {@link ValueExpressionListener} that receives the evaluation
 	 *            results. It is also possible to listen for the results using a
 	 *            {@link BroadcastReceiver}. Filter on datascheme
-	 *            "swanexpression" and action {@link #ACTION_NEW_VALUES}.
+	 *            "swan://<your.package.name>" and action
+	 *            {@link #ACTION_NEW_VALUES}.
 	 * @throws SwanException
 	 *             if id is null or invalid
 	 */
@@ -261,7 +269,8 @@ public class ExpressionManager {
 	 *            a {@link ValueExpressionListener} that receives the evaluation
 	 *            results. It is also possible to listen for the results using a
 	 *            {@link BroadcastReceiver}. Filter on datascheme
-	 *            "swanexpression" and action {@link #ACTION_NEW_VALUES}.
+	 *            "swan://<your.package.name>" and action
+	 *            {@link #ACTION_NEW_VALUES} or {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
 	 *             if id is null or invalid
 	 */
@@ -294,10 +303,66 @@ public class ExpressionManager {
 				sListeners.put(id, expressionListener);
 			}
 		}
+		Intent newTriState = new Intent(ACTION_NEW_TRISTATE);
+		newTriState.setData(Uri.parse("swan://" + context.getPackageName()));
+		Intent newValues = new Intent(ACTION_NEW_VALUES);
+		newValues.setData(Uri.parse("swan://" + context.getPackageName()));
+		registerExpression(context, id, expression, newTriState, newTriState,
+				newTriState, newValues);
+	}
 
+	/**
+	 * Registers a {@link TriStateExpression} for evaluation.
+	 * 
+	 * @param context
+	 * @param id
+	 *            the user provided unique id of the expression. Should not
+	 *            contain {@link Expression#SEPARATOR} or end with any of the
+	 *            {@link Expression#RESERVED_SUFFIXES}.
+	 * @param expression
+	 *            the {@link TriStateExpression} that should be evaluated
+	 * @param onTrue
+	 *            Intent that should be fired when state changes to true. By
+	 *            default the Intent is used to send a broadcast. Add
+	 *            {@link #EXTRA_INTENT_TYPE} with any of the values
+	 *            {@link #INTENT_TYPE_ACTIVITY}, {@link #INTENT_TYPE_SERVICE} to
+	 *            have Swan launch an activity or service.
+	 * @param onFalse
+	 *            Intent that should be fired when state changes to false. By
+	 *            default the Intent is used to send a broadcast. Add
+	 *            {@link #EXTRA_INTENT_TYPE} with any of the values
+	 *            {@link #INTENT_TYPE_ACTIVITY}, {@link #INTENT_TYPE_SERVICE} to
+	 *            have Swan launch an activity or service.
+	 * @param onUndefined
+	 *            Intent that should be fired when state changes to undefined.
+	 *            By default the Intent is used to send a broadcast. Add
+	 *            {@link #EXTRA_INTENT_TYPE} with any of the values
+	 *            {@link #INTENT_TYPE_ACTIVITY}, {@link #INTENT_TYPE_SERVICE} to
+	 *            have Swan launch an activity or service.
+	 */
+	public static void registerTriStateExpression(Context context, String id,
+			TriStateExpression expression, Intent onTrue, Intent onFalse,
+			Intent onUndefined) {
+		registerExpression(context, id, expression, onTrue, onFalse,
+				onUndefined, null);
+	}
+
+	public static void registerValueExpression(Context context, String id,
+			TriStateExpression expression, Intent onNewValues) {
+		registerExpression(context, id, expression, null, null, null,
+				onNewValues);
+	}
+
+	private static void registerExpression(Context context, String id,
+			Expression expression, Intent onTrue, Intent onFalse,
+			Intent onUndefined, Intent onNewValues) {
 		Intent intent = new Intent(ACTION_REGISTER);
 		intent.putExtra("expressionId", id);
 		intent.putExtra("expression", expression.toParseString());
+		intent.putExtra("onTrue", onTrue);
+		intent.putExtra("onFalse", onFalse);
+		intent.putExtra("onUndefined", onUndefined);
+		intent.putExtra("onNewValues", onNewValues);
 		context.sendBroadcast(intent);
 	}
 

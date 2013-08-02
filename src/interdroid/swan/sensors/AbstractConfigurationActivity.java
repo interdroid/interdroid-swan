@@ -1,5 +1,7 @@
 package interdroid.swan.sensors;
 
+import interdroid.swan.swansong.ExpressionFactory;
+import interdroid.swan.swansong.ExpressionParseException;
 import interdroid.swan.swansong.HistoryReductionMode;
 import interdroid.swan.swansong.SensorValueExpression;
 
@@ -7,13 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -22,7 +22,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.util.Log;
 
 /**
  * Base for ConfigurationActivities for configuring sensors.
@@ -32,11 +32,8 @@ import android.preference.PreferenceScreen;
  */
 public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		implements OnPreferenceChangeListener {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(AbstractConfigurationActivity.class);
+	private static final String TAG = AbstractConfigurationActivity.class
+			.getSimpleName();
 
 	/**
 	 * Returns the id for the sensors preferences XML setup.
@@ -57,6 +54,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 					.toArray(new String[names.size()]));
 			((ListPreference) findPreference("swan_location"))
 					.setEntryValues(names.toArray(new String[names.size()]));
+			intentToPrefs();
 		}
 
 	};
@@ -66,16 +64,46 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
+
+	private void intentToPrefs() {
+		if (getIntent().hasExtra("expression")) {
+			try {
+				SensorValueExpression sensor = (SensorValueExpression) ExpressionFactory
+						.parse(getIntent().getStringExtra("expression"));
+				updatePref("swan_location", sensor.getLocation());
+				updatePref("history_window", "" + sensor.getHistoryLength());
+				updatePref("history_reduction_mode", sensor
+						.getHistoryReductionMode().toParseString());
+				updatePref("valuepath", sensor.getValuePath());
+				for (String key : sensor.getConfiguration().keySet()) {
+					updatePref(key, sensor.getConfiguration().getString(key));
+				}
+			} catch (ExpressionParseException e) {
+				Log.d(TAG, "supplied expression cannot be parsed.", e);
+			} catch (ClassCastException e) {
+				Log.d(TAG, "supplied expression wrong type.", e);
+			}
+		} else {
+			Log.d(TAG, "no edit");
+		}
+	}
+
+	private void updatePref(String key, String value) {
+		findPreference(key).getEditor().putString(key, value).apply();
+		findPreference(key).getOnPreferenceChangeListener().onPreferenceChange(
+				findPreference(key), value);
+	}
+
+	@Override
+	protected void onResume() {
 		addPreferencesFromIntent(new Intent(
 				"interdroid.swan.DEFAULT_PREFERENCES"));
 		reAddPrefs(getPreferenceScreen());
 		addPreferencesFromResource(getPreferencesXML());
 		setupPrefs();
-		setResult(RESULT_CANCELED);
-	}
 
-	@Override
-	protected void onResume() {
+		setResult(RESULT_CANCELED);
 		registerReceiver(mNameReceiver, new IntentFilter(
 				"interdroid.swan.NAMES"));
 		sendBroadcast(new Intent("interdroid.swan.GET_NAMES"));
@@ -138,7 +166,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 				reAddPrefs((PreferenceGroup) preference);
 			} else {
 				group.removePreference(preference);
-				LOG.debug("not re adding preference: '" + preference.getKey()
+				Log.d(TAG, "not re adding preference: '" + preference.getKey()
 						+ "' not supported");
 			}
 		}
@@ -192,7 +220,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 					summary = ((ListPreference) preference).getValue()
 							.toString();
 				} catch (NullPointerException e) {
-					LOG.warn("Got null pointer while getting summary.", e);
+					Log.d(TAG, "Got null pointer while getting summary.", e);
 				}
 			} else if (preference instanceof EditTextPreference) {
 				summary = ((EditTextPreference) preference).getText();

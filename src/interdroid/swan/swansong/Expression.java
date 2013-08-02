@@ -7,7 +7,7 @@ public interface Expression extends Parseable<Expression> {
 	 * Separator used by the SWAN framework in internal ids. This should not be
 	 * used in expression ids.
 	 */
-	public static final String SEPARATOR = " ";
+	public static final String SEPARATOR = "~REMOTE~";
 
 	public static final String LEFT_SUFFIX = ".left";
 	public static final String RIGHT_SUFFIX = ".right";
