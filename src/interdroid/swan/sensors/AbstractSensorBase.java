@@ -180,7 +180,6 @@ public abstract class AbstractSensorBase extends Service implements
 			}
 			return info;
 		}
-
 	};
 
 	/**

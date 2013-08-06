@@ -999,17 +999,27 @@ public class EvaluationManager {
 	}
 
 	public Bundle[] activeSensorsAsBundle() {
-		Bundle[] sensors = new Bundle[mSensors.size()];
+//		Bundle[] sensors = new Bundle[mSensors.size()];
+		ArrayList<Bundle> sensors = new ArrayList<Bundle>();
 		int i = 0;
 		for (String key : mSensors.keySet()) {
 			try {
-				sensors[i] = mSensors.get(key).getInfo();
+				boolean dup = false;
+				for(Bundle b : sensors){
+					if(b.getString("name").equals(mSensors.get(key).getInfo().getString("name"))){
+						dup= true;
+					}
+				}
+				if(!dup){
+					sensors.add(mSensors.get(key).getInfo());	
+				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
 			i++;
 		}
-		return sensors;
+		Bundle[] res = new Bundle[sensors.size()];
+		res = sensors.toArray(res);
+		return res;
 	}
-
 }

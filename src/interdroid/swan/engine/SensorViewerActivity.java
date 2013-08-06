@@ -163,6 +163,5 @@ public class SensorViewerActivity extends ListActivity {
 
 			return convertView;
 		}
-
 	}
 }
