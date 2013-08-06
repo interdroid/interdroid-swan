@@ -80,25 +80,6 @@ public class MagnetometerSensor extends AbstractMemorySensor {
 				SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
-	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'magnetometer', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ X_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Y_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Z_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ TOTAL_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
 
 	@Override
 	public void onConnected() {

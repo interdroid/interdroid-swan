@@ -76,6 +76,8 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	private Schema schema;
 
+	public abstract String getScheme();
+
 	/**
 	 * Initialize this sensor.
 	 */

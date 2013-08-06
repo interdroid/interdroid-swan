@@ -42,11 +42,6 @@ public interface SensorInterface {
 	void unregister(String id);
 
 	/**
-	 * @return the scheme for this sensor
-	 */
-	String getScheme();
-
-	/**
 	 * 
 	 * @param id
 	 *            the id of the expression to use

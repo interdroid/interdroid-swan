@@ -89,7 +89,7 @@ public class TwitterSensor extends AbstractMemorySensor {
 		DEFAULT_CONFIGURATION.putLong(SAMPLE_INTERVAL, DEFAULT_SAMPLE_INTERVAL);
 	}
 
-	@Override
+	//@Override
 	public String getScheme() {
 		return "{'type': 'record', 'name': 'rain', 'namespace': 'context.sensor',"
 				+ " 'fields': ["

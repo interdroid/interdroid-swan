@@ -173,7 +173,7 @@ public class CalendarSensor extends AbstractSensorBase {
 				DEFAULT_IGNORE_FREE_EVENTS);
 	}
 
-	@Override
+	//@Override
 	public String getScheme() {
 		return "{'type': 'record', 'name': 'train', 'namespace': 'context.sensor',"
 				+ " 'fields': ["

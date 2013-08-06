@@ -73,16 +73,6 @@ public class PressureSensor extends AbstractMemorySensor {
 				SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
-	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'pressureSensor', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ PRESSURE_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
 
 	@Override
 	public void onConnected() {

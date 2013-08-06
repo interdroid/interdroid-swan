@@ -235,8 +235,7 @@ public class SensorInfo {
 	 */
 	public final Intent getConfigurationIntent() {
 		ComponentName configurationComponent = new ComponentName(
-				component.getPackageName(), component.getClassName()
-						+ "$ConfigurationActivity");
+				component.getPackageName(), component.getClassName());
 
 		Intent result = new Intent().setComponent(configurationComponent);
 		result.putExtra("entityId", entityId);

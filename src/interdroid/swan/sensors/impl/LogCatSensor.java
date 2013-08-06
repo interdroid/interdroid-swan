@@ -55,17 +55,6 @@ public class LogCatSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'logcat', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ LOG_FIELD
-				+ "', 'type': 'string'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 	}
 

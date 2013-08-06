@@ -75,17 +75,6 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'temperatureSensor', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ TEMPERATURE_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager

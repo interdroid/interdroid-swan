@@ -7,6 +7,7 @@ import interdroid.swan.SwanException;
 import interdroid.swan.crossdevice.Pusher;
 import interdroid.swan.crossdevice.Registry;
 import interdroid.swan.sensors.Sensor;
+import interdroid.swan.sensors.TimeSensor;
 import interdroid.swan.swansong.BinaryLogicOperator;
 import interdroid.swan.swansong.Comparator;
 import interdroid.swan.swansong.ComparatorResult;
@@ -128,6 +129,9 @@ public class EvaluationManager {
 			initialize(id + Expression.RIGHT_SUFFIX,
 					((MathValueExpression) expression).getRight());
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				return;
+			}
 			// do the real work here, bind to the sensor.
 			bindToSensor(id, (SensorValueExpression) expression, false);
 		}
@@ -156,6 +160,9 @@ public class EvaluationManager {
 			stop(id + Expression.RIGHT_SUFFIX,
 					((MathValueExpression) expression).getRight());
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				return;
+			}
 			// do the real work here, unbind from the sensor.
 			unbindFromSensor(id);
 		}
@@ -202,6 +209,10 @@ public class EvaluationManager {
 		} else if (expression instanceof MathValueExpression) {
 			result = doMath(id, (MathValueExpression) expression, now);
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				throw new RuntimeException(
+						"time can only be used in an ComparisonExpression on the left hand");
+			}
 			result = getFromSensor(id, (SensorValueExpression) expression, now);
 		}
 		if (result != null && result.getDeferUntil() != Long.MAX_VALUE) {
@@ -538,6 +549,21 @@ public class EvaluationManager {
 
 	private Result doCompare(String id, ComparisonExpression expression,
 			long now) throws SwanException {
+		if (expression.getLeft() instanceof SensorValueExpression
+				&& ((SensorValueExpression) expression.getLeft()).getEntity()
+						.equals("time")) {
+			return TimeSensor.determineValue(
+					now,
+					((SensorValueExpression) expression.getLeft())
+							.getValuePath(),
+					((SensorValueExpression) expression.getLeft())
+							.getConfiguration(),
+					expression.getComparator(),
+					(Comparable) evaluate(id + Expression.RIGHT_SUFFIX,
+							expression.getRight(), now).getValues()[0]
+							.getValue());
+		}
+
 		Result left = evaluate(id + Expression.LEFT_SUFFIX,
 				expression.getLeft(), now);
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
@@ -891,7 +917,7 @@ public class EvaluationManager {
 		return false;
 	}
 
-	private Object promote(Object object) {
+	private static Object promote(Object object) {
 		if (object instanceof Integer) {
 			return Long.valueOf((Integer) object);
 		}
@@ -911,8 +937,8 @@ public class EvaluationManager {
 	 * @return Result.FALSE or Result.TRUE
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private TriState comparePair(final Comparator comparator, Object left,
-			Object right) {
+	public static TriState comparePair(final Comparator comparator,
+			Object left, Object right) {
 		TriState result = TriState.FALSE;
 		// promote types
 		left = promote(left);

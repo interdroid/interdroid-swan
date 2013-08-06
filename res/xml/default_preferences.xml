@@ -15,6 +15,16 @@
             android:key="history_window"
             android:summary="Set History Window"
             android:title="History Window" />
+        
+
+        <ListPreference
+            android:defaultValue="ms"
+            android:entries="@array/time_units"
+            android:entryValues="@array/time_units_values"
+            android:key="time_units"
+            android:summary="Select Time Units"
+            android:title="Window Time Units" />
+        
 
         <ListPreference
             android:defaultValue="ANY"

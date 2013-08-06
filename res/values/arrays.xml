@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="timelength_units">
+    <string-array name="time_units">
+        <item>milliseconds</item>
+        <item>seconds</item>
+        <item>minutes</item>
+        <item>hours</item>
+    </string-array>
+    
+    <string-array name="time_units_values">
         <item>ms</item>
-        <item>sec</item>
-        <item>min</item>
-        <item>hrs</item>
-        <item>days</item>
+        <item>s</item>
+        <item>m</item>
+        <item>h</item>
     </string-array>
 
     <!-- history_reduction_modes -->
@@ -26,6 +32,13 @@
         <item>temperature</item>
         <item>plugged</item>
         <item>status_text</item>
+    </string-array>
+
+    <!-- time sensor -->
+    <string-array name="time_valuepaths">
+        <item>hour_of_day</item>
+        <item>day_of_week</item>
+        <item>current</item>
     </string-array>
 
     <!-- train sensor -->

@@ -134,23 +134,21 @@ public class ExpressionManager {
 		Log.d(TAG, "Starting sensor discovery");
 		PackageManager pm = context.getPackageManager();
 		Intent queryIntent = new Intent("interdroid.swan.sensor.DISCOVER");
-		List<ResolveInfo> discoveredSensors = pm.queryIntentServices(
+		List<ResolveInfo> discoveredSensors = pm.queryIntentActivities(
 				queryIntent, PackageManager.GET_META_DATA);
 		Log.d(TAG, "Found " + discoveredSensors.size() + " sensors");
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
 			try {
 				Drawable icon = new BitmapDrawable(
 						BitmapFactory.decodeResource(
-								pm.getResourcesForApplication(discoveredSensor.serviceInfo.packageName),
-								discoveredSensor.serviceInfo.icon));
-				Log.d(TAG, "\tDiscovered sensor: "
-						+ discoveredSensor.serviceInfo.packageName + " "
-						+ discoveredSensor.serviceInfo.name + " "
-						+ discoveredSensor.serviceInfo.icon);
+								pm.getResourcesForApplication(discoveredSensor.activityInfo.packageName),
+								discoveredSensor.activityInfo.icon));
+				Log.d(TAG, "\t"
+						+ discoveredSensor.activityInfo.name);
 				result.add(new SensorInfo(new ComponentName(
-						discoveredSensor.serviceInfo.packageName,
-						discoveredSensor.serviceInfo.name),
-						discoveredSensor.serviceInfo.metaData, icon));
+						discoveredSensor.activityInfo.packageName,
+						discoveredSensor.activityInfo.name),
+						discoveredSensor.activityInfo.metaData, icon));
 			} catch (Exception e) {
 				Log.e(TAG, "Error with discovered sensor: " + discoveredSensor,
 						e);

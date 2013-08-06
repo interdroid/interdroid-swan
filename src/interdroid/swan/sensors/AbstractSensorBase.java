@@ -148,11 +148,6 @@ public abstract class AbstractSensorBase extends Service implements
 		}
 
 		@Override
-		public String getScheme() throws RemoteException {
-			return mSensorInterface.getScheme();
-		}
-
-		@Override
 		public long getStartUpTime(String id) throws RemoteException {
 			return mSensorInterface.getStartUpTime(id);
 		}

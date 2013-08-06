@@ -35,6 +35,10 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 	private static final String TAG = AbstractConfigurationActivity.class
 			.getSimpleName();
 
+	private static final long SECOND = 1000;
+	private static final long MINUTE = 60 * SECOND;
+	private static final long HOUR = 60 * MINUTE;
+
 	/**
 	 * Returns the id for the sensors preferences XML setup.
 	 * 
@@ -281,6 +285,15 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		HistoryReductionMode mode = HistoryReductionMode.parse(map.remove(
 				"history_reduction_mode").toString());
 		long timespan = Long.parseLong(map.remove("history_window").toString());
+		String timeUnits = (String) map.remove("time_units");
+		if (timeUnits.equals("h")) {
+			timespan = timespan * HOUR;
+		} else if (timeUnits.equals("m")) {
+			timespan = timespan * MINUTE;
+		} else if (timeUnits.equals("s")) {
+			timespan = timespan * SECOND;
+		}
+
 		String entityId = getIntent().getStringExtra("entityId");
 
 		Bundle configuration = new Bundle();
