@@ -11,5 +11,7 @@ interface Sensor {
 	List<TimestampedValue> getValues(in String id, long now, long timespan);
 
 	long getStartUpTime(in String id);
+	
+	Bundle getInfo();
 }
 

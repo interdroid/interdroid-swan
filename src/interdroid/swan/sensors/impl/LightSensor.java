@@ -121,4 +121,9 @@ public class LightSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return lightSensor.getPower();
+	}
 }

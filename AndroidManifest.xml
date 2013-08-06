@@ -80,6 +80,13 @@
             android:label="@string/expression_viewer_name"
             android:launchMode="singleTask" />
 
+        <activity
+            android:name="interdroid.swan.engine.SensorViewerActivity"
+            android:exported="false"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/sensor_viewer_name"
+            android:launchMode="singleTask" />
+
         <!-- ui stuff -->
 
         <activity

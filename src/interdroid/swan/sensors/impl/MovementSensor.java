@@ -128,4 +128,9 @@ public class MovementSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return accelerometer.getPower();
+	}
 }

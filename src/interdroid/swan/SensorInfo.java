@@ -223,7 +223,10 @@ public class SensorInfo {
 	 * @return new Intent().setComponent(getComponent())
 	 */
 	public final Intent getIntent() {
-		return new Intent().setComponent(component);
+		ComponentName serviceComponent = new ComponentName(
+				component.getPackageName(), component.getClassName().replace(
+						"$ConfigurationActivity", ""));
+		return new Intent().setComponent(serviceComponent);
 	}
 
 	/**
@@ -234,10 +237,7 @@ public class SensorInfo {
 	 * @return an intent for launching the configuration activity
 	 */
 	public final Intent getConfigurationIntent() {
-		ComponentName configurationComponent = new ComponentName(
-				component.getPackageName(), component.getClassName());
-
-		Intent result = new Intent().setComponent(configurationComponent);
+		Intent result = new Intent().setComponent(component);
 		result.putExtra("entityId", entityId);
 		return result;
 	}

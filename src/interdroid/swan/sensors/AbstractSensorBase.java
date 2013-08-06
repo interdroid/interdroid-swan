@@ -7,9 +7,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -33,6 +36,8 @@ public abstract class AbstractSensorBase extends Service implements
 	 * The sensor interface.
 	 */
 	private final SensorInterface mSensorInterface = this;
+
+	private long mStartTime;
 
 	// Designed for direct use by subclasses.
 	/**
@@ -92,6 +97,7 @@ public abstract class AbstractSensorBase extends Service implements
 	@Override
 	public final void onCreate() {
 		Log.d(TAG, "abstract sensor oncreate");
+		mStartTime = System.currentTimeMillis();
 		init();
 		initDefaultConfiguration(mDefaultConfiguration);
 		onConnected();
@@ -152,6 +158,21 @@ public abstract class AbstractSensorBase extends Service implements
 			return mSensorInterface.getStartUpTime(id);
 		}
 
+		@Override
+		public Bundle getInfo() throws RemoteException {
+			Bundle info = new Bundle();
+			info.putString("name", getClass().getName());
+			int num = 0;
+			for (Map.Entry<String, List<String>> entry : expressionIdsPerValuePath
+					.entrySet()) {
+				num += entry.getValue().size();
+			}
+			info.putInt("registeredids", num);
+			info.putDouble("sensingRate", getAverageSensingRate());
+			info.putLong("starttime", getStartTime());
+			info.putFloat("currentMilliAmpere", getCurrentMilliAmpere());
+			return info;
+		}
 	};
 
 	/**
@@ -285,4 +306,19 @@ public abstract class AbstractSensorBase extends Service implements
 		return result;
 	}
 
+	@Override
+	public double getAverageSensingRate() {
+		return (double) getReadings()
+				/ ((System.currentTimeMillis() - mStartTime) / 1000.0);
+	}
+
+	public long getStartTime() {
+		return mStartTime;
+	}
+
+	public abstract long getReadings();
+
+	public float getCurrentMilliAmpere() {
+		return -1;
+	}
 }

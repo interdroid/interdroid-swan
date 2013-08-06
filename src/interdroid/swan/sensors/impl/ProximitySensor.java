@@ -99,9 +99,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 				}
 				if (configuration.containsKey(ACCURACY)) {
 					highestAccuracy = Math
-							.min(highestAccuracy,
-									Integer.parseInt(configuration
-											.getString(ACCURACY)));
+							.min(highestAccuracy,configuration.getInt(ACCURACY));
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,
@@ -121,4 +119,10 @@ public class ProximitySensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return proximitySensor.getPower();
+	}
+	
 }

@@ -348,7 +348,7 @@ public class EvaluationManager {
 			mSensorList = ExpressionManager.getSensors(mContext);
 		}
 		for (SensorInfo sensorInfo : mSensorList) {
-			// improve logging output here
+
 			if (sensorInfo.getEntity().equals(expression.getEntity())) {
 				if (sensorInfo.getValuePaths().contains(
 						expression.getValuePath())) {
@@ -392,7 +392,7 @@ public class EvaluationManager {
 					Log.d(TAG, "No valuepath found for valuepath '"
 							+ expression.getValuePath() + "'");
 				}
-			}
+			} 
 		}
 		Log.d(TAG, "No sensor found for entity '" + expression.getEntity()
 				+ "'");
@@ -1155,4 +1155,29 @@ public class EvaluationManager {
 		return ret;
 	}
 
+	public Bundle[] activeSensorsAsBundle() {
+		// Bundle[] sensors = new Bundle[mSensors.size()];
+		ArrayList<Bundle> sensors = new ArrayList<Bundle>();
+		int i = 0;
+		for (String key : mSensors.keySet()) {
+			try {
+				boolean dup = false;
+				for (Bundle b : sensors) {
+					if (b.getString("name").equals(
+							mSensors.get(key).getInfo().getString("name"))) {
+						dup = true;
+					}
+				}
+				if (!dup) {
+					sensors.add(mSensors.get(key).getInfo());
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			i++;
+		}
+		Bundle[] res = new Bundle[sensors.size()];
+		res = sensors.toArray(res);
+		return res;
+	}
 }

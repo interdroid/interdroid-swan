@@ -127,4 +127,9 @@ public class PressureSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return pressureSensor.getPower();
+	}
 }

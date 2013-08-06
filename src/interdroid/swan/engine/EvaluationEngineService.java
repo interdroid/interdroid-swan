@@ -45,6 +45,7 @@ public class EvaluationEngineService extends Service {
 	public static final String ACTION_NEW_RESULT_REMOTE = "interdroid.swan.new_result_remote";
 
 	public static final String UPDATE_EXPRESSIONS = "interdroid.swan.UPDATE_EXPRESSIONS";
+	public static final String UPDATE_SENSORS = "interdroid.swan.UPDATE_SENSORS";
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -92,11 +93,22 @@ public class EvaluationEngineService extends Service {
 					if (head.getDeferUntil() <= System.currentTimeMillis()) {
 						// evaluate now
 						try {
+							long evaluationDelay;
+							if (head.getDeferUntil() != 0) {
+								evaluationDelay = System.currentTimeMillis()
+										- head.getDeferUntil();
+							} else {
+								evaluationDelay = 0;
+							}
+
 							long start = System.currentTimeMillis();
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
-							head.evaluated(System.currentTimeMillis() - start);
+
+							head.evaluated(
+									(System.currentTimeMillis() - start),
+									evaluationDelay);
 
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
@@ -298,6 +310,7 @@ public class EvaluationEngineService extends Service {
 			try {
 				Expression expression = ExpressionFactory.parse(intent
 						.getStringExtra("expression"));
+
 				Intent onTrue = intent.getParcelableExtra("onTrue");
 				Intent onFalse = intent.getParcelableExtra("onFalse");
 				Intent onUndefined = intent.getParcelableExtra("onUndefined");
@@ -353,8 +366,15 @@ public class EvaluationEngineService extends Service {
 		} else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
 			restoreAfterBoot();
 		} else if (UPDATE_EXPRESSIONS.equals(action)) {
+			// Use local broadcast manager because broadcast
+			// needs only be send to this local app not other applications on
+			// android
 			LocalBroadcastManager.getInstance(this).sendBroadcast(
 					getRegisteredExpressions());
+			return START_STICKY;
+		} else if (UPDATE_SENSORS.equals(action)) {
+			LocalBroadcastManager.getInstance(this).sendBroadcast(
+					getActiveSensors());
 			return START_STICKY;
 		}
 		// after we handled the intent, we should update the notification and
@@ -366,6 +386,12 @@ public class EvaluationEngineService extends Service {
 			stopForeground(true);
 		}
 		return START_STICKY;
+	}
+
+	private Intent getActiveSensors() {
+		Intent intent = new Intent(UPDATE_SENSORS);
+		intent.putExtra("sensors", mEvaluationManager.activeSensorsAsBundle());
+		return intent;
 	}
 
 	private void doRegister(final String id, final Expression expression,
@@ -405,10 +431,10 @@ public class EvaluationEngineService extends Service {
 
 	private Intent getRegisteredExpressions() {
 		Intent intent = new Intent(UPDATE_EXPRESSIONS);
-		String[] expressions = new String[mRegisteredExpressions.size()];
+		Bundle[] expressions = new Bundle[mRegisteredExpressions.size()];
 		int i = 0;
 		for (String key : mRegisteredExpressions.keySet()) {
-			expressions[i] = mRegisteredExpressions.get(key).toString();
+			expressions[i] = mRegisteredExpressions.get(key).toBundle();
 			i++;
 		}
 		intent.putExtra("expressions", expressions);
@@ -517,20 +543,20 @@ public class EvaluationEngineService extends Service {
 		mNotificationManager.notify(NOTIFICATION_ID, mNotification);
 	}
 
-	private void sendUpdate(QueuedExpression expression, Result result) {
+	private void sendUpdate(QueuedExpression queued, Result result) {
 		// we know it has changed
-		if (expression.getId().contains(Expression.SEPARATOR)) {
+		if (queued.getId().contains(Expression.SEPARATOR)) {
 			sendUpdateToRemote(
-					expression.getId().split(Expression.SEPARATOR)[0],
-					expression.getId().split(Expression.SEPARATOR)[1], result);
+					queued.getId().split(Expression.SEPARATOR)[0],
+					queued.getId().split(Expression.SEPARATOR)[1], result);
 			return;
 		}
-		Intent update = expression.getIntent(result);
+		Intent update = queued.getIntent(result);
 		if (update == null) {
 			Log.d(TAG, "State change, but no update intent defined");
 			return;
 		}
-		if (expression instanceof ValueExpression) {
+		if (queued.getExpression() instanceof ValueExpression) {
 			if (result.getValues() == null) {
 				Log.d(TAG, "Update canceled, no values");
 				return;
@@ -538,6 +564,9 @@ public class EvaluationEngineService extends Service {
 			update.putExtra(ExpressionManager.EXTRA_NEW_VALUES,
 					result.getValues());
 		} else {
+			System.out.println("result: " + result);
+			System.out.println("tristate: " + result.getTriState());
+
 			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE, result
 					.getTriState().name());
 			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE_TIMESTAMP,
