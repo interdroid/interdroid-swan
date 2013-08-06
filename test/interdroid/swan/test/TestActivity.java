@@ -4,23 +4,34 @@ import interdroid.swan.ExpressionListener;
 import interdroid.swan.ExpressionManager;
 import interdroid.swan.R;
 import interdroid.swan.SwanException;
-import interdroid.swan.engine.BatteryUtil;
+import interdroid.swan.ValueExpressionListener;
 import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.ExpressionFactory;
 import interdroid.swan.swansong.ExpressionParseException;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.swan.swansong.TriState;
+import interdroid.swan.swansong.ValueExpression;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class TestActivity extends Activity {
+
+	private void toast(final String text) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(TestActivity.this, text, Toast.LENGTH_LONG)
+						.show();
+			}
+		});
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,41 +40,44 @@ public class TestActivity extends Activity {
 		
 		//BatteryUtil.readPowerProfile(this);
 
-		Expression parsedExpression;
-		Expression parsedExpression2 = null;
-		Expression parsedExpression3 = null;
+
+		Expression proximity;
+		Expression accelerometer = null;
+		Expression maxAccelerometer = null;
 		
 		try {
-			parsedExpression = ExpressionFactory
+			proximity = ExpressionFactory
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
 //			 .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
 			//.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
 			//.parse("self@movement:total?accuracy=3{ANY,0}");
 			 .parse("self@proximity:distance?accuracy=0{ANY,0}");
 			
-			parsedExpression2 = ExpressionFactory
+			accelerometer = ExpressionFactory
 					.parse("self@movement:total?accuracy=0{ANY,0}");
 			
-			parsedExpression3 = ExpressionFactory
-					.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+			maxAccelerometer = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{MEAN,300000}>12.0");
 			
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
 			finish();
-			parsedExpression = null;
+			proximity = null;
 		}
-		final Expression expression = parsedExpression;
-		final Expression expression2 = parsedExpression2;
-		final Expression expression3 = parsedExpression3;
+		final Expression proximityExpression = proximity;
+		final Expression accelerometerExpression = accelerometer;
+		final Expression maxExpression = maxAccelerometer;
 		
 		findViewById(R.id.register).setOnClickListener(
 				new View.OnClickListener() {
+
+
 
 					@Override
 					public void onClick(View v) {
 						try {
 							ExpressionManager.registerExpression(
-									TestActivity.this, "bla", expression,
+									TestActivity.this, "proximity", proximityExpression,
 									new ExpressionListener() {
 
 										@Override
@@ -119,7 +133,7 @@ public class TestActivity extends Activity {
 									});
 							
 							ExpressionManager.registerExpression(
-									TestActivity.this, "ala", expression2,
+									TestActivity.this, "accelerometer", accelerometerExpression,
 									new ExpressionListener() {
 
 										@Override
@@ -176,7 +190,7 @@ public class TestActivity extends Activity {
 							
 							
 							ExpressionManager.registerExpression(
-									TestActivity.this, "cla", expression3,
+									TestActivity.this, "accelerometerMax", maxExpression,
 									new ExpressionListener() {
 
 										@Override
@@ -236,20 +250,56 @@ public class TestActivity extends Activity {
 					}
 				});
 
+
 		findViewById(R.id.unregister).setOnClickListener(
 				new View.OnClickListener() {
 
 					@Override
 					public void onClick(View v) {
 						ExpressionManager.unregisterExpression(
+
 								TestActivity.this, "bla");
 						ExpressionManager.unregisterExpression(
 								TestActivity.this, "ala");
 						ExpressionManager.unregisterExpression(
 								TestActivity.this, "cla");
+
 					}
 				});
 
 	}
 
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 1234) {
+			if (resultCode == RESULT_OK) {
+				try {
+					Expression expression = ExpressionFactory.parse(data
+							.getStringExtra("Expression"));
+					ExpressionManager.registerValueExpression(
+							TestActivity.this, "test",
+							(ValueExpression) expression,
+							new ValueExpressionListener() {
+
+								@Override
+								public void onNewValues(String id,
+										TimestampedValue[] newValues) {
+									if (newValues.length > 0) {
+										System.out.println("got new values: "
+												+ newValues[0]);
+									}
+								}
+
+							});
+					toast("registered expression!");
+				} catch (ExpressionParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SwanException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+	}
 }

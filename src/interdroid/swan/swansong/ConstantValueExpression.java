@@ -26,6 +26,12 @@ public class ConstantValueExpression implements ValueExpression {
 	}
 
 	@Override
+	public void setInferredLocation(String location) {
+		throw new RuntimeException(
+				"Please don't use this method. For internal use only.");
+	}
+
+	@Override
 	public String getLocation() {
 		return LOCATION_INDEPENDENT;
 	}
@@ -35,8 +41,4 @@ public class ConstantValueExpression implements ValueExpression {
 		return HistoryReductionMode.DEFAULT_MODE;
 	}
 
-	@Override
-	public String toCrossDeviceString(Context context, String location) {
-		return toParseString();
-	}
 }

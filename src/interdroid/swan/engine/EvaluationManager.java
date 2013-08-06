@@ -7,6 +7,7 @@ import interdroid.swan.SwanException;
 import interdroid.swan.crossdevice.Pusher;
 import interdroid.swan.crossdevice.Registry;
 import interdroid.swan.sensors.Sensor;
+import interdroid.swan.sensors.TimeSensor;
 import interdroid.swan.swansong.BinaryLogicOperator;
 import interdroid.swan.swansong.Comparator;
 import interdroid.swan.swansong.ComparatorResult;
@@ -67,13 +68,51 @@ public class EvaluationManager {
 		mCachedResults.put(id, result);
 	}
 
+	public void resolveLocation(Expression expression) {
+		if (!Expression.LOCATION_INFER.equals(expression.getLocation())) {
+			return;
+		}
+		String left = null;
+		String right = null;
+		if (expression instanceof LogicExpression) {
+			resolveLocation(((LogicExpression) expression).getLeft());
+			left = ((LogicExpression) expression).getLeft().getLocation();
+			resolveLocation(((LogicExpression) expression).getRight());
+			right = ((LogicExpression) expression).getRight().getLocation();
+		} else if (expression instanceof ComparisonExpression) {
+			resolveLocation(((ComparisonExpression) expression).getLeft());
+			left = ((ComparisonExpression) expression).getLeft().getLocation();
+			resolveLocation(((ComparisonExpression) expression).getRight());
+			right = ((ComparisonExpression) expression).getRight()
+					.getLocation();
+		} else if (expression instanceof MathValueExpression) {
+			resolveLocation(((MathValueExpression) expression).getLeft());
+			left = ((MathValueExpression) expression).getLeft().getLocation();
+			resolveLocation(((MathValueExpression) expression).getRight());
+			right = ((MathValueExpression) expression).getRight().getLocation();
+		}
+		if (left.equals(right)) {
+			expression.setInferredLocation(left);
+		} else if (left.equals(Expression.LOCATION_INDEPENDENT)) {
+			expression.setInferredLocation(right);
+		} else if (right.equals(Expression.LOCATION_INDEPENDENT)) {
+			expression.setInferredLocation(left);
+		} else if (left.equals(Expression.LOCATION_SELF)
+				|| right.equals(Expression.LOCATION_SELF)) {
+			expression.setInferredLocation(Expression.LOCATION_SELF);
+		} else {
+			expression.setInferredLocation(left);
+		}
+	}
+
 	public void initialize(String id, Expression expression)
 			throws SensorConfigurationException, SensorSetupFailedException {
 		// should get the sensors start producing data.
+		resolveLocation(expression);
 		String location = expression.getLocation();
 		if (!location.equals(Expression.LOCATION_SELF)
 				&& !location.equals(Expression.LOCATION_INDEPENDENT)) {
-			initializeRemote(id, expression);
+			initializeRemote(id, expression, location);
 		} else if (expression instanceof LogicExpression) {
 			initialize(id + Expression.LEFT_SUFFIX,
 					((LogicExpression) expression).getLeft());
@@ -90,6 +129,9 @@ public class EvaluationManager {
 			initialize(id + Expression.RIGHT_SUFFIX,
 					((MathValueExpression) expression).getRight());
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				return;
+			}
 			// do the real work here, bind to the sensor.
 			bindToSensor(id, (SensorValueExpression) expression, false);
 		}
@@ -118,6 +160,9 @@ public class EvaluationManager {
 			stop(id + Expression.RIGHT_SUFFIX,
 					((MathValueExpression) expression).getRight());
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				return;
+			}
 			// do the real work here, unbind from the sensor.
 			unbindFromSensor(id);
 		}
@@ -164,6 +209,10 @@ public class EvaluationManager {
 		} else if (expression instanceof MathValueExpression) {
 			result = doMath(id, (MathValueExpression) expression, now);
 		} else if (expression instanceof SensorValueExpression) {
+			if (((SensorValueExpression) expression).getEntity().equals("time")) {
+				throw new RuntimeException(
+						"time can only be used in an ComparisonExpression on the left hand");
+			}
 			result = getFromSensor(id, (SensorValueExpression) expression, now);
 		}
 		if (result != null && result.getDeferUntil() != Long.MAX_VALUE) {
@@ -172,8 +221,8 @@ public class EvaluationManager {
 		return result;
 	}
 
-	private void initializeRemote(String id, Expression expression)
-			throws SensorSetupFailedException {
+	private void initializeRemote(String id, Expression expression,
+			String resolvedLocation) throws SensorSetupFailedException {
 		// send a push message with 'register' instead of 'initialize',
 		// disadvantage is that we will only later on get exceptions
 		String fromRegistrationId = Registry.get(mContext,
@@ -182,23 +231,94 @@ public class EvaluationManager {
 			throw new SensorSetupFailedException(
 					"Device not registered with Google Cloud Messaging, unable to use remote sensors.");
 		}
-		String toRegistrationId = Registry.get(mContext,
-				expression.getLocation());
+		String toRegistrationId = Registry.get(mContext, resolvedLocation);
 		if (toRegistrationId == null) {
 			throw new SensorSetupFailedException(
 					"No registration id known for location: "
-							+ expression.getLocation());
+							+ resolvedLocation);
 		}
 		// resolve all remote locations in the expression with respect to the
 		// new location.
-		Pusher.push(
-				fromRegistrationId,
-				toRegistrationId,
-				id,
+		Pusher.push(fromRegistrationId, toRegistrationId, id,
 				EvaluationEngineService.ACTION_REGISTER_REMOTE,
-				expression.toCrossDeviceString(mContext,
-						expression.getLocation()));
+				toCrossDeviceString(expression, toRegistrationId));
+		// expression.toCrossDeviceString(mContext,
+		// expression.getLocation()));
 
+	}
+
+	private String toCrossDeviceString(Expression expression,
+			String toRegistrationId) {
+		String registrationId = Registry
+				.get(mContext, expression.getLocation());
+		if (expression instanceof SensorValueExpression) {
+			String result = ((registrationId.equals(toRegistrationId)) ? Expression.LOCATION_SELF
+					: registrationId)
+					+ "@"
+					+ ((SensorValueExpression) expression).getEntity()
+					+ ":" + ((SensorValueExpression) expression).getValuePath();
+			Bundle config = ((SensorValueExpression) expression)
+					.getConfiguration();
+			if (config != null && config.size() > 0) {
+				boolean first = true;
+				for (String key : config.keySet()) {
+					result += (first ? "?" : "&") + key + "="
+							+ config.getString(key);
+					first = false;
+				}
+			}
+			result += "{"
+					+ ((SensorValueExpression) expression)
+							.getHistoryReductionMode().toParseString() + ","
+					+ ((SensorValueExpression) expression).getHistoryLength()
+					+ "}";
+			return result;
+		} else if (expression instanceof LogicExpression) {
+			if (((LogicExpression) expression).getRight() == null) {
+				return ((LogicExpression) expression).getOperator()
+						+ " "
+						+ toCrossDeviceString(
+								((LogicExpression) expression).getLeft(),
+								toRegistrationId);
+			}
+			return "("
+					+ toCrossDeviceString(
+							((LogicExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((LogicExpression) expression).getOperator()
+					+ " "
+					+ toCrossDeviceString(
+							((LogicExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof ComparisonExpression) {
+			return "("
+					+ toCrossDeviceString(
+							((ComparisonExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((ComparisonExpression) expression).getComparator()
+							.toParseString()
+					+ " "
+					+ toCrossDeviceString(
+							((ComparisonExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof MathValueExpression) {
+			return "("
+					+ toCrossDeviceString(
+							((MathValueExpression) expression).getLeft(),
+							registrationId)
+					+ " "
+					+ ((MathValueExpression) expression).getOperator()
+							.toParseString()
+					+ " "
+					+ toCrossDeviceString(
+							((MathValueExpression) expression).getRight(),
+							registrationId) + ")";
+		} else if (expression instanceof ConstantValueExpression) {
+			return ((ConstantValueExpression) expression).toParseString();
+		}
+		throw new RuntimeException("Unknown expression type: " + expression);
 	}
 
 	private void stopRemote(String id, Expression expression) {
@@ -213,13 +333,9 @@ public class EvaluationManager {
 		}
 		// resolve all remote locations in the expression with respect to the
 		// new location.
-		Pusher.push(
-				null,
-				toRegistrationId,
-				id,
+		Pusher.push(null, toRegistrationId, id,
 				EvaluationEngineService.ACTION_UNREGISTER_REMOTE,
-				expression.toCrossDeviceString(mContext,
-						expression.getLocation()));
+				toCrossDeviceString(expression, toRegistrationId));
 	}
 
 	private boolean bindToSensor(final String id,
@@ -232,7 +348,7 @@ public class EvaluationManager {
 			mSensorList = ExpressionManager.getSensors(mContext);
 		}
 		for (SensorInfo sensorInfo : mSensorList) {
-			// improve logging output here
+
 			if (sensorInfo.getEntity().equals(expression.getEntity())) {
 				if (sensorInfo.getValuePaths().contains(
 						expression.getValuePath())) {
@@ -276,7 +392,7 @@ public class EvaluationManager {
 					Log.d(TAG, "No valuepath found for valuepath '"
 							+ expression.getValuePath() + "'");
 				}
-			}
+			} 
 		}
 		Log.d(TAG, "No sensor found for entity '" + expression.getEntity()
 				+ "'");
@@ -433,6 +549,21 @@ public class EvaluationManager {
 
 	private Result doCompare(String id, ComparisonExpression expression,
 			long now) throws SwanException {
+		if (expression.getLeft() instanceof SensorValueExpression
+				&& ((SensorValueExpression) expression.getLeft()).getEntity()
+						.equals("time")) {
+			return TimeSensor.determineValue(
+					now,
+					((SensorValueExpression) expression.getLeft())
+							.getValuePath(),
+					((SensorValueExpression) expression.getLeft())
+							.getConfiguration(),
+					expression.getComparator(),
+					(Comparable) evaluate(id + Expression.RIGHT_SUFFIX,
+							expression.getRight(), now).getValues()[0]
+							.getValue());
+		}
+
 		Result left = evaluate(id + Expression.LEFT_SUFFIX,
 				expression.getLeft(), now);
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
@@ -458,7 +589,7 @@ public class EvaluationManager {
 		for (l = 0; l < left.getValues().length; l++) {
 			comparatorResult.startInnerLoop();
 			for (r = 0; r < right.getValues().length; r++) {
-				if (comparatorResult.innerResult(evaluatePair(
+				if (comparatorResult.innerResult(comparePair(
 						expression.getComparator(),
 						left.getValues()[l].getValue(),
 						right.getValues()[r].getValue()))) {
@@ -477,10 +608,12 @@ public class EvaluationManager {
 		// find out how long this result will remain valid and defer
 		// evaluation to that moment
 		long leftRemainsValidUntil = remainsValidUntil(expression.getLeft(),
-				left.getValues()[l].getTimestamp(), expression.getComparator(),
+				left.getValues()[l].getTimestamp(),
+				left.getValues()[0].getTimestamp(), expression.getComparator(),
 				comparatorResult.getTriState(), true);
 		long rightRemainsValidUntil = remainsValidUntil(expression.getRight(),
 				right.getValues()[r].getTimestamp(),
+				right.getValues()[0].getTimestamp(),
 				expression.getComparator(), comparatorResult.getTriState(),
 				false);
 		comparatorResult.setDeferUntil(Math.min(leftRemainsValidUntil,
@@ -495,8 +628,11 @@ public class EvaluationManager {
 				expression.getLeft(), now);
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
 				expression.getRight(), now);
-
-		if (left.getValues().length == 1 || right.getValues().length == 1) {
+		if (left.getValues().length == 0 || right.getValues().length == 0) {
+			Result result = new Result(left.getValues());
+			return result;
+		} else if (left.getValues().length == 1
+				|| right.getValues().length == 1) {
 			TimestampedValue[] values = new TimestampedValue[left.getValues().length
 					* right.getValues().length];
 			int index = 0;
@@ -577,26 +713,31 @@ public class EvaluationManager {
 	}
 
 	private long remainsValidUntil(ValueExpression expression,
-			long determiningValueTimestamp, Comparator comparator,
-			TriState triState, boolean left) {
+			long determiningValueTimestamp, long oldestValueTimestamp,
+			Comparator comparator, TriState triState, boolean left) {
 		if (expression instanceof MathValueExpression) {
 			// math value is valid as long both of its children are valid
 			return Math.min(
 					remainsValidUntil(
 							((MathValueExpression) expression).getLeft(),
-							determiningValueTimestamp, comparator, triState,
-							left),
+							determiningValueTimestamp, oldestValueTimestamp,
+							comparator, triState, left),
 					remainsValidUntil(
 							((MathValueExpression) expression).getRight(),
-							determiningValueTimestamp, comparator, triState,
-							left));
+							determiningValueTimestamp, oldestValueTimestamp,
+							comparator, triState, left));
 		} else if (expression instanceof ConstantValueExpression) {
 			return Long.MAX_VALUE;
 		} else if (expression instanceof SensorValueExpression) {
 			HistoryReductionMode mode = ((SensorValueExpression) expression)
 					.getHistoryReductionMode();
-			long deferTime = determiningValueTimestamp
-					+ ((SensorValueExpression) expression).getHistoryLength();
+			long historyLength = ((SensorValueExpression) expression)
+					.getHistoryLength();
+			if (historyLength == 0) {
+				return Long.MAX_VALUE;
+			}
+
+			long deferTime = determiningValueTimestamp + historyLength;
 			// here we need the big table, see thesis
 
 			// symmetric (left or right doesn't matter)
@@ -682,8 +823,10 @@ public class EvaluationManager {
 					}
 				}
 			}
+			// otherwise we defer based on the oldest timestamp
+			return oldestValueTimestamp + historyLength;
 		}
-		return 0;
+		return 0; // should not happen!
 	}
 
 	private void sleepAndBeReady(final String id, final Expression expression,
@@ -774,6 +917,16 @@ public class EvaluationManager {
 		return false;
 	}
 
+	private static Object promote(Object object) {
+		if (object instanceof Integer) {
+			return Long.valueOf((Integer) object);
+		}
+		if (object instanceof Float) {
+			return Double.valueOf((Float) object);
+		}
+		return object;
+	}
+
 	/**
 	 * Evaluates a leaf item performing the comparison.
 	 * 
@@ -784,9 +937,13 @@ public class EvaluationManager {
 	 * @return Result.FALSE or Result.TRUE
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private TriState evaluatePair(final Comparator comparator,
-			final Object left, final Object right) {
+	public static TriState comparePair(final Comparator comparator,
+			Object left, Object right) {
 		TriState result = TriState.FALSE;
+		// promote types
+		left = promote(left);
+		right = promote(right);
+
 		switch (comparator) {
 		case LESS_THAN:
 			if (((Comparable) left).compareTo(right) < 0) {
@@ -999,19 +1156,20 @@ public class EvaluationManager {
 	}
 
 	public Bundle[] activeSensorsAsBundle() {
-//		Bundle[] sensors = new Bundle[mSensors.size()];
+		// Bundle[] sensors = new Bundle[mSensors.size()];
 		ArrayList<Bundle> sensors = new ArrayList<Bundle>();
 		int i = 0;
 		for (String key : mSensors.keySet()) {
 			try {
 				boolean dup = false;
-				for(Bundle b : sensors){
-					if(b.getString("name").equals(mSensors.get(key).getInfo().getString("name"))){
-						dup= true;
+				for (Bundle b : sensors) {
+					if (b.getString("name").equals(
+							mSensors.get(key).getInfo().getString("name"))) {
+						dup = true;
 					}
 				}
-				if(!dup){
-					sensors.add(mSensors.get(key).getInfo());	
+				if (!dup) {
+					sensors.add(mSensors.get(key).getInfo());
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();

@@ -58,15 +58,6 @@ public class IntentSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'intent', "
-				+ "'namespace': 'context.sensor.intent'," + " 'fields': ["
-				+ "            {'name': '" + STARTED_FIELD
-				+ "', 'type': 'string'}" + "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 	}
 

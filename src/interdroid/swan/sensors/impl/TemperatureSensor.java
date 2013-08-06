@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class TemperatureSensor extends AbstractMemorySensor {
 
@@ -74,17 +75,6 @@ public class TemperatureSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'temperatureSensor', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ TEMPERATURE_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager
@@ -92,6 +82,7 @@ public class TemperatureSensor extends AbstractMemorySensor {
 		if (sensorList.size() > 0) {
 			temperatureSensor = sensorList.get(0);
 		} else {
+			Toast.makeText(getApplicationContext(), "No temperatureSensor found on device", Toast.LENGTH_SHORT).show();
 			Log.e(TAG, "No temperatureSensor found on device!");
 		}
 	}

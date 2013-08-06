@@ -7,18 +7,34 @@ public class LogicExpression implements TriStateExpression {
 	private TriStateExpression mLeft;
 	private TriStateExpression mRight;
 	private LogicOperator mOperator;
+	private String mLocation;
 
-	public LogicExpression(TriStateExpression left,
-			BinaryLogicOperator operator, TriStateExpression right) {
+	private LogicExpression(String location, TriStateExpression left,
+			LogicOperator operator, TriStateExpression right) {
+		this.mLocation = location;
 		this.mLeft = left;
 		this.mRight = right;
 		this.mOperator = operator;
 	}
 
-	public LogicExpression(UnaryLogicOperator operator,
+	public LogicExpression(String location, TriStateExpression left,
+			BinaryLogicOperator operator, TriStateExpression right) {
+		this(location, left, (LogicOperator) operator, right);
+	}
+
+	public LogicExpression(String location, UnaryLogicOperator operator,
 			TriStateExpression expression) {
-		this.mLeft = expression;
-		this.mOperator = operator;
+		this(location, expression, operator, null);
+	}
+
+	@Override
+	public void setInferredLocation(String location) {
+		if (mLocation.equals(Expression.LOCATION_INFER)) {
+			mLocation = location;
+			return;
+		}
+		throw new RuntimeException(
+				"Please don't use this method. For internal use only.");
 	}
 
 	public TriStateExpression getLeft() {
@@ -61,37 +77,7 @@ public class LogicExpression implements TriStateExpression {
 
 	@Override
 	public String getLocation() {
-		if (mRight == null) {
-			// unary logic
-			return mLeft.getLocation();
-		} else if (mLeft.getLocation().equals(LOCATION_SELF)
-				|| mRight.getLocation().equals(LOCATION_SELF)) {
-			// one of the children is local, so this expression is also local
-			return LOCATION_SELF;
-		} else if (mLeft.getLocation().equals(mRight.getLocation())) {
-			// both on same (remote) location
-			return mLeft.getLocation();
-		} else if (mLeft.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// left doesn't care
-			return mRight.getLocation();
-		} else if (mRight.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// right doesn't care
-			return mLeft.getLocation();
-		} else {
-			// TODO do this
-			throw new RuntimeException("TODO!");
-		}
+		return mLocation;
 	}
 
-	@Override
-	public String toCrossDeviceString(Context context, String location) {
-		if (mRight == null) {
-			return mOperator.toString() + " "
-					+ mLeft.toCrossDeviceString(context, location);
-		} else {
-			return "(" + mLeft.toCrossDeviceString(context, location) + " "
-					+ mOperator + " "
-					+ mRight.toCrossDeviceString(context, location) + ")";
-		}
-	}
 }

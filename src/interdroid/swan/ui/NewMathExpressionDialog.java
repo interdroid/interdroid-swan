@@ -82,8 +82,8 @@ public class NewMathExpressionDialog extends Activity {
 					// TODO get a configurable history reduction mode instead of
 					// default
 					Expression newExpression = new MathValueExpression(
-							(ValueExpression) left, operator,
-							(ValueExpression) right,
+							Expression.LOCATION_SELF, (ValueExpression) left,
+							operator, (ValueExpression) right,
 							HistoryReductionMode.DEFAULT_MODE);
 					Intent result = new Intent();
 					result.putExtra("Expression", newExpression.toParseString());

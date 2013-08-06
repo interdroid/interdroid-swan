@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 public class PressureSensor extends AbstractMemorySensor {
 
@@ -54,6 +55,7 @@ public class PressureSensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+
 				putValueTrimSize(PRESSURE_FIELD, null, now, event.values[0],
 						HISTORY_SIZE);
 			}
@@ -71,16 +73,6 @@ public class PressureSensor extends AbstractMemorySensor {
 				SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
-	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'pressureSensor', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ PRESSURE_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
 
 	@Override
 	public void onConnected() {
@@ -90,6 +82,9 @@ public class PressureSensor extends AbstractMemorySensor {
 		if (sensorList.size() > 0) {
 			pressureSensor = sensorList.get(0);
 		} else {
+			Toast.makeText(getApplicationContext(),
+					"No pressureSensor found on device!", Toast.LENGTH_SHORT)
+					.show();
 			Log.e(TAG, "No pressureSensor found on device!");
 		}
 	}

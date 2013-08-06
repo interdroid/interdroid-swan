@@ -81,6 +81,8 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	private Schema schema;
 
+	public abstract String getScheme();
+
 	/**
 	 * Initialize this sensor.
 	 */
@@ -166,9 +168,14 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	}
 
 	@Override
-	public final List<TimestampedValue> getValues(final String id,
-			final long now, final long timespan) {
+	public List<TimestampedValue> getValues(final String id, final long now,
+			final long timespan) {
 		String fieldName = registeredValuePaths.get(id);
+		return getValuesForValuePath(fieldName, id, now, timespan);
+	}
+
+	public List<TimestampedValue> getValuesForValuePath(final String fieldName,
+			String id, final long now, final long timespan) {
 		Type fieldType = getType(fieldName);
 		Cursor values;
 		if (schema.getField(EXPRESSION_ID) != null) {

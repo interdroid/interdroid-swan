@@ -27,15 +27,17 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 
 	private SharedPreferences prefs;
 
+	private boolean mRegistering = false;
+
 	@Override
 	public final synchronized void onConnected() {
 		// TODO improve picking of resource!
 		List<Resource> resources = Oracle.getAllResources(this);
 		System.out.println("got resources: " + resources.size());
+		prefs = getSharedPreferences(getClass().getSimpleName(),
+				Context.MODE_PRIVATE);
 		if (resources.size() > 0) {
 			remoteResource = resources.get(0);
-			prefs = getSharedPreferences(getClass().getSimpleName(),
-					Context.MODE_PRIVATE);
 			if (prefs.getString(REGISTRATION_ID, null) == null) {
 				registerBackground();
 			} else {
@@ -60,20 +62,21 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 			// TODO: maybe short circuit if a value is not serializable
 			configAsMap.put(key, configuration.get(key));
 		}
-		if (remoteResource != null) {
-			System.out.println("Trying to register expression");
-			new Thread() {
-				public void run() {
-					while (prefs.getString(REGISTRATION_ID, null) == null) {
-						System.out.println("waiting for reg id");
-						try {
-							sleep(1000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
+		System.out.println("Trying to register expression");
+		new Thread() {
+			public void run() {
+				while (prefs.getString(REGISTRATION_ID, null) == null
+						&& mRegistering) {
+					System.out.println("waiting for reg id");
+					try {
+						sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
+
+				}
+				if (prefs.getString(REGISTRATION_ID, null) != null) {
 					try {
 						Cuckoo.register(AbstractCuckooSensor.this,
 								remoteResource,
@@ -87,16 +90,16 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 						// fall back to local impl
 						remoteResource = null;
 					}
-					// local
-					System.out.println("EEP, local");
-					MonitorThread monitor = new MonitorThread(
-							AbstractCuckooSensor.this, valuePath, configAsMap);
-					monitors.put(id, monitor);
-					monitor.start();
 				}
-			}.start();
+				// local
+				System.out.println("EEP, local");
+				MonitorThread monitor = new MonitorThread(
+						AbstractCuckooSensor.this, valuePath, configAsMap);
+				monitors.put(id, monitor);
+				monitor.start();
+			}
+		}.start();
 
-		}
 	}
 
 	@Override
@@ -113,7 +116,8 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 				e.printStackTrace();
 			}
 		} else {
-			monitors.remove(id).interrupt();
+			System.out.println("interrupting monitor!");
+			monitors.remove(id).shouldStop = true;
 		}
 	}
 
@@ -128,6 +132,7 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 	private void registerBackground() {
 		new Thread() {
 			public void run() {
+				mRegistering = true;
 				try {
 					System.out
 							.println("getting a registration id for sender id: "
@@ -143,7 +148,10 @@ public abstract class AbstractCuckooSensor extends AbstractVdbSensor {
 							+ prefs.getString(REGISTRATION_ID, null));
 				} catch (IOException e) {
 					// TODO: something useful.
+					System.out.println("failed to get registration id");
+					e.printStackTrace();
 				}
+				mRegistering = false;
 			}
 		}.start();
 	}

@@ -7,9 +7,11 @@ public class ComparisonExpression implements TriStateExpression {
 	private ValueExpression mLeft;
 	private Comparator mComparator;
 	private ValueExpression mRight;
+	private String mLocation;
 
-	public ComparisonExpression(ValueExpression left, Comparator comparator,
-			ValueExpression right) {
+	public ComparisonExpression(String location, ValueExpression left,
+			Comparator comparator, ValueExpression right) {
+		this.mLocation = location;
 		this.mLeft = left;
 		this.mComparator = comparator;
 		this.mRight = right;
@@ -31,29 +33,22 @@ public class ComparisonExpression implements TriStateExpression {
 
 	@Override
 	public String getLocation() {
-		if (mLeft.getLocation().equals(mRight.getLocation())) {
-			// both on same (remote) location
-			return mLeft.getLocation();
-		} else if (mLeft.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// left doesn't care
-			return mRight.getLocation();
-		} else if (mRight.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// right doesn't care
-			return mLeft.getLocation();
-		} else {
-			return LOCATION_SELF;
+		return mLocation;
+	}
+
+	@Override
+	public void setInferredLocation(String location) {
+		if (mLocation.equals(Expression.LOCATION_INFER)) {
+			mLocation = location;
+			return;
 		}
+		throw new RuntimeException("Trying to set inferred location from '"
+				+ mLocation + "' to '" + location
+				+ "'. Please don't use this method. For internal use only.");
 	}
 
 	public Comparator getComparator() {
 		return mComparator;
-	}
-
-	@Override
-	public String toCrossDeviceString(Context context, String location) {
-		return mLeft.toCrossDeviceString(context, location) + " "
-				+ mComparator.toParseString() + " "
-				+ mRight.toCrossDeviceString(context, location);
 	}
 
 }

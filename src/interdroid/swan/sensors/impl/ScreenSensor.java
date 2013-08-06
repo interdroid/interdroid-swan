@@ -30,16 +30,6 @@ public class ScreenSensor extends AbstractVdbSensor {
 			AbstractConfigurationActivity {
 
 		@Override
-		protected void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			setResult(
-					RESULT_OK,
-					getIntent().putExtra("configuration",
-							ScreenSensor.IS_SCREEN_ON_FIELD));
-			finish();
-		}
-
-		@Override
 		public final int getPreferencesXML() {
 			return R.xml.screen_preferences;
 		}

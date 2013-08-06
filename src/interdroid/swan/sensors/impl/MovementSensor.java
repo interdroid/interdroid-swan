@@ -81,26 +81,6 @@ public class MovementSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'movement', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ X_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Y_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Z_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ TOTAL_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager

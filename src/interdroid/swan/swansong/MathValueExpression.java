@@ -7,11 +7,14 @@ public class MathValueExpression implements ValueExpression {
 	private ValueExpression mLeft;
 	private ValueExpression mRight;
 	private MathOperator mOperator;
+	private String mLocation;
 
 	private HistoryReductionMode mMode;
 
-	public MathValueExpression(ValueExpression left, MathOperator operator,
-			ValueExpression right, HistoryReductionMode mode) {
+	public MathValueExpression(String location, ValueExpression left,
+			MathOperator operator, ValueExpression right,
+			HistoryReductionMode mode) {
+		mLocation = location;
 		mLeft = left;
 		mRight = right;
 		mOperator = operator;
@@ -43,25 +46,17 @@ public class MathValueExpression implements ValueExpression {
 
 	@Override
 	public String getLocation() {
-		if (mLeft.getLocation().equals(mRight.getLocation())) {
-			// both on same (remote) location
-			return mLeft.getLocation();
-		} else if (mLeft.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// left doesn't care
-			return mRight.getLocation();
-		} else if (mRight.getLocation().equals(LOCATION_INDEPENDENT)) {
-			// right doesn't care
-			return mLeft.getLocation();
-		} else {
-			return LOCATION_SELF;
-		}
+		return mLocation;
 	}
 
 	@Override
-	public String toCrossDeviceString(Context context, String location) {
-		return "(" + mLeft.toCrossDeviceString(context, location) + " "
-				+ mOperator.toParseString() + " "
-				+ mRight.toCrossDeviceString(context, location) + ")";
+	public void setInferredLocation(String location) {
+		if (mLocation.equals(Expression.LOCATION_INFER)) {
+			mLocation = location;
+			return;
+		}
+		throw new RuntimeException(
+				"Please don't use this method. For internal use only.");
 	}
 
 }

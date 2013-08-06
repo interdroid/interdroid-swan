@@ -1,15 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <PreferenceCategory android:title="Location Preferences" >
+        <ListPreference
+            android:defaultValue="self"
+            android:key="swan_location"
+            android:title="Set Location" />
+    </PreferenceCategory>
     <PreferenceCategory android:title="History Preferences" >
-
         <EditTextPreference
+            android:defaultValue="0"
             android:dialogTitle="Enter History Window"
+            android:inputType="number"
             android:key="history_window"
             android:summary="Set History Window"
             android:title="History Window" />
+        
 
         <ListPreference
+            android:defaultValue="ms"
+            android:entries="@array/time_units"
+            android:entryValues="@array/time_units_values"
+            android:key="time_units"
+            android:summary="Select Time Units"
+            android:title="Window Time Units" />
+        
+
+        <ListPreference
+            android:defaultValue="ANY"
             android:entries="@array/history_reduction_modes"
             android:entryValues="@array/history_reduction_modes"
             android:key="history_reduction_mode"

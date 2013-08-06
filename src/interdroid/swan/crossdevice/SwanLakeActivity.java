@@ -96,7 +96,6 @@ public class SwanLakeActivity extends ListActivity {
 			public void onItemCheckedStateChanged(ActionMode mode,
 					int position, long id, boolean checked) {
 				mode.setTitle(getListView().getCheckedItemCount() + " selected");
-				System.out.println("clicked on item");
 			}
 		});
 		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -276,6 +275,13 @@ public class SwanLakeActivity extends ListActivity {
 		new Thread() {
 			public void run() {
 				try {
+					if (SwanGCMConstants.API_KEY.equals(SwanGCMConstants.EMPTY)
+							|| SwanGCMConstants.SENDER_ID
+									.equals(SwanGCMConstants.EMPTY)) {
+						throw new RuntimeException(
+								"Please provide valid values in SwanGCMConstants");
+
+					}
 					Registry.add(SwanLakeActivity.this,
 							Expression.LOCATION_SELF, GoogleCloudMessaging
 									.getInstance(SwanLakeActivity.this)

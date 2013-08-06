@@ -10,8 +10,6 @@ interface Sensor {
 
 	List<TimestampedValue> getValues(in String id, long now, long timespan);
 
-	String getScheme();
-	
 	long getStartUpTime(in String id);
 	
 	Bundle getInfo();

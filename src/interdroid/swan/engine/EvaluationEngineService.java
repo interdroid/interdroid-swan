@@ -9,10 +9,7 @@ import interdroid.swan.crossdevice.Pusher;
 import interdroid.swan.sensors.SensorInterface;
 import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.ExpressionFactory;
-import interdroid.swan.swansong.Parseable;
 import interdroid.swan.swansong.Result;
-import interdroid.swan.swansong.TimestampedValue;
-import interdroid.swan.swansong.TriState;
 import interdroid.swan.swansong.ValueExpression;
 
 import java.io.File;
@@ -29,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -74,7 +70,7 @@ public class EvaluationEngineService extends Service {
 		@Override
 		public QueuedExpression put(final String key,
 				final QueuedExpression value) {
-			storeToDb(key, value.getExpression());
+			storeToDb(value);
 			return super.put(key, value);
 		}
 
@@ -109,13 +105,14 @@ public class EvaluationEngineService extends Service {
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
+
 							head.evaluated(
 									(System.currentTimeMillis() - start),
 									evaluationDelay);
 
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
-								sendUpdate(head.getId(), result);
+								sendUpdate(head, result);
 							}
 							// re add the expression to the queue
 							synchronized (mEvaluationThread) {
@@ -157,8 +154,9 @@ public class EvaluationEngineService extends Service {
 		SQLiteDatabase db = openDb();
 
 		try {
-			Cursor c = db.query(TABLE, new String[] { "expressionId",
-					"expression" }, null, null, null, null, null);
+			Cursor c = db.query(TABLE, new String[] { "expression_id",
+					"expression", "on_true", "on_false", "on_undefined",
+					"on_new_values" }, null, null, null, null, null);
 			if (c != null) {
 				try {
 					if (c.getCount() > 0) {
@@ -167,7 +165,28 @@ public class EvaluationEngineService extends Service {
 								String expressionId = c.getString(0);
 								Expression expression = ExpressionFactory
 										.parse(c.getString(1));
-								doRegister(expressionId, expression);
+								Intent onTrue = null;
+								if (c.getString(2) != null) {
+									onTrue = Intent.parseUri(c.getString(2), 0);
+								}
+								Intent onFalse = null;
+								if (c.getString(3) != null) {
+									onFalse = Intent
+											.parseUri(c.getString(3), 0);
+								}
+								Intent onUndefined = null;
+								if (c.getString(4) != null) {
+									onUndefined = Intent.parseUri(
+											c.getString(4), 0);
+								}
+								Intent onNewValues = null;
+								if (c.getString(5) != null) {
+									onNewValues = Intent.parseUri(
+											c.getString(5), 0);
+								}
+
+								doRegister(expressionId, expression, onTrue,
+										onFalse, onUndefined, onNewValues);
 							} catch (Exception e) {
 								Log.e(TAG, "Error while restoring after boot.",
 										e);
@@ -203,7 +222,7 @@ public class EvaluationEngineService extends Service {
 	private void removeFromDb(final String id) {
 		SQLiteDatabase db = openDb();
 		try {
-			db.execSQL("DELETE FROM " + TABLE + " WHERE expressionId = ?",
+			db.execSQL("DELETE FROM " + TABLE + " WHERE expression_id = ?",
 					new String[] { id });
 		} finally {
 			closeDb(db);
@@ -233,7 +252,7 @@ public class EvaluationEngineService extends Service {
 			db.execSQL("DROP TABLE IF EXISTS " + TABLE);
 			db.execSQL("CREATE TABLE "
 					+ TABLE
-					+ " (_id integer primary key autoincrement, expressionId string, expression string)");
+					+ " (_id integer primary key autoincrement, expression_id string, expression string, on_true string, on_false string, on_undefined string, on_new_values string)");
 			db.setVersion(DATABASE_VERSION);
 		}
 		return db;
@@ -249,15 +268,27 @@ public class EvaluationEngineService extends Service {
 	 * @param type
 	 *            the type being stored
 	 */
-	private void storeToDb(final String id, final Parseable<?> expression) {
+	private void storeToDb(final QueuedExpression queued) {
 		SQLiteDatabase db = openDb();
 		try {
 			// Make sure it doesn't exist first in case we are reloading it.
-			db.delete(TABLE, "expressionId=?", new String[] { id });
+			db.delete(TABLE, "expression_id=?", new String[] { queued.getId() });
 			ContentValues values = new ContentValues();
-			values.put("expressionId", id);
-			values.put("expression", expression.toParseString());
-			db.insert(TABLE, "expressionId", values);
+			values.put("expression_id", queued.getId());
+			values.put("expression", queued.getExpression().toParseString());
+			if (queued.getOnTrue() != null) {
+				values.put("on_true", queued.getOnTrue().toUri(0));
+			}
+			if (queued.getOnFalse() != null) {
+				values.put("on_false", queued.getOnFalse().toUri(0));
+			}
+			if (queued.getOnUndefined() != null) {
+				values.put("on_undefined", queued.getOnUndefined().toUri(0));
+			}
+			if (queued.getOnNewValues() != null) {
+				values.put("on_new_values", queued.getOnNewValues().toUri(0));
+			}
+			db.insert(TABLE, "expression_id", values);
 		} finally {
 			closeDb(db);
 		}
@@ -267,6 +298,12 @@ public class EvaluationEngineService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// we can get several actions here, both from the API and from the
 		// Sensors as well as from the Boot event
+		if (intent == null) {
+			Log.d(TAG,
+					"huh? intent is null! This should never happen!! We will try to restore...");
+			restoreAfterBoot();
+			return START_STICKY;
+		}
 		String action = intent.getAction();
 		if (ExpressionManager.ACTION_REGISTER.equals(action)) {
 			String id = intent.getStringExtra("expressionId");
@@ -274,7 +311,12 @@ public class EvaluationEngineService extends Service {
 				Expression expression = ExpressionFactory.parse(intent
 						.getStringExtra("expression"));
 
-				doRegister(id, expression);
+				Intent onTrue = intent.getParcelableExtra("onTrue");
+				Intent onFalse = intent.getParcelableExtra("onFalse");
+				Intent onUndefined = intent.getParcelableExtra("onUndefined");
+				Intent onNewValues = intent.getParcelableExtra("onNewValues");
+				doRegister(id, expression, onTrue, onFalse, onUndefined,
+						onNewValues);
 			} catch (Throwable t) {
 				Log.d(TAG,
 						"Failed to register expression: "
@@ -292,7 +334,8 @@ public class EvaluationEngineService extends Service {
 			try {
 				Expression expression = ExpressionFactory
 						.parse(expressionString);
-				doRegister(regId + Expression.SEPARATOR + expId, expression);
+				doRegister(regId + Expression.SEPARATOR + expId, expression,
+						null, null, null, null);
 			} catch (Throwable t) {
 				Log.d(TAG, "Failed to register remote expression: "
 						+ expressionString, t);
@@ -351,24 +394,32 @@ public class EvaluationEngineService extends Service {
 		return intent;
 	}
 
-	private void doRegister(final String id, final Expression expression) {
+	private void doRegister(final String id, final Expression expression,
+			final Intent onTrue, final Intent onFalse,
+			final Intent onUndefined, Intent onNewValues) {
 		// handle registration
+		Log.d(TAG, "registring id: " + id + ", expression: " + expression);
 		if (mRegisteredExpressions.containsKey(id)) {
 			// FAIL!
+			Log.d(TAG, "failed to register, already contains id!");
+			return;
 		}
 		try {
 			mEvaluationManager.initialize(id, expression);
 		} catch (SensorConfigurationException e) {
 			// FAIL!
 			e.printStackTrace();
+			return;
 		} catch (SensorSetupFailedException e) {
 			// FAIL!
 			e.printStackTrace();
+			return;
 		}
 		synchronized (mEvaluationThread) {
 			// add this expression to our registered expression, the queue and
 			// notify the evaluation thread
-			QueuedExpression queued = new QueuedExpression(id, expression);
+			QueuedExpression queued = new QueuedExpression(id, expression,
+					onTrue, onFalse, onUndefined, onNewValues);
 			mRegisteredExpressions.put(id, queued);
 			mEvaluationQueue.add(queued);
 			mEvaluationThread.notify();
@@ -394,6 +445,8 @@ public class EvaluationEngineService extends Service {
 		QueuedExpression expression = mRegisteredExpressions.get(id);
 		if (expression == null) {
 			// FAIL!
+			Log.d(TAG, "Got spurious unregister for id: " + id);
+			return;
 		}
 		// first stop evaluating
 		synchronized (mEvaluationThread) {
@@ -475,23 +528,66 @@ public class EvaluationEngineService extends Service {
 				ExpressionViewerActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
+		boolean hasRemote = false;
+		for (String id : mRegisteredExpressions.keySet()) {
+			if (id.contains(Expression.SEPARATOR)) {
+				hasRemote = true;
+				break;
+			}
+		}
+		mNotification.icon = hasRemote ? R.drawable.ic_stat_swan_warning
+				: R.drawable.ic_stat_swan;
 		mNotification.setLatestEventInfo(this, "Swan",
 				"number of expressions: " + mRegisteredExpressions.size(),
 				contentIntent);
 		mNotificationManager.notify(NOTIFICATION_ID, mNotification);
 	}
 
-	private void sendUpdate(String id, Result result) {
-		if (id.contains(Expression.SEPARATOR)) {
-			// send update to remote!!
-			String[] components = id.split(Expression.SEPARATOR, 2);
-			sendUpdateToRemote(components[0], components[1], result);
-		} else if (result.getTriState() != null) {
-			sendTriState(id, result.getTimestamp(), result.getTriState());
-		} else if (result.getValues() != null) {
-			sendValues(id, result.getValues());
+	private void sendUpdate(QueuedExpression queued, Result result) {
+		// we know it has changed
+		if (queued.getId().contains(Expression.SEPARATOR)) {
+			sendUpdateToRemote(
+					queued.getId().split(Expression.SEPARATOR)[0],
+					queued.getId().split(Expression.SEPARATOR)[1], result);
+			return;
+		}
+		Intent update = queued.getIntent(result);
+		if (update == null) {
+			Log.d(TAG, "State change, but no update intent defined");
+			return;
+		}
+		if (queued.getExpression() instanceof ValueExpression) {
+			if (result.getValues() == null) {
+				Log.d(TAG, "Update canceled, no values");
+				return;
+			}
+			update.putExtra(ExpressionManager.EXTRA_NEW_VALUES,
+					result.getValues());
 		} else {
-			Log.d(TAG, "Send empty update. This should not occur!");
+			System.out.println("result: " + result);
+			System.out.println("tristate: " + result.getTriState());
+
+			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE, result
+					.getTriState().name());
+			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE_TIMESTAMP,
+					result.getTimestamp());
+		}
+		try {
+			String intentType = update
+					.getStringExtra(ExpressionManager.EXTRA_INTENT_TYPE);
+			if (intentType == null
+					|| intentType
+							.equals(ExpressionManager.INTENT_TYPE_BROADCAST)) {
+				sendBroadcast(update);
+			} else if (intentType
+					.equals(ExpressionManager.INTENT_TYPE_ACTIVITY)) {
+				update.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(update);
+			} else if (intentType.equals(ExpressionManager.INTENT_TYPE_SERVICE)) {
+				startService(update);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -504,26 +600,6 @@ public class EvaluationEngineService extends Service {
 		} catch (IOException e) {
 			Log.d(TAG, "Exception in converting result to string", e);
 		}
-	}
-
-	private void sendValues(String id, TimestampedValue[] values) {
-		if (values == null) {
-			Log.d(TAG, "no update, we have no values...");
-			return;
-		}
-		Intent intent = new Intent(ExpressionManager.ACTION_NEW_VALUES);
-		intent.setData(Uri.parse("swanexpression://" + id));
-		intent.putExtra(ExpressionManager.EXTRA_NEW_VALUES, values);
-		sendBroadcast(intent);
-	}
-
-	private void sendTriState(String id, long timestamp, TriState state) {
-		Intent intent = new Intent(ExpressionManager.ACTION_NEW_TRISTATE);
-		intent.setData(Uri.parse("swanexpression://" + id));
-		intent.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE, state.name());
-		intent.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE_TIMESTAMP,
-				timestamp);
-		sendBroadcast(intent);
 	}
 
 	// helper function to strip the suffixes for an expression generated by the

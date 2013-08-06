@@ -207,9 +207,9 @@ public class ExpressionBuilderActivity extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		int position = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
 		if (item.getTitle().toString().equals("Negate")) {
-			expressions.set(position,
-					new LogicExpression(UnaryLogicOperator.NOT,
-							(TriStateExpression) expressions.get(position)));
+			expressions.set(position, new LogicExpression(
+					Expression.LOCATION_INFER, UnaryLogicOperator.NOT,
+					(TriStateExpression) expressions.get(position)));
 			expressionlistAdapter.notifyDataSetChanged();
 		} else if (item.getTitle().toString().equals("Delete")) {
 			expressions.remove(position);

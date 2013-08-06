@@ -5,7 +5,7 @@
 			android:summary="Select a Value Path" android:key="valuepath"
 			android:entries="@array/gsm_valuepaths" android:entryValues="@array/gsm_valuepaths" />
 	</PreferenceCategory>
-	<PreferenceCategory android:title="Configuration">
+	<!-- <PreferenceCategory android:title="Configuration">
 		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Sample Interval" android:key="sample_interval" />
@@ -25,6 +25,6 @@
 			android:summary="Select	audio format" android:key="audio_format"
 			android:entries="@array/sound_audio_format" android:entryValues="@array/sound_audio_format_values" />
 
-	</PreferenceCategory>
+	</PreferenceCategory> -->
 </PreferenceScreen>
 

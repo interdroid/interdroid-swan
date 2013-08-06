@@ -5,9 +5,7 @@ import interdroid.swan.swansong.Result;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.swan.swansong.TriStateExpression;
 import interdroid.swan.swansong.ValueExpression;
-
-import java.util.Date;
-
+import android.content.Intent;
 import android.os.Bundle;
 
 public class QueuedExpression implements Comparable<QueuedExpression> {
@@ -15,18 +13,28 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	private Expression mExpression;
 	private String mId;
 	private Result mCurrentResult;
+	private Intent mOnTrue;
+	private Intent mOnFalse;
+	private Intent mOnUndefined;
+	private Intent mOnNewValues;
+
 	private long mStartTime;
 	private int mEvaluations; // number of evaluations
 	private long mTotalEvaluationTime; // total time spent on evaluations so far
 	private long mMinEvaluationTime = Long.MAX_VALUE;
 	private long mMaxEvaluationTime = Long.MIN_VALUE;
-	private long mTotalEvaluationDelay; //total delay
+	private long mTotalEvaluationDelay; // total delay
 	private long mNumEvaluationsDelay; // number of evaluations with delay
 
-	public QueuedExpression(String id, Expression expression) {
+	public QueuedExpression(String id, Expression expression, Intent onTrue,
+			Intent onFalse, Intent onUndefined, Intent onNewValues) {
 		mId = id;
 		mExpression = expression;
 		mStartTime = System.currentTimeMillis();
+		mOnTrue = onTrue;
+		mOnFalse = onFalse;
+		mOnUndefined = onUndefined;
+		mOnNewValues = onNewValues;
 	}
 
 	public int compareTo(QueuedExpression another) {
@@ -65,6 +73,7 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 			return false;
 		}
 		mCurrentResult = result;
+		System.out.println("set current result to " + result);
 		return true;
 	}
 
@@ -113,7 +122,8 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		 */
 		return id // position 0
 				+ "\n" + "Evaluation Percentage" // position 1
-				+ "\n" + ((mTotalEvaluationTime * 100) / (float) (System // position 2
+				+ "\n" + ((mTotalEvaluationTime * 100) / (float) (System // position
+																			// 2
 						.currentTimeMillis() - mStartTime)) + "\n";
 	}
 
@@ -132,14 +142,52 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		Bundle bundle = new Bundle();
 		bundle.putLong("start-time", mStartTime);
 		bundle.putString("name", mId);
-		bundle.putString("result", mCurrentResult.toString());
-		bundle.putDouble("evaluation-rate", (mEvaluations / ((System.currentTimeMillis() - mStartTime) / 1000.0)));
+		System.out.println("mCurrentResult: " + mCurrentResult);
+		bundle.putString("result", mCurrentResult == null ? "n.a."
+				: mCurrentResult.toString());
+		bundle.putDouble(
+				"evaluation-rate",
+				(mEvaluations / ((System.currentTimeMillis() - mStartTime) / 1000.0)));
 		bundle.putLong("min-evaluation-time", mMinEvaluationTime);
 		bundle.putLong("max-evaluation-time", mMaxEvaluationTime);
-		bundle.putLong("avg-evaluation-time", (mTotalEvaluationTime / Math.max(mEvaluations, 1)));
-		bundle.putFloat("evaluation-percentage", ((mTotalEvaluationTime * 100) / (float)(System .currentTimeMillis() - mStartTime)));
-		bundle.putLong("avg-evaluation-delay", (mTotalEvaluationDelay/Math.max(mNumEvaluationsDelay, 1)));
+		bundle.putLong("avg-evaluation-time",
+				(mTotalEvaluationTime / Math.max(mEvaluations, 1)));
+		bundle.putFloat("evaluation-percentage",
+				((mTotalEvaluationTime * 100) / (float) (System
+						.currentTimeMillis() - mStartTime)));
+		bundle.putLong("avg-evaluation-delay",
+				(mTotalEvaluationDelay / Math.max(mNumEvaluationsDelay, 1)));
 		return bundle;
+	}
+
+	public Intent getIntent(Result result) {
+		if (mExpression instanceof TriStateExpression) {
+			switch (result.getTriState()) {
+			case TRUE:
+				return mOnTrue;
+			case FALSE:
+				return mOnFalse;
+			case UNDEFINED:
+				return mOnUndefined;
+			}
+		}
+		return mOnNewValues;
+	}
+
+	public Intent getOnTrue() {
+		return mOnTrue;
+	}
+
+	public Intent getOnFalse() {
+		return mOnFalse;
+	}
+
+	public Intent getOnUndefined() {
+		return mOnUndefined;
+	}
+
+	public Intent getOnNewValues() {
+		return mOnNewValues;
 	}
 
 }

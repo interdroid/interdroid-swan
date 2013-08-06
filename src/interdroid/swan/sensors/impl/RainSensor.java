@@ -171,7 +171,7 @@ public class RainSensor extends AbstractMemorySensor {
 		DEFAULT_CONFIGURATION.putInt(THRESHOLD, DEFAULT_THRESHOLD);
 	}
 
-	@Override
+//	@Override
 	public String getScheme() {
 		return "{'type': 'record', 'name': 'rain', 'namespace': 'context.sensor',"
 				+ " 'fields': ["

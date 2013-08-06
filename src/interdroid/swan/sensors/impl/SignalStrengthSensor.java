@@ -30,20 +30,21 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	public static class ConfigurationActivity extends
 			AbstractConfigurationActivity {
 
-		@Override
-		protected void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			setResult(
-					RESULT_OK,
-					getIntent().putExtra("configuration",
-							SignalStrengthSensor.GSM_SIGNAL_STRENGTH_FIELD));
-			finish();
-		}
+//		@Override
+//		protected void onCreate(Bundle savedInstanceState) {
+//			super.onCreate(savedInstanceState);
+//			setResult(
+//					RESULT_OK,
+//					getIntent().putExtra("configuration",
+//							SignalStrengthSensor.GSM_SIGNAL_STRENGTH_FIELD).putExtra("Expression", "signal:" + GSM_SIGNAL_STRENGTH_FIELD + " {ANY,0}"));
+//			finish();
+//		}
 
 		@Override
 		public final int getPreferencesXML() {
 			return R.xml.gsm_preferences;
 		}
+		
 
 	}
 

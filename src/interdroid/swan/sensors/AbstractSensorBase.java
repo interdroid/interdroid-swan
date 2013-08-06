@@ -3,6 +3,7 @@ package interdroid.swan.sensors;
 import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +36,9 @@ public abstract class AbstractSensorBase extends Service implements
 	 * The sensor interface.
 	 */
 	private final SensorInterface mSensorInterface = this;
-	
+
 	private long mStartTime;
-	
+
 	// Designed for direct use by subclasses.
 	/**
 	 * The value paths we support.
@@ -153,11 +154,6 @@ public abstract class AbstractSensorBase extends Service implements
 		}
 
 		@Override
-		public String getScheme() throws RemoteException {
-			return mSensorInterface.getScheme();
-		}
-
-		@Override
 		public long getStartUpTime(String id) throws RemoteException {
 			return mSensorInterface.getStartUpTime(id);
 		}
@@ -165,19 +161,16 @@ public abstract class AbstractSensorBase extends Service implements
 		@Override
 		public Bundle getInfo() throws RemoteException {
 			Bundle info = new Bundle();
-			try {
-				info.putString("name", new JSONObject(getScheme()).getString("name"));
-				int num = 0;
-				for(Map.Entry<String, List<String>> entry: expressionIdsPerValuePath.entrySet()){
-					num += entry.getValue().size();
-				}
-				info.putInt("registeredids", num);
-				info.putDouble("sensingRate", getAverageSensingRate());
-				info.putLong("starttime", getStartTime());
-				info.putFloat("currentMilliAmpere", getCurrentMilliAmpere());
-			} catch (JSONException e) {
-				e.printStackTrace();
+			info.putString("name", getClass().getName());
+			int num = 0;
+			for (Map.Entry<String, List<String>> entry : expressionIdsPerValuePath
+					.entrySet()) {
+				num += entry.getValue().size();
 			}
+			info.putInt("registeredids", num);
+			info.putDouble("sensingRate", getAverageSensingRate());
+			info.putLong("starttime", getStartTime());
+			info.putFloat("currentMilliAmpere", getCurrentMilliAmpere());
 			return info;
 		}
 	};
@@ -241,6 +234,7 @@ public abstract class AbstractSensorBase extends Service implements
 	protected final void notifyDataChangedForId(final String... ids) {
 		Intent notifyIntent = new Intent(ACTION_NOTIFY);
 		notifyIntent.putExtra("expressionIds", ids);
+		System.out.println("sending data changed for: " + Arrays.toString(ids));
 		sendBroadcast(notifyIntent);
 	}
 
@@ -311,18 +305,19 @@ public abstract class AbstractSensorBase extends Service implements
 		}
 		return result;
 	}
-	
+
 	@Override
 	public double getAverageSensingRate() {
-		return (double) getReadings() / ((System.currentTimeMillis() - mStartTime) / 1000.0);
+		return (double) getReadings()
+				/ ((System.currentTimeMillis() - mStartTime) / 1000.0);
 	}
-	
-	public long getStartTime(){
+
+	public long getStartTime() {
 		return mStartTime;
 	}
-	
+
 	public abstract long getReadings();
-	
+
 	public float getCurrentMilliAmpere() {
 		return -1;
 	}

@@ -5,21 +5,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Stores and keeps tracks of sensor service information.
  */
 public class SensorInfo {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(SensorInfo.class);
+
+	private static final String TAG = "Sensor Info";
 
 	/**
 	 * The name of the component the sensor runs in..
@@ -42,6 +39,17 @@ public class SensorInfo {
 	private final ArrayList<String> valuePaths = new ArrayList<String>();
 
 	/**
+	 * The units the valuepath returns.
+	 */
+	private final ArrayList<String> units = new ArrayList<String>();
+
+	/**
+	 * The Drawable icon for this sensor.
+	 */
+
+	private Drawable icon;
+
+	/**
 	 * The configuration for this sensor.
 	 */
 	private final Bundle configuration;
@@ -54,8 +62,10 @@ public class SensorInfo {
 	 * @param metaData
 	 *            metadata bundle for the service from the package manager
 	 */
-	public SensorInfo(final ComponentName sensorComponent, final Bundle metaData) {
+	public SensorInfo(final ComponentName sensorComponent,
+			final Bundle metaData, Drawable icon) {
 		this.component = sensorComponent;
+		this.icon = icon;
 		// strip out the entityId
 		if (metaData == null) {
 			throw new IllegalArgumentException("no metadata!");
@@ -65,10 +75,15 @@ public class SensorInfo {
 		authority = metaData.getString("authority");
 		metaData.remove("authority");
 
+		// and the units
+		units.addAll(Arrays.asList(metaData.getString("units").split(",", -1)));
+		metaData.remove("units");
+
 		// and the value paths
 		valuePaths.addAll(Arrays.asList(metaData.getString("valuePaths").split(
 				",")));
 		metaData.remove("valuePaths");
+
 		// all other items in the bundle are supposed to be configurable (values
 		// are default values)
 		configuration = metaData;
@@ -84,7 +99,7 @@ public class SensorInfo {
 					metaData.remove(key);
 					metaData.putLong(key, longValue);
 				} catch (NumberFormatException e) {
-					LOG.debug("Can't convert number. Using string.");
+					Log.d(TAG, "Can't convert number. Using string.");
 				}
 			}
 			if (metaData.get(key).toString().endsWith("D")) {
@@ -95,11 +110,19 @@ public class SensorInfo {
 					metaData.remove(key);
 					metaData.putDouble(key, doubleValue);
 				} catch (NumberFormatException e) {
-					LOG.debug("Can't convert number. Using string.");
+					Log.d(TAG, "Can't convert number. Using string.");
 				}
 			}
 		}
 
+	}
+
+	/**
+	 * 
+	 * @return icon of the sensor
+	 */
+	public Drawable getIcon() {
+		return icon;
 	}
 
 	/**
@@ -114,6 +137,13 @@ public class SensorInfo {
 	 */
 	public final ArrayList<String> getValuePaths() {
 		return valuePaths;
+	}
+
+	/**
+	 * @return the units this sensor supports.
+	 */
+	public final ArrayList<String> getUnits() {
+		return units;
 	}
 
 	/**
@@ -193,7 +223,10 @@ public class SensorInfo {
 	 * @return new Intent().setComponent(getComponent())
 	 */
 	public final Intent getIntent() {
-		return new Intent().setComponent(component);
+		ComponentName serviceComponent = new ComponentName(
+				component.getPackageName(), component.getClassName().replace(
+						"$ConfigurationActivity", ""));
+		return new Intent().setComponent(serviceComponent);
 	}
 
 	/**
@@ -204,11 +237,7 @@ public class SensorInfo {
 	 * @return an intent for launching the configuration activity
 	 */
 	public final Intent getConfigurationIntent() {
-		ComponentName configurationComponent = new ComponentName(
-				component.getPackageName(), component.getClassName()
-						+ "$ConfigurationActivity");
-
-		Intent result = new Intent().setComponent(configurationComponent);
+		Intent result = new Intent().setComponent(component);
 		result.putExtra("entityId", entityId);
 		return result;
 	}
