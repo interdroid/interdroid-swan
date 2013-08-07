@@ -42,7 +42,7 @@ import android.util.Log;
 
 public class EvaluationManager {
 
-	private static final String TAG = "SensorManager";
+	private static final String TAG = "EvaluationManager";
 
 	private static final long START_UP_TIME_REMOTE = 60 * 1000;
 

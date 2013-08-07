@@ -81,7 +81,6 @@ public class SoundSensor extends AbstractMemorySensor {
 
 	@Override
 	public final void unregister(String id) {
-		System.out.println("UNREGISTER SOUND SENSOR!");
 		activeThreads.remove(id).shouldStop();
 	}
 
@@ -129,7 +128,6 @@ public class SoundSensor extends AbstractMemorySensor {
 				long start = System.currentTimeMillis();
 				double sample = sample(audioRecord, bufferSize,
 						DB_FIELD.equals(valuePath) ? peakDb : -1);
-				System.out.println(valuePath + ": " + sample);
 				putValueTrimSize(valuePath, id, start, sample, HISTORY_SIZE);
 				long sleepTime = configuration.getInt(SAMPLE_INTERVAL,
 						mDefaultConfiguration.getInt(SAMPLE_INTERVAL))

@@ -161,7 +161,7 @@ public abstract class AbstractSensorBase extends Service implements
 		@Override
 		public Bundle getInfo() throws RemoteException {
 			Bundle info = new Bundle();
-			info.putString("name", getClass().getName());
+			info.putString("name", AbstractSensorBase.this.getClass().getSimpleName());
 			int num = 0;
 			for (Map.Entry<String, List<String>> entry : expressionIdsPerValuePath
 					.entrySet()) {
@@ -234,7 +234,6 @@ public abstract class AbstractSensorBase extends Service implements
 	protected final void notifyDataChangedForId(final String... ids) {
 		Intent notifyIntent = new Intent(ACTION_NOTIFY);
 		notifyIntent.putExtra("expressionIds", ids);
-		System.out.println("sending data changed for: " + Arrays.toString(ids));
 		sendBroadcast(notifyIntent);
 	}
 

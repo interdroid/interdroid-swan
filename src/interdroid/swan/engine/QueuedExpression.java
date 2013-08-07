@@ -73,7 +73,6 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 			return false;
 		}
 		mCurrentResult = result;
-		System.out.println("set current result to " + result);
 		return true;
 	}
 
@@ -142,7 +141,6 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		Bundle bundle = new Bundle();
 		bundle.putLong("start-time", mStartTime);
 		bundle.putString("name", mId);
-		System.out.println("mCurrentResult: " + mCurrentResult);
 		bundle.putString("result", mCurrentResult == null ? "n.a."
 				: mCurrentResult.toString());
 		bundle.putDouble(

@@ -107,8 +107,15 @@ public class MovementSensor extends AbstractMemorySensor {
 					continue;
 				}
 				if (configuration.containsKey(ACCURACY)) {
-					highestAccuracy = Math.min(highestAccuracy,
-							configuration.getInt(ACCURACY));
+					// accuracy can be string or int
+					if (configuration.getString(ACCURACY, null) == null) {
+						highestAccuracy = Math.min(highestAccuracy,
+								configuration.getInt(ACCURACY));
+					} else {
+						highestAccuracy = Math.min(highestAccuracy, Integer
+								.parseInt(configuration.getString(ACCURACY)));
+					}
+
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,
@@ -128,7 +135,7 @@ public class MovementSensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
-	
+
 	@Override
 	public float getCurrentMilliAmpere() {
 		return accelerometer.getPower();

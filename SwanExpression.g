@@ -178,7 +178,7 @@ parentheticalExpression returns [Expression expression]
             {$expression = exp /* .expression */ ;}
     ;
     
-multiplicativeExpression returns [ValueExpression expression]
+multiplicativeExpression returns [Expression expression]
 @init {
     Stack<ValueExpression> rightStack = new Stack<ValueExpression>();
     Stack<MathOperator> opStack = new Stack<MathOperator>();
@@ -196,12 +196,12 @@ multiplicativeExpression returns [ValueExpression expression]
     if (rightStack.size() > 0) {
         $expression = new MathValueExpression(locationStack.pop(), (ValueExpression) left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
     } else {
-        $expression = (ValueExpression) left /* .expression */ ;
+        $expression = left /* .expression */ ;
     }
 }
     ;
 
-additiveExpression returns [ValueExpression expression]
+additiveExpression returns [Expression expression]
 @init {
     Stack<ValueExpression> rightStack = new Stack<ValueExpression>();
     Stack<MathOperator> opStack = new Stack<MathOperator>();
@@ -209,7 +209,7 @@ additiveExpression returns [ValueExpression expression]
 }
     : left=multiplicativeExpression
     ((location=ID '@')? op=additive_math_operator right=multiplicativeExpression 
-        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); opStack.push(op /* .math_operator */ ); rightStack.push(right /* .expression */ );}
+        {locationStack.push(location == null ? Expression.LOCATION_INFER : location.getText()); opStack.push(op /* .math_operator */ ); rightStack.push((ValueExpression) right /* .expression */ );}
     )*
 {
     while(rightStack.size() > 1) {
@@ -217,7 +217,7 @@ additiveExpression returns [ValueExpression expression]
         rightStack.push(new MathValueExpression(locationStack.pop(), rightStack.pop(), opStack.pop(), temp, HistoryReductionMode.DEFAULT_MODE));
     }
     if (rightStack.size() > 0) {
-        $expression = new MathValueExpression(locationStack.pop(), left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
+        $expression = new MathValueExpression(locationStack.pop(), (ValueExpression) left /* .expression */ , opStack.pop(), rightStack.pop(), HistoryReductionMode.DEFAULT_MODE);
     } else {
         $expression = left /* .expression */ ;
     }

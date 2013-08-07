@@ -129,10 +129,10 @@ public class EvaluationEngineService extends Service {
 										1,
 										head.getDeferUntil()
 												- System.currentTimeMillis());
-								Log.d(TAG, "Waiting for " + waitTime + " ms.");
+								//Log.d(TAG, "Waiting for " + waitTime + " ms.");
 								mEvaluationThread.wait(waitTime);
-								Log.d(TAG, "Done waiting for " + waitTime
-										+ " ms.");
+//								Log.d(TAG, "Done waiting for " + waitTime
+//										+ " ms.");
 							} catch (InterruptedException e) {
 								continue;
 							}
@@ -477,7 +477,7 @@ public class EvaluationEngineService extends Service {
 						+ "), should we kill the sensor?");
 				continue;
 			}
-			Log.d(TAG, "Got notification for: " + queued);
+			// Log.d(TAG, "Got notification for: " + queued);
 			if (queued.getExpression() instanceof ValueExpression
 					|| queued.getDeferUntil() == Long.MAX_VALUE) {
 				// evaluate now!
@@ -564,9 +564,6 @@ public class EvaluationEngineService extends Service {
 			update.putExtra(ExpressionManager.EXTRA_NEW_VALUES,
 					result.getValues());
 		} else {
-			System.out.println("result: " + result);
-			System.out.println("tristate: " + result.getTriState());
-
 			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE, result
 					.getTriState().name());
 			update.putExtra(ExpressionManager.EXTRA_NEW_TRISTATE_TIMESTAMP,

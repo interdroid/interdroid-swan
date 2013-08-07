@@ -239,5 +239,19 @@
         <item>rri</item>
         <item>status_text</item>
     </string-array>
+    
+    <string-array name="accuracy">
+        <item>fastest</item>
+        <item>game</item>
+        <item>ui</item>
+        <item>normal</item>
+    </string-array>
+    
+    <string-array name="accuracy_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 
 </resources>

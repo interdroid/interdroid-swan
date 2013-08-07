@@ -439,7 +439,7 @@
         <activity
             android:name="interdroid.swan.sensors.impl.SignalStrengthSensor$ConfigurationActivity"
             android:exported="true"
-            android:icon="@drawable/bluetooth_icon" >
+            android:icon="@drawable/signal_icon" >
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
