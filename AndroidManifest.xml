@@ -363,7 +363,7 @@
         <activity
             android:name="interdroid.swan.sensors.impl.BluetoothSensor$ConfigurationActivity"
             android:exported="true"
-            android:icon="@drawable/bluetooth_icon" >
+            android:icon="@drawable/bluetooth_icon" android:label="Configure Bluetooth Sensor" >
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
@@ -693,35 +693,7 @@
                 android:name="units"
                 android:value="bpm,status,index,rri," />
         </activity>
-        <activity
-            android:name="interdroid.swan.sensors.impl.TrainSensor$ConfigurationActivity"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="interdroid.swan.sensor.DISCOVER" />
-            </intent-filter>
-
-            <meta-data
-                android:name="entityId"
-                android:value="train" />
-            <meta-data
-                android:name="valuePaths"
-                android:value="departure_time,arrival_time" />
-            <meta-data
-                android:name="sample_interval"
-                android:value="300000L" />
-            <meta-data
-                android:name="from_station"
-                android:value="null" />
-            <meta-data
-                android:name="to_station"
-                android:value="null" />
-            <meta-data
-                android:name="departure_time"
-                android:value="null" />
-            <meta-data
-                android:name="units"
-                android:value="departure_time,arrival_time" />
-        </activity>
+        
 
         <service
             android:name="interdroid.swan.sensors.impl.BatterySensor"
@@ -862,12 +834,7 @@
             android:name="interdroid.swan.sensors.impl.WifiSensor$Provider"
             android:authorities="interdroid.context.sensor.wifi" />
 
-        <service
-            android:name="interdroid.swan.sensors.impl.TrainSensor"
-            android:exported="true"
-            android:icon="@drawable/train_icon"
-            android:process=":trainsensor" >
-        </service>
+        
         <service
             android:name="interdroid.swan.sensors.impl.CalendarSensor"
             android:exported="true"

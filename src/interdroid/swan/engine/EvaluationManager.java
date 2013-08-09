@@ -392,7 +392,7 @@ public class EvaluationManager {
 					Log.d(TAG, "No valuepath found for valuepath '"
 							+ expression.getValuePath() + "'");
 				}
-			} 
+			}
 		}
 		Log.d(TAG, "No sensor found for entity '" + expression.getEntity()
 				+ "'");
@@ -549,25 +549,29 @@ public class EvaluationManager {
 
 	private Result doCompare(String id, ComparisonExpression expression,
 			long now) throws SwanException {
+		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
+				expression.getRight(), now);
+
 		if (expression.getLeft() instanceof SensorValueExpression
 				&& ((SensorValueExpression) expression.getLeft()).getEntity()
 						.equals("time")) {
-			return TimeSensor.determineValue(
-					now,
+			if (right.getValues().length == 0) {
+				Log.d(TAG, "No data for: " + expression);
+				Result result = new Result(now, TriState.UNDEFINED);
+				result.setDeferUntil(Long.MAX_VALUE);
+				return result;
+			}
+			return TimeSensor.determineValue(now,
 					((SensorValueExpression) expression.getLeft())
 							.getValuePath(),
 					((SensorValueExpression) expression.getLeft())
-							.getConfiguration(),
-					expression.getComparator(),
-					(Comparable) evaluate(id + Expression.RIGHT_SUFFIX,
-							expression.getRight(), now).getValues()[0]
-							.getValue());
+							.getConfiguration(), expression.getComparator(),
+					(Comparable) right.getValues()[0].getValue());
 		}
 
 		Result left = evaluate(id + Expression.LEFT_SUFFIX,
 				expression.getLeft(), now);
-		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
-				expression.getRight(), now);
+
 		if (left.getValues().length == 0 || right.getValues().length == 0) {
 			Log.d(TAG, "No data for: " + expression);
 			Result result = new Result(now, TriState.UNDEFINED);
