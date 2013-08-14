@@ -96,7 +96,7 @@ public class ExpressionManager {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String id = intent.getData().getAuthority();
+			String id = intent.getData().getFragment();
 			if (sListeners.containsKey(id)) {
 				if (intent.getAction().equals(ACTION_NEW_VALUES)) {
 					// do the conversion from Parcelable[] to
@@ -118,6 +118,9 @@ public class ExpressionManager {
 											.getStringExtra(EXTRA_NEW_TRISTATE)));
 				}
 
+			} else {
+				System.out.println("got spurious broadcast: "
+						+ intent.getDataString());
 			}
 		}
 	};
@@ -143,8 +146,7 @@ public class ExpressionManager {
 						BitmapFactory.decodeResource(
 								pm.getResourcesForApplication(discoveredSensor.activityInfo.packageName),
 								discoveredSensor.activityInfo.icon));
-				Log.d(TAG, "\t"
-						+ discoveredSensor.activityInfo.name);
+				Log.d(TAG, "\t" + discoveredSensor.activityInfo.name);
 				result.add(new SensorInfo(new ComponentName(
 						discoveredSensor.activityInfo.packageName,
 						discoveredSensor.activityInfo.name),
@@ -181,7 +183,7 @@ public class ExpressionManager {
 	 *            a {@link TriStateExpressionListener} that receives the
 	 *            evaluation results. It is also possible to listen for the
 	 *            results using a {@link BroadcastReceiver}. Filter on
-	 *            datascheme "swan://<your.package.name>" and action
+	 *            datascheme "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
 	 *             if id is null or invalid
@@ -224,7 +226,7 @@ public class ExpressionManager {
 	 *            a {@link ValueExpressionListener} that receives the evaluation
 	 *            results. It is also possible to listen for the results using a
 	 *            {@link BroadcastReceiver}. Filter on datascheme
-	 *            "swan://<your.package.name>" and action
+	 *            "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_VALUES}.
 	 * @throws SwanException
 	 *             if id is null or invalid
@@ -267,7 +269,7 @@ public class ExpressionManager {
 	 *            a {@link ValueExpressionListener} that receives the evaluation
 	 *            results. It is also possible to listen for the results using a
 	 *            {@link BroadcastReceiver}. Filter on datascheme
-	 *            "swan://<your.package.name>" and action
+	 *            "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_VALUES} or {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
 	 *             if id is null or invalid
@@ -302,9 +304,11 @@ public class ExpressionManager {
 			}
 		}
 		Intent newTriState = new Intent(ACTION_NEW_TRISTATE);
-		newTriState.setData(Uri.parse("swan://" + context.getPackageName()));
+		newTriState.setData(Uri.parse("swan://" + context.getPackageName()
+				+ "#" + id));
 		Intent newValues = new Intent(ACTION_NEW_VALUES);
-		newValues.setData(Uri.parse("swan://" + context.getPackageName()));
+		newValues.setData(Uri.parse("swan://" + context.getPackageName() + "#"
+				+ id));
 		registerExpression(context, id, expression, newTriState, newTriState,
 				newTriState, newValues);
 	}
@@ -387,7 +391,8 @@ public class ExpressionManager {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ACTION_NEW_TRISTATE);
 		intentFilter.addAction(ACTION_NEW_VALUES);
-		intentFilter.addDataScheme("swanexpression");
+		intentFilter.addDataScheme("swan");
+		intentFilter.addDataAuthority(context.getPackageName(), null);
 		context.registerReceiver(sReceiver, intentFilter);
 	}
 
