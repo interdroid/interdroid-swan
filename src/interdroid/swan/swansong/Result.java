@@ -13,10 +13,13 @@ public class Result implements Comparable<Result>, Serializable {
 	protected TimestampedValue[] mValues;
 	protected TriState mTriState;
 	protected long mTimestamp;
+	protected long mOldestTimestamp;
 	protected long mDeferUntil = Long.MAX_VALUE;
+	protected boolean mDeferGuaranteed = true;
 
-	public Result(TimestampedValue[] values) {
+	public Result(TimestampedValue[] values, long oldestTimestamp) {
 		mValues = values;
+		mOldestTimestamp = oldestTimestamp;
 	}
 
 	public Result(long timestamp, TriState triState) {
@@ -59,11 +62,24 @@ public class Result implements Comparable<Result>, Serializable {
 		return (mValues == null ? mTriState : Arrays.toString(mValues))
 				+ " until "
 				+ (mDeferUntil == 0 ? "NOW"
-						: (mDeferUntil == Long.MAX_VALUE ? "FOREVER"
-								: new Date(mDeferUntil)));
+						: (mDeferUntil == Long.MAX_VALUE ? "FOREVER" : ""
+								+ new Date(mDeferUntil)
+								+ "." + (System.currentTimeMillis() % 1000)));
 	}
 
 	public long getTimestamp() {
 		return mTimestamp;
+	}
+
+	public long getOldestTimestamp() {
+		return mOldestTimestamp;
+	}
+
+	public void setDeferUntilGuaranteed(boolean guaranteed) {
+		mDeferGuaranteed = guaranteed;
+	}
+
+	public boolean isDeferUntilGuaranteed() {
+		return mDeferGuaranteed;
 	}
 }

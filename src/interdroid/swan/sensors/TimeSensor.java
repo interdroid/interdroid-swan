@@ -88,6 +88,7 @@ public class TimeSensor {
 			Result result = new Result(now, compare(comparator, nowHourOfDay,
 					rightHourOfDay) ? TriState.TRUE : TriState.FALSE);
 			result.setDeferUntil(calendar.getTimeInMillis());
+			result.setDeferUntilGuaranteed(true);
 			return result;
 		} else if (DAY_OF_WEEK_FIELD.equals(valuePath)) {
 			Calendar calendar = Calendar.getInstance();
@@ -114,6 +115,7 @@ public class TimeSensor {
 			Result result = new Result(now, compare(comparator, nowDayOfWeek,
 					rightDayOfWeek) ? TriState.TRUE : TriState.FALSE);
 			result.setDeferUntil(calendar.getTimeInMillis());
+			result.setDeferUntilGuaranteed(true);
 			return result;
 		}
 
