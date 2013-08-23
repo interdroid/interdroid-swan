@@ -48,7 +48,7 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	public String getId() {
 		return mId;
 	}
-
+	
 	/**
 	 * update the current result and return whether this update caused a change
 	 * 
@@ -56,12 +56,6 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	 * @return
 	 */
 	public boolean update(Result result) {
-		if (result == null) {
-			// result is null, means reset defer until
-			mCurrentResult.setDeferUntil(0);
-			// mCurrentResult = null;
-			return false;
-		}
 		if (mExpression instanceof TriStateExpression && mCurrentResult != null
 				&& mCurrentResult.getTriState() == result.getTriState()) {
 			mCurrentResult = result;
@@ -98,7 +92,15 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 			// we don't have a current result yet, so we can't defer
 			return 0;
 		}
+	}
 
+	public boolean isDeferUntilGuaranteed() {
+		if (mCurrentResult != null) {
+			return mCurrentResult.isDeferUntilGuaranteed();
+		} else {
+			// we don't have a current result yet, so we can't defer
+			return false;
+		}
 	}
 
 	public String toString() {
@@ -119,15 +121,17 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		 * "\nAvg Evaluation Delay: " +
 		 * (mTotalEvaluationDelay/Math.max(mEvaluationsDelay, 1));
 		 */
-		return id // position 0
-				+ "\n" + "Evaluation Percentage" // position 1
-				+ "\n" + ((mTotalEvaluationTime * 100) / (float) (System // position
-																			// 2
-						.currentTimeMillis() - mStartTime)) + "\n";
+		return "";
+
+		// id
+		// + "\n" + "Evaluation Percentage"
+		// + "\n" + ((mTotalEvaluationTime * 100) / (float) (System
+		// .currentTimeMillis() - mStartTime)) + "\n";
 	}
 
 	public void evaluated(long currentEvalutionTime, long evalDelay) {
 		mEvaluations += 1;
+//		System.out.println("total evals: " + mEvaluations);
 		mTotalEvaluationTime += currentEvalutionTime;
 		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
 		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);

@@ -60,6 +60,11 @@ public class EvaluationManager {
 
 	private final Map<String, Result> mCachedResults = new HashMap<String, Result>();
 
+	private long totalGetValuesTime = 0;
+	private int numGetValues = 0;
+	private long mMinGetValuesTime = Long.MAX_VALUE;
+	private long mMaxGetValuesTime = Long.MIN_VALUE;
+
 	public EvaluationManager(Context context) {
 		mContext = context;
 	}
@@ -174,6 +179,17 @@ public class EvaluationManager {
 		}
 	}
 
+	public void clearCacheFor(String id) {
+		if (mCachedResults.get(id) != null) {
+			mCachedResults.get(id).setDeferUntil(0);
+		}
+		for (String suffix : Expression.RESERVED_SUFFIXES) {
+			if (id.endsWith(suffix)) {
+				clearCacheFor(id.substring(0, id.length() - suffix.length()));
+			}
+		}
+	}
+
 	public Result evaluate(String id, Expression expression, long now)
 			throws SwanException {
 		if (expression == null) {
@@ -197,9 +213,10 @@ public class EvaluationManager {
 				}
 			} else if (expression instanceof ValueExpression) {
 				// we don't have anything cached, so send an empty result.
-				result = new Result(new TimestampedValue[] {});
+				result = new Result(new TimestampedValue[] {}, 0);
 			}
 			result.setDeferUntil(Long.MAX_VALUE);
+			result.setDeferUntilGuaranteed(false);
 		} else if (expression instanceof LogicExpression) {
 			result = applyLogic(id, (LogicExpression) expression, now);
 		} else if (expression instanceof ComparisonExpression) {
@@ -215,7 +232,7 @@ public class EvaluationManager {
 			}
 			result = getFromSensor(id, (SensorValueExpression) expression, now);
 		}
-		if (result != null && result.getDeferUntil() != Long.MAX_VALUE) {
+		if (result != null) {
 			mCachedResults.put(id, result);
 		}
 		return result;
@@ -529,21 +546,33 @@ public class EvaluationManager {
 
 		if (shortcut(expression, first)) {
 			// apply the sleep and be ready to last
-			sleepAndBeReady(id + lastSuffix, lastExpression,
-					first.getDeferUntil());
+			if (first.isDeferUntilGuaranteed()) {
+				sleepAndBeReady(id + lastSuffix, lastExpression,
+						first.getDeferUntil());
+			}
+			// put line below in the above if statement if we want to take the
+			// risk of evaluating the other part of the expression. This can
+			// potentially lead to a sleep and be ready on the current part of
+			// the expression.
 			return first;
 		}
 		Result last = evaluate(id + lastSuffix, lastExpression, now);
 
+		if (shortcut(expression, last)) {
+			if (last.isDeferUntilGuaranteed()) {
+				sleepAndBeReady(id + firstSuffix, firstExpression,
+						last.getDeferUntil());
+			}
+			return last;
+		}
+
 		Result result = new Result(now, expression.getOperator().operate(
 				first.getTriState(), last.getTriState()));
-		if (last.getTriState() == TriState.TRUE
-				&& expression.getOperator().equals(BinaryLogicOperator.OR)) {
-			result.setDeferUntil(last.getDeferUntil());
-		} else {
-			result.setDeferUntil(Math.min(first.getDeferUntil(),
-					last.getDeferUntil()));
-		}
+
+		result.setDeferUntil(Math.min(first.getDeferUntil(),
+				last.getDeferUntil()));
+		result.setDeferUntilGuaranteed(first.isDeferUntilGuaranteed()
+				&& last.isDeferUntilGuaranteed());
 		return result;
 	}
 
@@ -576,6 +605,7 @@ public class EvaluationManager {
 			Log.d(TAG, "No data for: " + expression);
 			Result result = new Result(now, TriState.UNDEFINED);
 			result.setDeferUntil(Long.MAX_VALUE);
+			result.setDeferUntilGuaranteed(false);
 			return result;
 		}
 
@@ -611,19 +641,31 @@ public class EvaluationManager {
 
 		// find out how long this result will remain valid and defer
 		// evaluation to that moment
-		long leftRemainsValidUntil = remainsValidUntil(expression.getLeft(),
-				left.getValues()[l].getTimestamp(),
-				left.getValues()[0].getTimestamp(), expression.getComparator(),
-				comparatorResult.getTriState(), true);
-		long rightRemainsValidUntil = remainsValidUntil(expression.getRight(),
-				right.getValues()[r].getTimestamp(),
-				right.getValues()[0].getTimestamp(),
+		DeferUntilResult leftDefer = remainsValidUntil(expression.getLeft(),
+				left.getValues()[l].getTimestamp(), left.getOldestTimestamp(),
 				expression.getComparator(), comparatorResult.getTriState(),
-				false);
-		comparatorResult.setDeferUntil(Math.min(leftRemainsValidUntil,
-				rightRemainsValidUntil));
+				true);
+		DeferUntilResult rightDefer = remainsValidUntil(expression.getRight(),
+				right.getValues()[r].getTimestamp(),
+				right.getOldestTimestamp(), expression.getComparator(),
+				comparatorResult.getTriState(), false);
 
+		comparatorResult.setDeferUntilGuaranteed(leftDefer.guaranteed
+				&& rightDefer.guaranteed);
+		comparatorResult.setDeferUntil(Math.min(leftDefer.deferUntil,
+				leftDefer.deferUntil));
 		return comparatorResult;
+	}
+
+	class DeferUntilResult {
+		public long deferUntil;
+		public boolean guaranteed;
+
+		public DeferUntilResult(long deferUntil, boolean guaranteed) {
+			this.deferUntil = deferUntil;
+			this.guaranteed = guaranteed;
+		}
+
 	}
 
 	private Result doMath(String id, MathValueExpression expression, long now)
@@ -633,7 +675,8 @@ public class EvaluationManager {
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
 				expression.getRight(), now);
 		if (left.getValues().length == 0 || right.getValues().length == 0) {
-			Result result = new Result(left.getValues());
+			Result result = new Result(left.getValues(),
+					left.getOldestTimestamp());
 			return result;
 		} else if (left.getValues().length == 1
 				|| right.getValues().length == 1) {
@@ -646,9 +689,11 @@ public class EvaluationManager {
 							expression.getOperator(), right.getValues()[j]);
 				}
 			}
-			Result result = new Result(values);
-			result.setDeferUntil(values[0].getTimestamp()
-					+ getMinHistoryLength(expression));
+			Result result = new Result(values, Math.min(
+					left.getOldestTimestamp(), right.getOldestTimestamp()));
+			result.setDeferUntil(Math.min(left.getDeferUntil(),
+					right.getDeferUntil()));
+			result.setDeferUntilGuaranteed(false);
 			return result;
 		} else {
 			// TODO: we could relax this statement a bit, and allow for
@@ -681,31 +726,52 @@ public class EvaluationManager {
 		if (mSensors.get(id) == null) {
 			// put logging here
 			Log.d(TAG, "not yet bound for: " + id + ", " + expression);
-			Result result = new Result(new TimestampedValue[] {});
+			Result result = new Result(new TimestampedValue[] {}, 0);
 			// TODO make this a constant (configurable?)
 			result.setDeferUntil(System.currentTimeMillis() + 300);
+			result.setDeferUntilGuaranteed(false);
 			return result;
 		}
 		try {
+//			long start = System.currentTimeMillis();
 			List<TimestampedValue> values = mSensors.get(id).getValues(id, now,
 					expression.getHistoryLength());
+
+//			long end = System.currentTimeMillis();
+
+//			totalGetValuesTime += (end - start);
+//			numGetValues++;
+//
+//			mMinGetValuesTime = Math.min(mMinGetValuesTime, (end - start));
+//			mMaxGetValuesTime = Math.max(mMaxGetValuesTime, (end - start));
+
+//			System.out.println("Min: " + mMinGetValuesTime + ", Max: "
+//					+ mMaxGetValuesTime + ", Avg: "
+//					+ (totalGetValuesTime / numGetValues));
+
+			// System.out.println("total get values: " + numGetValues);
 			if (values == null || values.size() == 0) {
-				Result result = new Result(new TimestampedValue[] {});
+				Result result = new Result(new TimestampedValue[] {}, 0);
 				result.setDeferUntil(now + 1000);
+				result.setDeferUntilGuaranteed(false);
 				return result;
 			}
+
 			TimestampedValue[] reduced = TimestampedValue.applyMode(values,
 					expression.getHistoryReductionMode());
 
-			Result result = new Result(reduced);
+			Result result = new Result(reduced, values.get(values.size() - 1)
+					.getTimestamp());
 			if (expression.getHistoryLength() == 0 || reduced == null
 					|| reduced.length == 0) {
 				// we cannot defer based on values, new values will be retrieved
 				// when they arrive
 				result.setDeferUntil(Long.MAX_VALUE);
+				result.setDeferUntilGuaranteed(false);
 			} else {
-				result.setDeferUntil(reduced[0].getTimestamp()
-						+ expression.getHistoryLength());
+				result.setDeferUntil(values.get(values.size() - 1)
+						.getTimestamp() + expression.getHistoryLength());
+				result.setDeferUntilGuaranteed(false);
 			}
 			return result;
 		} catch (RemoteException e) {
@@ -716,29 +782,31 @@ public class EvaluationManager {
 		return null;
 	}
 
-	private long remainsValidUntil(ValueExpression expression,
+	private DeferUntilResult remainsValidUntil(ValueExpression expression,
 			long determiningValueTimestamp, long oldestValueTimestamp,
 			Comparator comparator, TriState triState, boolean left) {
 		if (expression instanceof MathValueExpression) {
 			// math value is valid as long both of its children are valid
-			return Math.min(
-					remainsValidUntil(
-							((MathValueExpression) expression).getLeft(),
-							determiningValueTimestamp, oldestValueTimestamp,
-							comparator, triState, left),
-					remainsValidUntil(
-							((MathValueExpression) expression).getRight(),
-							determiningValueTimestamp, oldestValueTimestamp,
-							comparator, triState, left));
+			DeferUntilResult leftResult = remainsValidUntil(
+					((MathValueExpression) expression).getLeft(),
+					determiningValueTimestamp, oldestValueTimestamp,
+					comparator, triState, left);
+			DeferUntilResult rightResult = remainsValidUntil(
+					((MathValueExpression) expression).getRight(),
+					determiningValueTimestamp, oldestValueTimestamp,
+					comparator, triState, left);
+			return new DeferUntilResult(Math.min(leftResult.deferUntil,
+					rightResult.deferUntil), leftResult.guaranteed
+					&& rightResult.guaranteed);
 		} else if (expression instanceof ConstantValueExpression) {
-			return Long.MAX_VALUE;
+			return new DeferUntilResult(Long.MAX_VALUE, true);
 		} else if (expression instanceof SensorValueExpression) {
 			HistoryReductionMode mode = ((SensorValueExpression) expression)
 					.getHistoryReductionMode();
 			long historyLength = ((SensorValueExpression) expression)
 					.getHistoryLength();
 			if (historyLength == 0) {
-				return Long.MAX_VALUE;
+				return new DeferUntilResult(Long.MAX_VALUE, false);
 			}
 
 			long deferTime = determiningValueTimestamp + historyLength;
@@ -750,21 +818,21 @@ public class EvaluationManager {
 					|| comparator == Comparator.STRING_CONTAINS) {
 				if (triState == TriState.TRUE) {
 					if (mode == HistoryReductionMode.ANY) {
-						return deferTime;
+						return new DeferUntilResult(deferTime, true);
 					}
 				} else if (triState == TriState.FALSE) {
 					if (mode == HistoryReductionMode.ALL) {
-						return deferTime;
+						return new DeferUntilResult(deferTime, true);
 					}
 				}
 			} else if (comparator == Comparator.NOT_EQUALS) {
 				if (triState == TriState.TRUE) {
 					if (mode == HistoryReductionMode.ALL) {
-						return deferTime;
+						return new DeferUntilResult(deferTime, true);
 					}
 				} else if (triState == TriState.FALSE) {
 					if (mode == HistoryReductionMode.ANY) {
-						return deferTime;
+						return new DeferUntilResult(deferTime, true);
 					}
 				}
 			}
@@ -776,12 +844,12 @@ public class EvaluationManager {
 					if (triState == TriState.TRUE) {
 						if (mode == HistoryReductionMode.MAX
 								|| mode == HistoryReductionMode.ANY) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					} else if (triState == TriState.FALSE) {
 						if (mode == HistoryReductionMode.MIN
 								|| mode == HistoryReductionMode.ALL) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					}
 				} else if (comparator == Comparator.LESS_THAN
@@ -789,12 +857,12 @@ public class EvaluationManager {
 					if (triState == TriState.TRUE) {
 						if (mode == HistoryReductionMode.MIN
 								|| mode == HistoryReductionMode.ANY) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					} else if (triState == TriState.FALSE) {
 						if (mode == HistoryReductionMode.MAX
 								|| mode == HistoryReductionMode.ALL) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					}
 				}
@@ -804,12 +872,12 @@ public class EvaluationManager {
 					if (triState == TriState.TRUE) {
 						if (mode == HistoryReductionMode.MIN
 								|| mode == HistoryReductionMode.ANY) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					} else if (triState == TriState.FALSE) {
 						if (mode == HistoryReductionMode.MAX
 								|| mode == HistoryReductionMode.ALL) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					}
 				} else if (comparator == Comparator.LESS_THAN
@@ -817,20 +885,22 @@ public class EvaluationManager {
 					if (triState == TriState.TRUE) {
 						if (mode == HistoryReductionMode.MAX
 								|| mode == HistoryReductionMode.ANY) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					} else if (triState == TriState.FALSE) {
 						if (mode == HistoryReductionMode.MIN
 								|| mode == HistoryReductionMode.ALL) {
-							return deferTime;
+							return new DeferUntilResult(deferTime, true);
 						}
 					}
 				}
 			}
+
 			// otherwise we defer based on the oldest timestamp
-			return oldestValueTimestamp + historyLength;
+			return new DeferUntilResult(oldestValueTimestamp + historyLength,
+					false);
 		}
-		return 0; // should not happen!
+		return new DeferUntilResult(0, false); // should not happen!
 	}
 
 	private void sleepAndBeReady(final String id, final Expression expression,

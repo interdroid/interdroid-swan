@@ -8,8 +8,9 @@ public class ConstantValueExpression implements ValueExpression {
 
 	public ConstantValueExpression(Object constant) {
 		mResult = new Result(new TimestampedValue[] { new TimestampedValue(
-				constant) });
+				constant) }, 0);
 		mResult.setDeferUntil(Long.MAX_VALUE);
+		mResult.setDeferUntilGuaranteed(true);
 	}
 
 	public Result getResult() {

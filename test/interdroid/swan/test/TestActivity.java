@@ -38,27 +38,24 @@ public class TestActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.test);
 		
-		//BatteryUtil.readPowerProfile(this);
-
-
 		Expression proximity;
 		Expression accelerometer = null;
-		Expression maxAccelerometer = null;
-		
+		Expression avgAccelerometer = null;
+
 		try {
-			proximity = ExpressionFactory
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
-//			 .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
-			//.parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
-			//.parse("self@movement:total?accuracy=3{ANY,0}");
-			 .parse("self@proximity:distance?accuracy=0{ANY,0}");
-			
+			// .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
+			// .parse("self@movement:total?accuracy=0{MAX,5000}>12.0");
+			// .parse("self@movement:total?accuracy=3{ANY,0}");
+			proximity = ExpressionFactory
+					.parse("self@proximity:distance?accuracy=0{ANY,0}");
+
 			accelerometer = ExpressionFactory
 					.parse("self@movement:total?accuracy=0{ANY,0}");
-			
-			maxAccelerometer = ExpressionFactory
-					.parse("self@movement:total?accuracy=0{MEAN,300000}>12.0");
-			
+
+			avgAccelerometer = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{MEAN,10000}>12.0");
+
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
 			finish();
@@ -66,132 +63,131 @@ public class TestActivity extends Activity {
 		}
 		final Expression proximityExpression = proximity;
 		final Expression accelerometerExpression = accelerometer;
-		final Expression maxExpression = maxAccelerometer;
-		
+		final Expression avgExpression = avgAccelerometer;
+
 		findViewById(R.id.register).setOnClickListener(
 				new View.OnClickListener() {
-
-
 
 					@Override
 					public void onClick(View v) {
 						try {
+//							ExpressionManager.registerExpression(
+//									TestActivity.this, "proximity",
+//									proximityExpression,
+//									new ExpressionListener() {
+//
+//										@Override
+//										public void onNewState(final String id,
+//												final long timestamp,
+//												final TriState newState) {
+//											runOnUiThread(new Runnable() {
+//												public void run() {
+//													((TextView) findViewById(R.id.text))
+//															.setText(new Date(
+//																	timestamp)
+//																	+ ": "
+//																	+ newState);
+//													Toast.makeText(
+//															TestActivity.this,
+//															id + ": "
+//																	+ newState,
+//															Toast.LENGTH_LONG)
+//															.show();
+//												}
+//											});
+//											System.out.println(id + ": "
+//													+ newState);
+//										}
+//
+//										@Override
+//										public void onNewValues(
+//												String id,
+//												final TimestampedValue[] newValues) {
+//											runOnUiThread(new Runnable() {
+//												public void run() {
+//													if (newValues == null
+//															|| newValues.length == 0) {
+//														((TextView) findViewById(R.id.text))
+//																.setText("n.a.");
+//													} else {
+//														((TextView) findViewById(R.id.text))
+//																.setText(new Date(
+//																		newValues[0]
+//																				.getTimestamp())
+//																		+ ": "
+//																		+ newValues[0]
+//																				.getValue());
+//													}
+//												}
+//											});
+//
+//											// System.out.println(id
+//											// + ": "
+//											// + Arrays.toString(newValues));
+//										}
+//
+//									});
+//
+//							ExpressionManager.registerExpression(
+//									TestActivity.this, "accelerometer",
+//									accelerometerExpression,
+//									new ExpressionListener() {
+//
+//										@Override
+//										public void onNewState(final String id,
+//												final long timestamp,
+//												final TriState newState) {
+//											runOnUiThread(new Runnable() {
+//												public void run() {
+//													((TextView) findViewById(R.id.text))
+//															.setText(new Date(
+//																	timestamp)
+//																	+ ": "
+//																	+ newState);
+//													Toast.makeText(
+//															TestActivity.this,
+//															id + ": "
+//																	+ newState,
+//															Toast.LENGTH_LONG)
+//															.show();
+//												}
+//											});
+//											System.out.println(id + ": "
+//													+ newState);
+//										}
+//
+//										@Override
+//										public void onNewValues(
+//												String id,
+//												final TimestampedValue[] newValues) {
+//											runOnUiThread(new Runnable() {
+//												public void run() {
+//													if (newValues == null
+//															|| newValues.length == 0) {
+//														((TextView) findViewById(R.id.text))
+//																.setText("n.a.");
+//													} else {
+//														((TextView) findViewById(R.id.text))
+//																.setText(new Date(
+//																		newValues[0]
+//																				.getTimestamp())
+//																		+ ": "
+//																		+ newValues[0]
+//																				.getValue());
+//													}
+//												}
+//											});
+//
+//											// System.out.println(id
+//											// + ": "
+//											// + Arrays.toString(newValues));
+//										}
+//
+//									});
+
 							ExpressionManager.registerExpression(
-									TestActivity.this, "proximity", proximityExpression,
-									new ExpressionListener() {
-
-										@Override
-										public void onNewState(final String id,
-												final long timestamp,
-												final TriState newState) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													((TextView) findViewById(R.id.text))
-															.setText(new Date(
-																	timestamp)
-																	+ ": "
-																	+ newState);
-													Toast.makeText(
-															TestActivity.this,
-															id + ": "
-																	+ newState,
-															Toast.LENGTH_LONG)
-															.show();
-												}
-											});
-											System.out.println(id + ": "
-													+ newState);
-										}
-
-										@Override
-										public void onNewValues(
-												String id,
-												final TimestampedValue[] newValues) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													if (newValues == null
-															|| newValues.length == 0) {
-														((TextView) findViewById(R.id.text))
-																.setText("n.a.");
-													} else {
-														((TextView) findViewById(R.id.text))
-																.setText(new Date(
-																		newValues[0]
-																				.getTimestamp())
-																		+ ": "
-																		+ newValues[0]
-																				.getValue());
-													}
-												}
-											});
-
-											// System.out.println(id
-											// + ": "
-											// + Arrays.toString(newValues));
-										}
-
-									});
-							
-							ExpressionManager.registerExpression(
-									TestActivity.this, "accelerometer", accelerometerExpression,
-									new ExpressionListener() {
-
-										@Override
-										public void onNewState(final String id,
-												final long timestamp,
-												final TriState newState) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													((TextView) findViewById(R.id.text))
-															.setText(new Date(
-																	timestamp)
-																	+ ": "
-																	+ newState);
-													Toast.makeText(
-															TestActivity.this,
-															id + ": "
-																	+ newState,
-															Toast.LENGTH_LONG)
-															.show();
-												}
-											});
-											System.out.println(id + ": "
-													+ newState);
-										}
-
-										@Override
-										public void onNewValues(
-												String id,
-												final TimestampedValue[] newValues) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													if (newValues == null
-															|| newValues.length == 0) {
-														((TextView) findViewById(R.id.text))
-																.setText("n.a.");
-													} else {
-														((TextView) findViewById(R.id.text))
-																.setText(new Date(
-																		newValues[0]
-																				.getTimestamp())
-																		+ ": "
-																		+ newValues[0]
-																				.getValue());
-													}
-												}
-											});
-
-											// System.out.println(id
-											// + ": "
-											// + Arrays.toString(newValues));
-										}
-
-									});
-							
-							
-							ExpressionManager.registerExpression(
-									TestActivity.this, "accelerometerMax", maxExpression,
-									new ExpressionListener() {
+									TestActivity.this, "accelerometerAvg",
+									avgExpression, new ExpressionListener() {
 
 										@Override
 										public void onNewState(final String id,
@@ -250,7 +246,6 @@ public class TestActivity extends Activity {
 					}
 				});
 
-
 		findViewById(R.id.unregister).setOnClickListener(
 				new View.OnClickListener() {
 
@@ -258,11 +253,11 @@ public class TestActivity extends Activity {
 					public void onClick(View v) {
 						ExpressionManager.unregisterExpression(
 
-								TestActivity.this, "bla");
+						TestActivity.this, "proximity");
 						ExpressionManager.unregisterExpression(
-								TestActivity.this, "ala");
+								TestActivity.this, "accelerometer");
 						ExpressionManager.unregisterExpression(
-								TestActivity.this, "cla");
+								TestActivity.this, "accelerometerAvg");
 
 					}
 				});

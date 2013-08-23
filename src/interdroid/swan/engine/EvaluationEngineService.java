@@ -102,13 +102,16 @@ public class EvaluationEngineService extends Service {
 							}
 
 							long start = System.currentTimeMillis();
+
+							// System.out.println("Delay:" + evaluationDelay);
+
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
 									System.currentTimeMillis());
 
-							head.evaluated(
-									(System.currentTimeMillis() - start),
-									evaluationDelay);
+							long end = System.currentTimeMillis();
+
+							head.evaluated((end - start), evaluationDelay);
 
 							if (head.update(result)) {
 								Log.d(TAG, "Result: " + result);
@@ -479,13 +482,13 @@ public class EvaluationEngineService extends Service {
 			}
 			// Log.d(TAG, "Got notification for: " + queued);
 			if (queued.getExpression() instanceof ValueExpression
-					|| queued.getDeferUntil() == Long.MAX_VALUE) {
+					|| !queued.isDeferUntilGuaranteed()) {
 				// evaluate now!
 				synchronized (mEvaluationThread) {
 					// get it out the queue, update defer until, and put it
 					// back, then notify the evaluation thread.
 					mEvaluationQueue.remove(queued);
-					queued.update(null);
+					mEvaluationManager.clearCacheFor(id);
 					mEvaluationQueue.add(queued);
 					mEvaluationThread.notifyAll();
 				}
@@ -546,8 +549,7 @@ public class EvaluationEngineService extends Service {
 	private void sendUpdate(QueuedExpression queued, Result result) {
 		// we know it has changed
 		if (queued.getId().contains(Expression.SEPARATOR)) {
-			sendUpdateToRemote(
-					queued.getId().split(Expression.SEPARATOR)[0],
+			sendUpdateToRemote(queued.getId().split(Expression.SEPARATOR)[0],
 					queued.getId().split(Expression.SEPARATOR)[1], result);
 			return;
 		}
