@@ -27,8 +27,6 @@ public class WifiSensor extends AbstractVdbSensor {
 	// wifi:ssid{ANY,1000} == test && wifi:level?ssid=test > 10
 	// wifi:level?bssid=A:B:C:D > 10
 	// wifi:level{MAX,1000} > 10
-	// does getValues provide the config? no, but id, which can be used to get
-	// config (registeredConfigurations)
 
 	private static final String TAG = "WiFi Sensor";
 

@@ -79,7 +79,6 @@
             android:icon="@drawable/ic_launcher"
             android:label="@string/expression_viewer_name"
             android:launchMode="singleTask" />
-
         <activity
             android:name="interdroid.swan.engine.SensorViewerActivity"
             android:exported="false"
@@ -363,7 +362,8 @@
         <activity
             android:name="interdroid.swan.sensors.impl.BluetoothSensor$ConfigurationActivity"
             android:exported="true"
-            android:icon="@drawable/bluetooth_icon" android:label="Configure Bluetooth Sensor" >
+            android:icon="@drawable/bluetooth_icon"
+            android:label="Configure Bluetooth Sensor" >
             <intent-filter>
                 <action android:name="interdroid.swan.sensor.DISCOVER" />
             </intent-filter>
@@ -574,7 +574,7 @@
                 android:value="interdroid.context.sensor.screen" />
             <meta-data
                 android:name="units"
-                android:value="ScreenState" />
+                android:value="" />
         </activity>
         <activity
             android:name="interdroid.swan.sensors.impl.SoundSensor$ConfigurationActivity"
@@ -693,7 +693,6 @@
                 android:name="units"
                 android:value="bpm,status,index,rri," />
         </activity>
-        
 
         <service
             android:name="interdroid.swan.sensors.impl.BatterySensor"
@@ -834,7 +833,6 @@
             android:name="interdroid.swan.sensors.impl.WifiSensor$Provider"
             android:authorities="interdroid.context.sensor.wifi" />
 
-        
         <service
             android:name="interdroid.swan.sensors.impl.CalendarSensor"
             android:exported="true"

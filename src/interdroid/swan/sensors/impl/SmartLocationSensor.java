@@ -237,11 +237,6 @@ public class SmartLocationSensor extends AbstractVdbSensor {
 	};
 
 	@Override
-	public void onStart(Intent intent, int startId) {
-		super.onStart(intent, startId);
-	}
-
-	@Override
 	public final String[] getValuePaths() {
 		return new String[] { VICINITY, WITHIN };
 	}

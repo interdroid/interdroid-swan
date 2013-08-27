@@ -4,6 +4,7 @@ import interdroid.swan.swansong.TimestampedValue;
 import interdroid.vdb.content.EntityUriBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -266,7 +267,11 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
 		// Build where args
 		if (id != null) {
-			where = EXPRESSION_ID + "=?";
+			// we might have a non null id, but values stored without an
+			// expression id (e.g. id independent values), therefore we also
+			// accept expression ids that are null.
+			where = "( " + EXPRESSION_ID + "=? OR " + EXPRESSION_ID
+					+ " is null ) ";
 
 			if (timespan <= 0) {
 				whereArgs = new String[] { id };
@@ -285,7 +290,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 			c = context.getContentResolver().query(uri, projection, where,
 					whereArgs,
 					// If timespan is zero we just pull the last one in time
-					TIMESTAMP_FIELD + " DESC");
+					TIMESTAMP_FIELD + " DESC LIMIT 1");
 
 		} else {
 
@@ -293,9 +298,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 					uri,
 					projection,
 					(where == null ? "" : where + " AND ") + TIMESTAMP_FIELD
-							+ " >= ? ", whereArgs,
-					// If timespan is zero we just pull the last one in time
-					TIMESTAMP_FIELD + " ASC");
+							+ " >= ? ", whereArgs, TIMESTAMP_FIELD + " ASC");
 
 		}
 

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.PowerManager;
 
 /**
  * A sensor for if the screen is on or off.
@@ -18,7 +19,6 @@ import android.os.Bundle;
  * 
  */
 public class ScreenSensor extends AbstractVdbSensor {
-
 
 	/**
 	 * The configuration activity for this sensor.
@@ -70,7 +70,7 @@ public class ScreenSensor extends AbstractVdbSensor {
 		String scheme = "{'type': 'record', 'name': 'screen', "
 				+ "'namespace': 'interdroid.context.sensor.screen',"
 				+ "\n'fields': [" + SCHEMA_TIMESTAMP_FIELDS + "\n{'name': '"
-				+ IS_SCREEN_ON_FIELD + "', 'type': 'boolean'}" + "\n]" + "}";
+				+ IS_SCREEN_ON_FIELD + "', 'type': 'string'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -85,9 +85,9 @@ public class ScreenSensor extends AbstractVdbSensor {
 			ContentValues values = new ContentValues();
 
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				values.put(IS_SCREEN_ON_FIELD, false);
+				values.put(IS_SCREEN_ON_FIELD, "false");
 			} else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-				values.put(IS_SCREEN_ON_FIELD, true);
+				values.put(IS_SCREEN_ON_FIELD, "true");
 			}
 			putValues(values, now);
 		}
@@ -116,6 +116,11 @@ public class ScreenSensor extends AbstractVdbSensor {
 	public final void register(final String id, final String valuePath,
 			final Bundle configuration) {
 		if (registeredConfigurations.size() == 1) {
+			PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+			ContentValues values = new ContentValues();
+			values.put(IS_SCREEN_ON_FIELD, "" + pm.isScreenOn());
+			putValues(values, System.currentTimeMillis());
+
 			IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
 			filter.addAction(Intent.ACTION_SCREEN_OFF);
 			registerReceiver(screenReceiver, filter);
