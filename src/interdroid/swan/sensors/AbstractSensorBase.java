@@ -3,14 +3,9 @@ package interdroid.swan.sensors;
 import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.Intent;

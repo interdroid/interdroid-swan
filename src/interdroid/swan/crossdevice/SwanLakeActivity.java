@@ -40,6 +40,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+/**
+ * Activity that shows which remote devices are known and enables to pair with
+ * other devices.
+ * 
+ * @author rkemp
+ * 
+ */
 public class SwanLakeActivity extends ListActivity {
 
 	private static final String TAG = "SwanLakeActivity";
@@ -142,6 +149,7 @@ public class SwanLakeActivity extends ListActivity {
 				}).create();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onPause() {
 		// mNfcAdapter.disableForegroundDispatch(this);
@@ -201,6 +209,7 @@ public class SwanLakeActivity extends ListActivity {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -216,6 +225,7 @@ public class SwanLakeActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void updateNFC() {
 		String regId = Registry.get(this, Expression.LOCATION_SELF);
 		if (regId == null) {
@@ -345,6 +355,7 @@ public class SwanLakeActivity extends ListActivity {
 			return 0;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public View getView(final int position, View convertView,
 				ViewGroup parent) {

@@ -82,16 +82,48 @@ public class ExpressionManager {
 	 */
 	public static final String EXTRA_NEW_TRISTATE_TIMESTAMP = "timestamp";
 
+	/**
+	 * The extra key that can be used with
+	 * {@link #registerExpression(Context, String, Expression, Intent, Intent, Intent, Intent)}
+	 * intents to indicate what type the intents are. Possible values are
+	 * {@link #INTENT_TYPE_ACTIVITY}, {@link #INTENT_TYPE_BROADCAST} (default),
+	 * {@link #INTENT_TYPE_SERVICE}.
+	 */
 	public static final String EXTRA_INTENT_TYPE = "intent_type";
 
+	/**
+	 * Extra value for key {@link #EXTRA_INTENT_TYPE} that indicates that the
+	 * intent should be broadcast
+	 */
 	public static final String INTENT_TYPE_BROADCAST = "broadcast";
+
+	/**
+	 * Extra value for key {@link #EXTRA_INTENT_TYPE} that indicates that the
+	 * intent should start an activity
+	 */
 	public static final String INTENT_TYPE_ACTIVITY = "activity";
+
+	/**
+	 * Extra value for key {@link #EXTRA_INTENT_TYPE} that indicates that the
+	 * intent should start a service
+	 */
 	public static final String INTENT_TYPE_SERVICE = "service";
 
+	/**
+	 * Map containing all listeners currently in use, mapped by id of the
+	 * expression
+	 */
 	private static Map<String, ExpressionListener> sListeners = new HashMap<String, ExpressionListener>();
 
+	/**
+	 * Boolean indicating whether we received a register to intercept broadcasts
+	 * and forward them to the respective listeners
+	 */
 	private static boolean sReceiverRegistered = false;
 
+	/**
+	 * Broadcast receiver used in case values have to be forwarded to listeners
+	 */
 	private static BroadcastReceiver sReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -119,8 +151,7 @@ public class ExpressionManager {
 				}
 
 			} else {
-				System.out.println("got spurious broadcast: "
-						+ intent.getDataString());
+				Log.d(TAG, "got spurious broadcast: " + intent.getDataString());
 			}
 		}
 	};
@@ -143,6 +174,7 @@ public class ExpressionManager {
 		for (ResolveInfo discoveredSensor : discoveredSensors) {
 			try {
 				Drawable icon = new BitmapDrawable(
+						context.getResources(),
 						BitmapFactory.decodeResource(
 								pm.getResourcesForApplication(discoveredSensor.activityInfo.packageName),
 								discoveredSensor.activityInfo.icon));
@@ -159,6 +191,16 @@ public class ExpressionManager {
 		return result;
 	}
 
+	/**
+	 * Returns the information about a sensor with a specific name or throws a
+	 * {@link SwanException} if the sensor is not installed on the device.
+	 * 
+	 * @param context
+	 * @param name
+	 *            the entity name of the sensor
+	 * @return The sensor information
+	 * @throws SwanException
+	 */
 	public static SensorInfo getSensor(Context context, String name)
 			throws SwanException {
 		for (SensorInfo sensorInfo : getSensors(context)) {
@@ -181,9 +223,10 @@ public class ExpressionManager {
 	 *            the {@link TriStateExpression} that should be evaluated
 	 * @param listener
 	 *            a {@link TriStateExpressionListener} that receives the
-	 *            evaluation results. It is also possible to listen for the
-	 *            results using a {@link BroadcastReceiver}. Filter on
-	 *            datascheme "swan://<your.package.name>#<your.expression.id>" and action
+	 *            evaluation results. If this parameter is null, it is also
+	 *            possible to listen for the results using a
+	 *            {@link BroadcastReceiver}. Filter on datascheme
+	 *            "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
 	 *             if id is null or invalid
@@ -224,8 +267,9 @@ public class ExpressionManager {
 	 *            the {@link ValueExpression} that should be evaluated
 	 * @param listener
 	 *            a {@link ValueExpressionListener} that receives the evaluation
-	 *            results. It is also possible to listen for the results using a
-	 *            {@link BroadcastReceiver}. Filter on datascheme
+	 *            results. If this parameter is null, it is also possible to
+	 *            listen for the results using a {@link BroadcastReceiver}.
+	 *            Filter on datascheme
 	 *            "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_VALUES}.
 	 * @throws SwanException
@@ -267,8 +311,9 @@ public class ExpressionManager {
 	 *            the {@link ValueExpression} that should be evaluated
 	 * @param listener
 	 *            a {@link ValueExpressionListener} that receives the evaluation
-	 *            results. It is also possible to listen for the results using a
-	 *            {@link BroadcastReceiver}. Filter on datascheme
+	 *            results. If this parameter is null, it is also possible to
+	 *            listen for the results using a {@link BroadcastReceiver}.
+	 *            Filter on datascheme
 	 *            "swan://<your.package.name>#<your.expression.id>" and action
 	 *            {@link #ACTION_NEW_VALUES} or {@link #ACTION_NEW_TRISTATE}.
 	 * @throws SwanException
@@ -349,6 +394,22 @@ public class ExpressionManager {
 				onUndefined, null);
 	}
 
+	/**
+	 * Registers a {@link ValueExpression} for evaluation.
+	 * 
+	 * @param context
+	 * @param id
+	 *            the user provided unique id of the expression. Should not
+	 *            contain {@link Expression#SEPARATOR} or end with any of the
+	 *            {@link Expression#RESERVED_SUFFIXES}.
+	 * @param expression
+	 *            the {@link ValueExpression} that should be evaluated
+	 * @param onNewValues
+	 *            Intent that should be fired when new values are available. Add
+	 *            {@link #EXTRA_INTENT_TYPE} with any of the values
+	 *            {@link #INTENT_TYPE_ACTIVITY}, {@link #INTENT_TYPE_SERVICE} to
+	 *            have Swan launch an activity or service.
+	 */
 	public static void registerValueExpression(Context context, String id,
 			TriStateExpression expression, Intent onNewValues) {
 		registerExpression(context, id, expression, null, null, null,
@@ -387,6 +448,12 @@ public class ExpressionManager {
 
 	}
 
+	/**
+	 * registers the broadcast receiver to receive values on behalve of
+	 * listeners and forward them subsequently.
+	 * 
+	 * @param context
+	 */
 	private static void registerReceiver(Context context) {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ACTION_NEW_TRISTATE);
@@ -396,6 +463,12 @@ public class ExpressionManager {
 		context.registerReceiver(sReceiver, intentFilter);
 	}
 
+	/**
+	 * unregisters the broadcast receiver. This is executed if no listeners are
+	 * present anymore.
+	 * 
+	 * @param context
+	 */
 	private static void unregisterReceiver(Context context) {
 		context.unregisterReceiver(sReceiver);
 	}

@@ -90,20 +90,32 @@ public class EvaluationEngineService extends Service {
 						}
 					}
 				} else {
-					if (head.getDeferUntil() <= System.currentTimeMillis()) {
+					long deferUntil = head.getDeferUntil();
+					if (deferUntil <= System.currentTimeMillis()) {
 						// evaluate now
 						try {
+							// evaluation delay is the time in ms between when
+							// the expression should be evaluated (as indicated
+							// by deferuntil) and when it is really evaluated.
+							// Normally the evaluation delay is neglectable, but
+							// when the load is high, this can become
+							// significant.
 							long evaluationDelay;
-							if (head.getDeferUntil() != 0) {
+							if (deferUntil != 0) {
 								evaluationDelay = System.currentTimeMillis()
-										- head.getDeferUntil();
+										- deferUntil;
+								// code below for debugging purposes
+								if (evaluationDelay > 3600000) {
+									throw new RuntimeException(
+											"Weird evaluation delay: "
+													+ evaluationDelay + ", "
+													+ deferUntil);
+								}
 							} else {
 								evaluationDelay = 0;
 							}
 
 							long start = System.currentTimeMillis();
-
-							// System.out.println("Delay:" + evaluationDelay);
 
 							Result result = mEvaluationManager.evaluate(
 									head.getId(), head.getExpression(),
@@ -111,6 +123,7 @@ public class EvaluationEngineService extends Service {
 
 							long end = System.currentTimeMillis();
 
+							// update with statistics: evaluationTime and evaluationDelay
 							head.evaluated((end - start), evaluationDelay);
 
 							if (head.update(result)) {
@@ -132,10 +145,11 @@ public class EvaluationEngineService extends Service {
 										1,
 										head.getDeferUntil()
 												- System.currentTimeMillis());
-								//Log.d(TAG, "Waiting for " + waitTime + " ms.");
+								// Log.d(TAG, "Waiting for " + waitTime +
+								// " ms.");
 								mEvaluationThread.wait(waitTime);
-//								Log.d(TAG, "Done waiting for " + waitTime
-//										+ " ms.");
+								// Log.d(TAG, "Done waiting for " + waitTime
+								// + " ms.");
 							} catch (InterruptedException e) {
 								continue;
 							}
@@ -501,6 +515,7 @@ public class EvaluationEngineService extends Service {
 	 * 
 	 * @see android.app.Service#onCreate()
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public final void onCreate() {
 		super.onCreate();
@@ -526,6 +541,7 @@ public class EvaluationEngineService extends Service {
 	/**
 	 * Update notification.
 	 */
+	@SuppressWarnings("deprecation")
 	private void updateNotification() {
 		Intent notificationIntent = new Intent(this,
 				ExpressionViewerActivity.class);

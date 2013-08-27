@@ -44,7 +44,9 @@ public class EvaluationManager {
 
 	private static final String TAG = "EvaluationManager";
 
-	private static final long START_UP_TIME_REMOTE = 60 * 1000;
+	// time it takes to start up the remote sensor, this is a bit arbitrary
+	// because we don't (and cannot) know when the push message arrives
+	private static final long START_UP_TIME_REMOTE_SENSOR = 60 * 1000;
 
 	/** The sensor information. */
 	private List<SensorInfo> mSensorList = new ArrayList<SensorInfo>();
@@ -59,11 +61,6 @@ public class EvaluationManager {
 	private final Context mContext;
 
 	private final Map<String, Result> mCachedResults = new HashMap<String, Result>();
-
-	private long totalGetValuesTime = 0;
-	private int numGetValues = 0;
-	private long mMinGetValuesTime = Long.MAX_VALUE;
-	private long mMaxGetValuesTime = Long.MIN_VALUE;
 
 	public EvaluationManager(Context context) {
 		mContext = context;
@@ -361,7 +358,6 @@ public class EvaluationManager {
 		if (discover) {
 			// run discovery
 			mSensorList.clear();
-			Log.d(TAG, "Starting sensor discovery");
 			mSensorList = ExpressionManager.getSensors(mContext);
 		}
 		for (SensorInfo sensorInfo : mSensorList) {
@@ -411,15 +407,15 @@ public class EvaluationManager {
 				}
 			}
 		}
-		Log.d(TAG, "No sensor found for entity '" + expression.getEntity()
-				+ "'");
-
 		if (!discover) {
 			// try again with discovery
 			if (bindToSensor(id, expression, true)) {
 				return true;
 			}
 		}
+		Log.d(TAG, "No sensor found for entity '" + expression.getEntity()
+				+ "'");
+
 		// still not found?
 		throw new SensorSetupFailedException("Failed to bind to service for: "
 				+ expression);
@@ -484,14 +480,15 @@ public class EvaluationManager {
 			return true;
 		}
 
-		float pLeftTrue = 0.8f; // the chance that evaluating the left part
+		// TODO values below should be replaced by real estimates
+		float pLeftTrue = 0.5f; // the chance that evaluating the left part
 								// results in true
 		float pRightTrue = 0.5f; // the chance that evaluating the right part
 									// results in true
 		float leftEvaluationCost = 100;
-		float rightEvaluationCost = 300;
+		float rightEvaluationCost = 100;
 		float leftSenseCost = 200;
-		float rightSenseCost = 100;
+		float rightSenseCost = 200;
 
 		float leftFirstCost, rightFirstCost;
 		// check which evaluation cost is likely to be cheaper
@@ -576,6 +573,7 @@ public class EvaluationManager {
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private Result doCompare(String id, ComparisonExpression expression,
 			long now) throws SwanException {
 		Result right = evaluate(id + Expression.RIGHT_SUFFIX,
@@ -657,7 +655,7 @@ public class EvaluationManager {
 		return comparatorResult;
 	}
 
-	class DeferUntilResult {
+	private class DeferUntilResult {
 		public long deferUntil;
 		public boolean guaranteed;
 
@@ -704,27 +702,9 @@ public class EvaluationManager {
 		}
 	}
 
-	private long getMinHistoryLength(ValueExpression expression) {
-		if (expression instanceof ConstantValueExpression) {
-			return Long.MAX_VALUE;
-		} else if (expression instanceof MathValueExpression) {
-			return Math.min(
-					getMinHistoryLength(((MathValueExpression) expression)
-							.getLeft()),
-					getMinHistoryLength(((MathValueExpression) expression)
-							.getRight()));
-		} else if (expression instanceof SensorValueExpression) {
-			return ((SensorValueExpression) expression).getHistoryLength();
-		} else {
-			// should not happen
-			return 0;
-		}
-	}
-
 	private Result getFromSensor(String id, SensorValueExpression expression,
 			long now) {
 		if (mSensors.get(id) == null) {
-			// put logging here
 			Log.d(TAG, "not yet bound for: " + id + ", " + expression);
 			Result result = new Result(new TimestampedValue[] {}, 0);
 			// TODO make this a constant (configurable?)
@@ -733,25 +713,14 @@ public class EvaluationManager {
 			return result;
 		}
 		try {
-//			long start = System.currentTimeMillis();
 			List<TimestampedValue> values = mSensors.get(id).getValues(id, now,
 					expression.getHistoryLength());
 
-//			long end = System.currentTimeMillis();
-
-//			totalGetValuesTime += (end - start);
-//			numGetValues++;
-//
-//			mMinGetValuesTime = Math.min(mMinGetValuesTime, (end - start));
-//			mMaxGetValuesTime = Math.max(mMaxGetValuesTime, (end - start));
-
-//			System.out.println("Min: " + mMinGetValuesTime + ", Max: "
-//					+ mMaxGetValuesTime + ", Avg: "
-//					+ (totalGetValuesTime / numGetValues));
-
-			// System.out.println("total get values: " + numGetValues);
+			// TODO if values is empty, should we not just defer until forever?
+			// And can values be null at all?
 			if (values == null || values.size() == 0) {
 				Result result = new Result(new TimestampedValue[] {}, 0);
+				// TODO make this a constant (configurable?)
 				result.setDeferUntil(now + 1000);
 				result.setDeferUntilGuaranteed(false);
 				return result;
@@ -927,7 +896,7 @@ public class EvaluationManager {
 			long sensorStartUpTime = 0;
 			if (!location.equals(Expression.LOCATION_SELF)
 					&& !location.equals(Expression.LOCATION_INDEPENDENT)) {
-				sensorStartUpTime = START_UP_TIME_REMOTE;
+				sensorStartUpTime = START_UP_TIME_REMOTE_SENSOR;
 			} else {
 				try {
 					mSensors.get(id).getStartUpTime(id);
@@ -1230,9 +1199,7 @@ public class EvaluationManager {
 	}
 
 	public Bundle[] activeSensorsAsBundle() {
-		// Bundle[] sensors = new Bundle[mSensors.size()];
 		ArrayList<Bundle> sensors = new ArrayList<Bundle>();
-		int i = 0;
 		for (String key : mSensors.keySet()) {
 			try {
 				boolean dup = false;
@@ -1248,10 +1215,7 @@ public class EvaluationManager {
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
-			i++;
 		}
-		Bundle[] res = new Bundle[sensors.size()];
-		res = sensors.toArray(res);
-		return res;
+		return sensors.toArray(new Bundle[sensors.size()]);
 	}
 }

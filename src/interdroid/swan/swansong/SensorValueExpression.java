@@ -1,7 +1,5 @@
 package interdroid.swan.swansong;
 
-import interdroid.swan.crossdevice.Registry;
-import android.content.Context;
 import android.os.Bundle;
 
 public class SensorValueExpression implements ValueExpression {

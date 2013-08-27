@@ -6,7 +6,6 @@ import interdroid.swan.swansong.Expression;
 import interdroid.swan.swansong.ExpressionFactory;
 import interdroid.swan.swansong.ExpressionParseException;
 import interdroid.swan.swansong.LogicExpression;
-import interdroid.swan.swansong.LogicOperator;
 import interdroid.swan.swansong.TriStateExpression;
 
 import java.util.ArrayList;

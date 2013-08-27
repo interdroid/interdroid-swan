@@ -169,8 +169,6 @@ public class SensorInfo {
 			keys.addAll(b.keySet());
 			for (String key : keys) {
 				if (configuration.containsKey(key)) {
-					// We cannot do this, since parsing the configuration in
-					// ContextTypedValue will always put a String value
 					if (!b.get(key).getClass()
 							.isInstance(configuration.get(key))) {
 						try {
@@ -242,6 +240,7 @@ public class SensorInfo {
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		return entityId;
 	}

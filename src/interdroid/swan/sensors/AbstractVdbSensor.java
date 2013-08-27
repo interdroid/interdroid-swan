@@ -1,6 +1,5 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.sensors.impl.MovementSensor;
 import interdroid.swan.swansong.TimestampedValue;
 import interdroid.vdb.content.EntityUriBuilder;
 
@@ -17,7 +16,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.hardware.SensorManager;
 import android.net.Uri;
 
 /**

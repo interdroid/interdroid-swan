@@ -48,7 +48,7 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	public String getId() {
 		return mId;
 	}
-	
+
 	/**
 	 * update the current result and return whether this update caused a change
 	 * 
@@ -108,30 +108,11 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 		if (mId.contains(Expression.SEPARATOR)) {
 			id = "<remote> " + mId.split(Expression.SEPARATOR, 2)[1];
 		}
-		/*
-		 * return id + "\n" + mCurrentResult + "\n" +
-		 * mExpression.toParseString() + "\nStart time: " + new Date(mStartTime)
-		 * + "\nEvaluation Rate: " + (mEvaluations /
-		 * ((System.currentTimeMillis() - mStartTime) / 60000.0)) +
-		 * " per minute" + "\nAvg Evaluation Time: " + (mTotalEvaluationTime /
-		 * Math.max(mEvaluations, 1)) + "\nMin Evaluation Time: " +
-		 * mMinEvaluationTime + "\nMax Evaluation Time: " + mMaxEvaluationTime +
-		 * "\nEvaluation Percentage: " + ((mTotalEvaluationTime * 100) / (float)
-		 * (System .currentTimeMillis() - mStartTime)) +
-		 * "\nAvg Evaluation Delay: " +
-		 * (mTotalEvaluationDelay/Math.max(mEvaluationsDelay, 1));
-		 */
-		return "";
-
-		// id
-		// + "\n" + "Evaluation Percentage"
-		// + "\n" + ((mTotalEvaluationTime * 100) / (float) (System
-		// .currentTimeMillis() - mStartTime)) + "\n";
+		return id;
 	}
 
 	public void evaluated(long currentEvalutionTime, long evalDelay) {
 		mEvaluations += 1;
-//		System.out.println("total evals: " + mEvaluations);
 		mTotalEvaluationTime += currentEvalutionTime;
 		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
 		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);

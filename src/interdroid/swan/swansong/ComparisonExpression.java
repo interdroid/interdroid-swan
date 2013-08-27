@@ -1,6 +1,5 @@
 package interdroid.swan.swansong;
 
-import android.content.Context;
 
 public class ComparisonExpression implements TriStateExpression {
 

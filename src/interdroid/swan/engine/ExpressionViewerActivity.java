@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,9 +14,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.PorterDuff;
 
 public class ExpressionViewerActivity extends ListActivity {
 	private double mMaxEvalRate = Double.MIN_VALUE;
@@ -98,7 +93,7 @@ public class ExpressionViewerActivity extends ListActivity {
 			final boolean ascending) {
 		return new Comparator<Bundle>() {
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public int compare(Bundle lhs, Bundle rhs) {
 				Bundle first = ascending ? lhs : rhs;
@@ -423,13 +418,6 @@ public class ExpressionViewerActivity extends ListActivity {
 
 			mySeekBar.getProgressDrawable().setColorFilter(Color.RED,
 					Mode.SRC_IN);
-
-			// test text progress bar
-			// TextProgressBar textPB = (TextProgressBar)
-			// convertView.findViewById(R.id.PbWithText);
-			// textPB.setText("TEST");
-			// textPB.setProgress(70);
-			// textPB.setTextSize(18);
 
 			return convertView;
 		}

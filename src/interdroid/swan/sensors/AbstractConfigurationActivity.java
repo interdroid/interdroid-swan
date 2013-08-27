@@ -13,7 +13,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -50,6 +49,7 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 	private BroadcastReceiver mNameReceiver = new BroadcastReceiver() {
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			List<String> names = intent.getStringArrayListExtra("names");
@@ -63,8 +63,6 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 
 	};
 
-	// Android includes lifecycle checks ensuring super.onCreate() was called.
-	// CHECKSTYLE:OFF
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -93,12 +91,14 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void updatePref(String key, String value) {
 		findPreference(key).getEditor().putString(key, value).apply();
 		findPreference(key).getOnPreferenceChangeListener().onPreferenceChange(
 				findPreference(key), value);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onResume() {
 		addPreferencesFromIntent(new Intent(
@@ -182,11 +182,11 @@ public abstract class AbstractConfigurationActivity extends PreferenceActivity
 		}
 	}
 
-	// CHECKSTYLE:ON
 
 	/**
 	 * Sets up this activity.
 	 */
+	@SuppressWarnings("deprecation")
 	private void setupPrefs() {
 		setupPref(null, getPreferenceScreen());
 	}

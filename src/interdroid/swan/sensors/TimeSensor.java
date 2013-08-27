@@ -58,6 +58,7 @@ public class TimeSensor {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static Result determineValue(long now, String valuePath,
 			Bundle configuration, Comparator comparator, Comparable right) {
 		if (CURRENT_MS_FIELD.equals(valuePath)) {

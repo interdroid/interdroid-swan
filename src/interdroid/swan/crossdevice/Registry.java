@@ -91,12 +91,6 @@ public class Registry {
 		if (getDirty(context)) {
 			update(context);
 		}
-		if (names.size() == 0) {
-			names.add("John");
-			names.add("Jane");
-			names.add("Bob");
-			names.add("Alice");
-		}
 		return names;
 	}
 
