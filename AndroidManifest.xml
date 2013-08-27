@@ -449,7 +449,7 @@
                 android:value="signal" />
             <meta-data
                 android:name="valuePaths"
-                android:value="is_gsm,,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
+                android:value="is_gsm,gsm_signal_strength,gsm_bit_error_rate,cdma_dbm,cdma_ecio,evdo_dbm,evdo_ecio,evdo_snr" />
             <meta-data
                 android:name="authority"
                 android:value="interdroid.context.sensor.signal" />
@@ -772,7 +772,6 @@
         <service
             android:name="interdroid.swan.sensors.impl.SignalStrengthSensor"
             android:exported="true"
-            android:icon="@drawable/signal_icon"
             android:process=":signalsensor" >
         </service>
 
