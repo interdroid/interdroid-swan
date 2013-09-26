@@ -126,13 +126,17 @@ public class TimestampedValue implements Serializable, Parcelable,
 	 */
 	public static TimestampedValue calculateMean(
 			final List<TimestampedValue> values) {
+//		long start = System.currentTimeMillis();
 		double sumValues = 0.0;
 
 		for (TimestampedValue value : values) {
 			sumValues += (Double) value.mValue;
 		}
+//		long end = System.currentTimeMillis();
+//		System.out.println("Time: " + (end-start));
+		
 		return new TimestampedValue(sumValues / values.size(),
-				values.get(0).mTimestamp);
+				values.get(values.size()-1).mTimestamp);
 	}
 
 	/**

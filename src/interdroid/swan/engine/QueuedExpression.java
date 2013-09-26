@@ -131,14 +131,21 @@ public class QueuedExpression implements Comparable<QueuedExpression> {
 	}
 
 	public void evaluated(long currentEvalutionTime, long evalDelay) {
-		mEvaluations += 1;
-//		System.out.println("total evals: " + mEvaluations);
-		mTotalEvaluationTime += currentEvalutionTime;
-		mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
-		mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
+//			if((mStartTime + 321000) <= System.currentTimeMillis() ? true : false){
+			mEvaluations += 1;
+//			System.out.println("total evals: " + mEvaluations);
+			mTotalEvaluationTime += currentEvalutionTime;
+			mMinEvaluationTime = Math.min(mMinEvaluationTime, currentEvalutionTime);
+			mMaxEvaluationTime = Math.max(mMaxEvaluationTime, currentEvalutionTime);
+//		}
 		if (evalDelay != 0) {
-			mTotalEvaluationDelay += evalDelay;
-			mNumEvaluationsDelay += 1;
+			if(!(evalDelay > 100000000)){
+				mTotalEvaluationDelay += evalDelay;
+				mNumEvaluationsDelay += 1;
+			}else{
+				System.out.println("Eval delay: " + evalDelay);
+			}
+			
 		}
 	}
 

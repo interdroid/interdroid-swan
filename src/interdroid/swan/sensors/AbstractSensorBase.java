@@ -1,5 +1,7 @@
 package interdroid.swan.sensors;
 
+import interdroid.swan.engine.EvaluationEngineReceiver;
+import interdroid.swan.engine.EvaluationEngineService;
 import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
@@ -86,7 +88,7 @@ public abstract class AbstractSensorBase extends Service implements
 
 	@Override
 	public abstract String[] getValuePaths();
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

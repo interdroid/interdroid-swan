@@ -27,6 +27,7 @@ import interdroid.swan.swansong.UnaryLogicOperator;
 import interdroid.swan.swansong.ValueExpression;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +65,11 @@ public class EvaluationManager {
 	private int numGetValues = 0;
 	private long mMinGetValuesTime = Long.MAX_VALUE;
 	private long mMaxGetValuesTime = Long.MIN_VALUE;
-
+	private long mStartTime;
+	
 	public EvaluationManager(Context context) {
 		mContext = context;
+		mStartTime = System.currentTimeMillis();
 	}
 
 	public void newRemoteResult(String id, Result result) {
@@ -716,7 +719,10 @@ public class EvaluationManager {
 			return 0;
 		}
 	}
-
+	
+	long lastEvaluated = 1000;
+	List<TimestampedValue> totalValues = new ArrayList<TimestampedValue>();
+	
 	private Result getFromSensor(String id, SensorValueExpression expression,
 			long now) {
 		if (mSensors.get(id) == null) {
@@ -729,33 +735,21 @@ public class EvaluationManager {
 			return result;
 		}
 		try {
-//			long start = System.currentTimeMillis();
-			List<TimestampedValue> values = mSensors.get(id).getValues(id, now,
+
+/*			List<TimestampedValue> values = mSensors.get(id).getValues(id, now,
 					expression.getHistoryLength());
-
-//			long end = System.currentTimeMillis();
-
-//			totalGetValuesTime += (end - start);
-//			numGetValues++;
-//
-//			mMinGetValuesTime = Math.min(mMinGetValuesTime, (end - start));
-//			mMaxGetValuesTime = Math.max(mMaxGetValuesTime, (end - start));
-
-//			System.out.println("Min: " + mMinGetValuesTime + ", Max: "
-//					+ mMaxGetValuesTime + ", Avg: "
-//					+ (totalGetValuesTime / numGetValues));
-
-			// System.out.println("total get values: " + numGetValues);
+			
 			if (values == null || values.size() == 0) {
 				Result result = new Result(new TimestampedValue[] {}, 0);
 				result.setDeferUntil(now + 1000);
 				result.setDeferUntilGuaranteed(false);
 				return result;
 			}
-
+			
+			
 			TimestampedValue[] reduced = TimestampedValue.applyMode(values,
-					expression.getHistoryReductionMode());
-
+			expression.getHistoryReductionMode());
+			
 			Result result = new Result(reduced, values.get(values.size() - 1)
 					.getTimestamp());
 			if (expression.getHistoryLength() == 0 || reduced == null
@@ -768,7 +762,86 @@ public class EvaluationManager {
 				result.setDeferUntil(values.get(values.size() - 1)
 						.getTimestamp() + expression.getHistoryLength());
 				result.setDeferUntilGuaranteed(false);
+			}*/
+			
+			/** NEW CODE */	
+			
+			long start = 0;
+			long end = 0;
+//
+//			System.out.println("Time: " + now);
+			List<TimestampedValue> temp = new ArrayList<TimestampedValue>();
+			temp.addAll(totalValues);
+//			
+			long timeWindow = now-lastEvaluated;
+			List<TimestampedValue> values = mSensors.get(id).getValues(id, now,
+					timeWindow);
+//			
+			lastEvaluated = now;
+			Collections.reverse(values);
+			temp.addAll(values);
+//			
+			long border = now - expression.getHistoryLength();
+			int i = 0;
+			for(TimestampedValue tValue : temp){
+				if(tValue.getTimestamp() < border){
+					i++;
+				}else{
+					temp = temp.subList(i, temp.size());
+					break;
+				}
 			}
+//
+//			//System.out.println("Total Values Size: " + temp.size() + " Values Size: " + values.size());
+//			// System.out.println("total get values: " + numGetValues);
+//
+////			start = System.currentTimeMillis();
+//
+////			List<TimestampedValue> hah = new ArrayList<TimestampedValue>();
+////			
+////			for(int j=0; j < 500; j++){
+////				hah.add(new TimestampedValue(9.0 + (double)(Math.random() * ((10.0 - 9.0) + 1))));
+////			}
+							
+			start = System.currentTimeMillis();
+		
+			TimestampedValue[] reduced = TimestampedValue.applyMode(temp,
+					expression.getHistoryReductionMode());
+			end = System.currentTimeMillis();
+//			
+//
+//			
+			Result result = new Result(reduced, temp.get(0)
+					.getTimestamp());
+			if (expression.getHistoryLength() == 0 || reduced == null
+					|| reduced.length == 0) {
+				// we cannot defer based on values, new values will be retrieved
+				// when they arrive
+				result.setDeferUntil(Long.MAX_VALUE);
+				result.setDeferUntilGuaranteed(false);
+			} else {
+				result.setDeferUntil(temp.get(0)
+						.getTimestamp() + expression.getHistoryLength());
+				result.setDeferUntilGuaranteed(false);
+			}
+			totalValues.clear();
+			totalValues.addAll(temp);
+//			
+//			end = System.currentTimeMillis();
+////			System.out.println("Now: " + now + " delay: " + result.getDeferUntil());
+//
+//			if ((mStartTime + 20100) <= System.currentTimeMillis() ? true : false) {
+				totalGetValuesTime += (end - start);
+				numGetValues++;
+
+				mMinGetValuesTime = Math.min(mMinGetValuesTime, (end - start));
+				mMaxGetValuesTime = Math.max(mMaxGetValuesTime, (end - start));
+
+				System.out.println("Min: " + mMinGetValuesTime + ", Max: "
+						+ mMaxGetValuesTime + ", Avg: "
+						+ (totalGetValuesTime / numGetValues));
+//			}
+			
 			return result;
 		} catch (RemoteException e) {
 			Log.e(TAG,

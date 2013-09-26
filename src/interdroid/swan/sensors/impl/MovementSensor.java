@@ -42,7 +42,7 @@ public class MovementSensor extends AbstractMemorySensor {
 	public static final String Z_FIELD = "z";
 	public static final String TOTAL_FIELD = "total";
 
-	protected static final int HISTORY_SIZE = 80 * 160; //hz x seconds
+	protected static final int HISTORY_SIZE = 80 * 500; //hz x seconds
 
 	private Sensor accelerometer;
 	private SensorManager sensorManager;

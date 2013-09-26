@@ -39,9 +39,19 @@ public class TestActivity extends Activity {
 		setContentView(R.layout.test);
 		
 		Expression proximity;
-		Expression accelerometer = null;
+		
+		Expression accelerometer1 = null;
+		Expression accelerometer2 = null;
+		Expression accelerometer3 = null;
+		Expression accelerometer4 = null;
+		Expression accelerometer5 = null;
+		Expression accelerometer6 = null;
+		Expression accelerometer7 = null;
+		Expression accelerometer8 = null;
+		
 		Expression avgAccelerometer = null;
-
+		Expression magnetometer = null;
+		
 		try {
 			// .parse("Roelof@movement:total{MAX,5000}>15.0");
 			// .parse("self@wifi:level?bssid='b8:f6:b1:12:9d:77'&discovery_interval=5000{ANY,0}");
@@ -49,12 +59,31 @@ public class TestActivity extends Activity {
 			// .parse("self@movement:total?accuracy=3{ANY,0}");
 			proximity = ExpressionFactory
 					.parse("self@proximity:distance?accuracy=0{ANY,0}");
-
-			accelerometer = ExpressionFactory
+			
+			accelerometer1 = ExpressionFactory
 					.parse("self@movement:total?accuracy=0{ANY,0}");
-
+			accelerometer2 = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{MAX,0}");
+			accelerometer3 = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{MIN,0}");
+			accelerometer4 = ExpressionFactory
+					.parse("self@movement:total?accuracy=0{ALL,0}");
+//			accelerometer5 = ExpressionFactory
+//					.parse("self@movement:total?accuracy=0{ALL,0}");
+//			accelerometer6 = ExpressionFactory
+//					.parse("self@movement:total?accuracy=3{ANY,0}");
+//			accelerometer7 = ExpressionFactory
+//					.parse("self@movement:total?accuracy=2{ANY,0}");
+//			accelerometer8 = ExpressionFactory
+//					.parse("self@movement:total?accuracy=1{ANY,0}");
+			
+			
 			avgAccelerometer = ExpressionFactory
-					.parse("self@movement:total?accuracy=0{MEAN,10000}>12.0");
+					.parse("self@movement:total?accuracy=0{MEAN,20000}>12.0");
+			
+			magnetometer = ExpressionFactory
+					.parse("self@magnetometer:total?accuracy=0{ANY,0}");
+			
 
 		} catch (ExpressionParseException e1) {
 			e1.printStackTrace(System.out);
@@ -62,187 +91,40 @@ public class TestActivity extends Activity {
 			proximity = null;
 		}
 		final Expression proximityExpression = proximity;
-		final Expression accelerometerExpression = accelerometer;
+		
+		final Expression accelerometer1Expression = accelerometer1;
+		final Expression accelerometer2Expression = accelerometer2;
+		final Expression accelerometer3Expression = accelerometer3;
+		final Expression accelerometer4Expression = accelerometer4;
+		final Expression accelerometer5Expression = accelerometer5;
+		final Expression accelerometer6Expression = accelerometer6;
+		final Expression accelerometer7Expression = accelerometer7;
+		final Expression accelerometer8Expression = accelerometer8;
+		
 		final Expression avgExpression = avgAccelerometer;
-
+		final Expression magnetometerExpression = magnetometer;
+		
 		findViewById(R.id.register).setOnClickListener(
 				new View.OnClickListener() {
 
 					@Override
 					public void onClick(View v) {
-						try {
-//							ExpressionManager.registerExpression(
-//									TestActivity.this, "proximity",
-//									proximityExpression,
-//									new ExpressionListener() {
-//
-//										@Override
-//										public void onNewState(final String id,
-//												final long timestamp,
-//												final TriState newState) {
-//											runOnUiThread(new Runnable() {
-//												public void run() {
-//													((TextView) findViewById(R.id.text))
-//															.setText(new Date(
-//																	timestamp)
-//																	+ ": "
-//																	+ newState);
-//													Toast.makeText(
-//															TestActivity.this,
-//															id + ": "
-//																	+ newState,
-//															Toast.LENGTH_LONG)
-//															.show();
-//												}
-//											});
-//											System.out.println(id + ": "
-//													+ newState);
-//										}
-//
-//										@Override
-//										public void onNewValues(
-//												String id,
-//												final TimestampedValue[] newValues) {
-//											runOnUiThread(new Runnable() {
-//												public void run() {
-//													if (newValues == null
-//															|| newValues.length == 0) {
-//														((TextView) findViewById(R.id.text))
-//																.setText("n.a.");
-//													} else {
-//														((TextView) findViewById(R.id.text))
-//																.setText(new Date(
-//																		newValues[0]
-//																				.getTimestamp())
-//																		+ ": "
-//																		+ newValues[0]
-//																				.getValue());
-//													}
-//												}
-//											});
-//
-//											// System.out.println(id
-//											// + ": "
-//											// + Arrays.toString(newValues));
-//										}
-//
-//									});
-//
-//							ExpressionManager.registerExpression(
-//									TestActivity.this, "accelerometer",
-//									accelerometerExpression,
-//									new ExpressionListener() {
-//
-//										@Override
-//										public void onNewState(final String id,
-//												final long timestamp,
-//												final TriState newState) {
-//											runOnUiThread(new Runnable() {
-//												public void run() {
-//													((TextView) findViewById(R.id.text))
-//															.setText(new Date(
-//																	timestamp)
-//																	+ ": "
-//																	+ newState);
-//													Toast.makeText(
-//															TestActivity.this,
-//															id + ": "
-//																	+ newState,
-//															Toast.LENGTH_LONG)
-//															.show();
-//												}
-//											});
-//											System.out.println(id + ": "
-//													+ newState);
-//										}
-//
-//										@Override
-//										public void onNewValues(
-//												String id,
-//												final TimestampedValue[] newValues) {
-//											runOnUiThread(new Runnable() {
-//												public void run() {
-//													if (newValues == null
-//															|| newValues.length == 0) {
-//														((TextView) findViewById(R.id.text))
-//																.setText("n.a.");
-//													} else {
-//														((TextView) findViewById(R.id.text))
-//																.setText(new Date(
-//																		newValues[0]
-//																				.getTimestamp())
-//																		+ ": "
-//																		+ newValues[0]
-//																				.getValue());
-//													}
-//												}
-//											});
-//
-//											// System.out.println(id
-//											// + ": "
-//											// + Arrays.toString(newValues));
-//										}
-//
-//									});
-
-							ExpressionManager.registerExpression(
-									TestActivity.this, "accelerometerAvg",
-									avgExpression, new ExpressionListener() {
-
-										@Override
-										public void onNewState(final String id,
-												final long timestamp,
-												final TriState newState) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													((TextView) findViewById(R.id.text))
-															.setText(new Date(
-																	timestamp)
-																	+ ": "
-																	+ newState);
-													Toast.makeText(
-															TestActivity.this,
-															id + ": "
-																	+ newState,
-															Toast.LENGTH_LONG)
-															.show();
-												}
-											});
-											System.out.println(id + ": "
-													+ newState);
-										}
-
-										@Override
-										public void onNewValues(
-												String id,
-												final TimestampedValue[] newValues) {
-											runOnUiThread(new Runnable() {
-												public void run() {
-													if (newValues == null
-															|| newValues.length == 0) {
-														((TextView) findViewById(R.id.text))
-																.setText("n.a.");
-													} else {
-														((TextView) findViewById(R.id.text))
-																.setText(new Date(
-																		newValues[0]
-																				.getTimestamp())
-																		+ ": "
-																		+ newValues[0]
-																				.getValue());
-													}
-												}
-											});
-
-											// System.out.println(id
-											// + ": "
-											// + Arrays.toString(newValues));
-										}
-
-									});
-						} catch (SwanException e) {
-							e.printStackTrace();
-						}
+//						registerExpressionTest(proximityExpression,"proximty");
+						
+//						for(int i =0; i<1; i++){
+//							String name = "accelerometer" + i;
+//							registerExpressionTest(accelerometer1Expression,name);
+//						}
+//						registerExpressionTest(accelerometer2Expression,"accelerometer2");
+//						registerExpressionTest(accelerometer3Expression,"accelerometer3");
+//						registerExpressionTest(accelerometer4Expression,"accelerometer4");
+//						registerExpressionTest(accelerometer5Expression,"accelerometer5");
+//						registerExpressionTest(accelerometer6Expression,"accelerometer6");
+//						registerExpressionTest(accelerometer7Expression,"accelerometer7");
+//						registerExpressionTest(accelerometer8Expression,"accelerometer8");
+						
+						registerExpressionTest(avgExpression,"avgAccelerometer");
+						
 					}
 				});
 
@@ -251,19 +133,105 @@ public class TestActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						ExpressionManager.unregisterExpression(
+//						ExpressionManager.unregisterExpression(
+//						TestActivity.this, "proximity");
+//						
+//						for(int i =0; i<1; i++){
+//							String name = "accelerometer" + i;
+//							ExpressionManager.unregisterExpression(
+//									TestActivity.this, name);
+//						}
+//						
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer1");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer2");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer3");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer4");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer5");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer6");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer7");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "accelerometer8");
 
-						TestActivity.this, "proximity");
+						
 						ExpressionManager.unregisterExpression(
-								TestActivity.this, "accelerometer");
-						ExpressionManager.unregisterExpression(
-								TestActivity.this, "accelerometerAvg");
-
+								TestActivity.this, "avgAccelerometer");
+//						ExpressionManager.unregisterExpression(
+//								TestActivity.this, "magnetometer");
 					}
 				});
 
 	}
 
+	void registerExpressionTest(Expression expression, String name){
+		try {
+			ExpressionManager.registerExpression(
+					TestActivity.this, name,
+					expression, new ExpressionListener() {
+
+						@Override
+						public void onNewState(final String id,
+								final long timestamp,
+								final TriState newState) {
+							runOnUiThread(new Runnable() {
+								public void run() {
+									((TextView) findViewById(R.id.text))
+											.setText(new Date(
+													timestamp)
+													+ ": "
+													+ newState);
+									Toast.makeText(
+											TestActivity.this,
+											id + ": "
+													+ newState,
+											Toast.LENGTH_LONG)
+											.show();
+								}
+							});
+							System.out.println(id + ": "
+									+ newState);
+						}
+
+						@Override
+						public void onNewValues(
+								String id,
+								final TimestampedValue[] newValues) {
+							runOnUiThread(new Runnable() {
+								public void run() {
+									if (newValues == null
+											|| newValues.length == 0) {
+										((TextView) findViewById(R.id.text))
+												.setText("n.a.");
+									} else {
+										((TextView) findViewById(R.id.text))
+												.setText(new Date(
+														newValues[0]
+																.getTimestamp())
+														+ ": "
+														+ newValues[0]
+																.getValue());
+									}
+								}
+							});
+
+							// System.out.println(id
+							// + ": "
+							// + Arrays.toString(newValues));
+						}
+
+					});
+		} catch (SwanException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 1234) {
 			if (resultCode == RESULT_OK) {
