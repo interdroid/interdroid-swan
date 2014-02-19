@@ -2,8 +2,8 @@ package interdroid.swan.sensors.impl;
 
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
-import interdroid.swan.sensors.AbstractSensorBase;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.sensors.AbstractVdbSensor;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -33,7 +33,7 @@ import org.xml.sax.SAXException;
 import android.os.Bundle;
 import android.util.Log;
 
-public class CalendarSensor extends AbstractSensorBase {
+public class CalendarSensor extends AbstractVdbSensor {
 
 	public static final String TAG = "Calendar";
 
@@ -173,7 +173,7 @@ public class CalendarSensor extends AbstractSensorBase {
 				DEFAULT_IGNORE_FREE_EVENTS);
 	}
 
-	@Override
+	//@Override
 	public String getScheme() {
 		return "{'type': 'record', 'name': 'train', 'namespace': 'context.sensor',"
 				+ " 'fields': ["
@@ -197,12 +197,6 @@ public class CalendarSensor extends AbstractSensorBase {
 	@Override
 	public final void unregister(String id) {
 		activeThreads.remove(id).interrupt();
-	}
-
-	@Override
-	public List<TimestampedValue> getValues(String id, long now, long timespan) {
-		return getValuesForTimeSpan(activeThreads.get(id).getValues(), now,
-				timespan);
 	}
 
 	class CalendarPoller extends Thread {
@@ -258,11 +252,5 @@ public class CalendarSensor extends AbstractSensorBase {
 			calendarPoller.interrupt();
 		}
 	}
-
-	@Override
-	protected void init() {
-		// TODO Auto-generated method stub
-
-	};
 
 }

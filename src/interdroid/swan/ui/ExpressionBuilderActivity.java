@@ -1,10 +1,12 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
-import interdroid.swan.contextexpressions.LogicExpression;
-import interdroid.swan.contextexpressions.LogicOperator;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionFactory;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.LogicExpression;
+import interdroid.swan.swansong.TriStateExpression;
+import interdroid.swan.swansong.UnaryLogicOperator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +168,7 @@ public class ExpressionBuilderActivity extends Activity {
 		if (resultCode == RESULT_OK) {
 			if (data.hasExtra("Expression")) {
 				try {
-					expressions.add(Expression.parse(data
+					expressions.add(ExpressionFactory.parse(data
 							.getStringExtra("Expression")));
 					expressionlistAdapter.notifyDataSetChanged();
 				} catch (ExpressionParseException e) {
@@ -180,7 +182,7 @@ public class ExpressionBuilderActivity extends Activity {
 				for (String expression : data
 						.getStringArrayListExtra("Expressions")) {
 					try {
-						expressions.add(Expression.parse(expression));
+						expressions.add(ExpressionFactory.parse(expression));
 					} catch (ExpressionParseException e) {
 						// should not happen
 						e.printStackTrace();
@@ -205,8 +207,9 @@ public class ExpressionBuilderActivity extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		int position = ((AdapterContextMenuInfo) item.getMenuInfo()).position;
 		if (item.getTitle().toString().equals("Negate")) {
-			expressions.set(position, new LogicExpression(LogicOperator.NOT,
-					expressions.get((position))));
+			expressions.set(position, new LogicExpression(
+					Expression.LOCATION_INFER, UnaryLogicOperator.NOT,
+					(TriStateExpression) expressions.get(position)));
 			expressionlistAdapter.notifyDataSetChanged();
 		} else if (item.getTitle().toString().equals("Delete")) {
 			expressions.remove(position);

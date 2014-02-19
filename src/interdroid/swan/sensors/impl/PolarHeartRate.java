@@ -80,6 +80,8 @@ public class PolarHeartRate extends AbstractVdbSensor {
 	public static final String INDEX = "index";
 	/** RRI values in ms. 60000 / rri = bpm. */
 	public static final String RRI = "rri";
+	/** Status text, shows the status of the connection to the sensor */
+	public static final String STATUS_TEXT_FIELD = "status_text";
 
 	/** The device name configuration. */
 	public static final String DEVICE_NAME = "deviceName";
@@ -104,6 +106,9 @@ public class PolarHeartRate extends AbstractVdbSensor {
 						+ "\n{'name': '"
 						+ STATUS
 						+ "', 'type': 'int'},"
+						+ "\n{'name': '"
+						+ STATUS_TEXT_FIELD
+						+ "', 'type': 'string'},"
 						+ "\n{'name': '"
 						+ RRI
 						+ "', 'type': 'int'}"
@@ -230,12 +235,25 @@ public class PolarHeartRate extends AbstractVdbSensor {
 			values.put(INDEX, index);
 			values.put(STATUS, status);
 			values.put(RRI, rri);
+			values.put(STATUS_TEXT_FIELD, statusAsText(status));
 
 			// Send it to the database
 			putValues(values, now);
 		}
 
 	}
+	
+	private String statusAsText(int status){
+		switch(status){
+		case 241:
+			return "Connected - Active reading HR";
+		case 251:
+			return "Connected - Problem reading HR";
+		default:
+			return "Unknown: " + status;
+		}
+		}
+	
 
 	@Override
 	public final void register(final String id, final String valuePath,

@@ -1,8 +1,7 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ConstantTypedValue;
-import interdroid.swan.contextexpressions.TypedValueExpression;
+import interdroid.swan.swansong.ConstantValueExpression;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -48,8 +47,8 @@ public class EnterConstantDialog extends Activity {
 					break;
 				}
 				Intent result = new Intent();
-				result.putExtra("Expression", new TypedValueExpression(
-						new ConstantTypedValue(constant)).toParseString());
+				result.putExtra("Expression", new ConstantValueExpression(
+						constant).toParseString());
 				setResult(RESULT_OK, result);
 				finish();
 			}

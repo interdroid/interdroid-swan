@@ -2,6 +2,7 @@
 <launchConfiguration type="org.eclipse.ant.AntBuilderLaunchConfigurationType">
 <booleanAttribute key="org.eclipse.ant.ui.ATTR_TARGETS_UPDATED" value="true"/>
 <booleanAttribute key="org.eclipse.ant.ui.DEFAULT_VM_INSTALL" value="false"/>
+<booleanAttribute key="org.eclipse.ant.uiSET_INPUTHANDLER" value="false"/>
 <stringAttribute key="org.eclipse.debug.core.ATTR_REFRESH_SCOPE" value="${project}"/>
 <booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="false"/>
 <listAttribute key="org.eclipse.jdt.launching.CLASSPATH">
@@ -12,10 +13,11 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.ant.ui.AntClasspathProvider"/>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value=""/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_BUILD_SCOPE" value="${working_set:&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;resources&gt;&#10;&lt;item path=&quot;/ContextDroid/ContextExpression.g&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/contextexpressions/ContextExpression.tokens&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/contextexpressions/ContextExpressionLexer.java&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/contextexpressions/ContextExpressionParser.java&quot; type=&quot;1&quot;/&gt;&#10;&lt;/resources&gt;}"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${build_project}/buildgrammar.ant"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="swan"/>
+<booleanAttribute key="org.eclipse.ui.externaltools.ATTR_BUILDER_ENABLED" value="true"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_BUILD_SCOPE" value="${working_set:&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;resources&gt;&#10;&lt;item path=&quot;/ContextDroid/ContextExpression.g&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/swansong/ContextExpression.tokens&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/swansong/ContextExpressionLexer.java&quot; type=&quot;1&quot;/&gt;&#10;&lt;item path=&quot;/ContextDroid/gen/interdroid/contextdroid/swansong/ContextExpressionParser.java&quot; type=&quot;1&quot;/&gt;&#10;&lt;/resources&gt;}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/swan/buildgrammar.ant}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="incremental,"/>
 <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_TRIGGERS_CONFIGURED" value="true"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${build_project}"/>
 </launchConfiguration>

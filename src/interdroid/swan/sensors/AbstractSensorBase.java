@@ -1,21 +1,18 @@
 package interdroid.swan.sensors;
 
-import interdroid.swan.ConnectionListener;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.swansong.TimestampedValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * This class is the abstract base for all Sensor services. Sensor implementors
@@ -27,62 +24,17 @@ import android.os.RemoteException;
  */
 public abstract class AbstractSensorBase extends Service implements
 		SensorInterface {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(AbstractSensorBase.class);
 
-	/**
-	 * Gets all readings from timespan seconds ago until now. Readings are in
-	 * reverse order (latest first). This is important for the expression
-	 * engine.
-	 * 
-	 * @param now
-	 *            the start
-	 * @param timespan
-	 *            the end
-	 * @param values
-	 *            the values
-	 * @return All readings in the timespan between timespan seconds ago and now
-	 */
-	protected static final List<TimestampedValue> getValuesForTimeSpan(
-			final List<TimestampedValue> values, final long now,
-			final long timespan) {
-		// make a copy of the list
-		List<TimestampedValue> result;
-
-		if (timespan == 0) {
-			result = values.subList(Math.max(0, values.size() - 1),
-					values.size());
-		} else {
-			result = new ArrayList<TimestampedValue>();
-			int startPos = 0;
-			int endPos = 0;
-			if (values != null) {
-				result.addAll(values);
-				for (int i = 0; i < values.size(); i++) {
-					if ((now - timespan) > values.get(i).getTimestamp()) {
-						startPos++;
-					}
-					if (now > values.get(i).getTimestamp()) {
-						endPos++;
-					}
-				}
-			}
-
-			result = result.subList(startPos, endPos);
-		}
-		return result;
-	}
+	private static final String TAG = "AbstractSensorBase";
 
 	/**
 	 * The sensor interface.
 	 */
 	private final SensorInterface mSensorInterface = this;
 
+	private long mStartTime;
+
 	// Designed for direct use by subclasses.
-	// CHECKSTYLE:OFF
 	/**
 	 * The value paths we support.
 	 */
@@ -113,16 +65,6 @@ public abstract class AbstractSensorBase extends Service implements
 	 */
 	protected final Map<String, List<String>> expressionIdsPerValuePath = new HashMap<String, List<String>>();
 
-	/** Access to the sensor service to send notifications. */
-	protected SensorContextServiceConnector contextServiceConnector;
-
-	// CHECKSTYLE:ON
-
-	/**
-	 * A map of what has been notified.
-	 */
-	private final HashMap<String, Boolean> notified = new HashMap<String, Boolean>();
-
 	/**
 	 * Initializes the default configuration for this sensor.
 	 * 
@@ -149,55 +91,25 @@ public abstract class AbstractSensorBase extends Service implements
 	 */
 	@Override
 	public final void onCreate() {
-		contextServiceConnector = new SensorContextServiceConnector(this);
-		contextServiceConnector.start(new ConnectionListener() {
-
-			@Override
-			public void onDisconnected() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onConnected() {
-				AbstractSensorBase.this.onConnected();
-				synchronized (contextServiceConnector) {
-					contextServiceConnector.notifyAll();
-				}
-			}
-		});
-
+		Log.d(TAG, "abstract sensor oncreate");
+		mStartTime = System.currentTimeMillis();
 		init();
 		initDefaultConfiguration(mDefaultConfiguration);
+		onConnected();
 	}
 
 	/** The binder. */
-	private final IAsynchronousContextSensor.Stub mBinder = new IAsynchronousContextSensor.Stub() {
+	private final Sensor.Stub mBinder = new Sensor.Stub() {
 
 		@Override
 		public void register(final String id, final String valuePath,
 				final Bundle configuration) throws RemoteException {
-
-			// TODO: We should be checking if valuePath exists and if id is
-			// unique.
-
-			// any calls to register should wait until we're connected back to
-			// the context service
-			synchronized (contextServiceConnector) {
-				while (!contextServiceConnector.isConnected()) {
-					LOG.debug("Waiting for registration to complete.");
-					try {
-						contextServiceConnector.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
+			// value path exists and id is unique (enforced by evaluation
+			// engine)
 			synchronized (mSensorInterface) {
 				try {
-					LOG.debug("Registering id: {} path: {}", id, valuePath);
-					notified.put(getRootIdFor(id), false);
+					Log.d(TAG, "Registering id: " + id + " value path: "
+							+ valuePath);
 					registeredConfigurations.put(id, configuration);
 					registeredValuePaths.put(id, valuePath);
 					List<String> ids = expressionIdsPerValuePath.get(valuePath);
@@ -206,13 +118,11 @@ public abstract class AbstractSensorBase extends Service implements
 						expressionIdsPerValuePath.put(valuePath, ids);
 					}
 					ids.add(id);
-					if (LOG.isDebugEnabled()) {
-						printState();
-					}
-					LOG.debug("Registering with implementation.");
+					printState();
+					Log.d(TAG, "Registering with implementation.");
 					mSensorInterface.register(id, valuePath, configuration);
 				} catch (Exception e) {
-					LOG.error("Caught exception while registering.", e);
+					Log.e(TAG, "Caught exception while registering.", e);
 					throw new RemoteException();
 				}
 			}
@@ -220,23 +130,16 @@ public abstract class AbstractSensorBase extends Service implements
 
 		@Override
 		public void unregister(final String id) throws RemoteException {
-			notified.remove(getRootIdFor(id));
 			registeredConfigurations.remove(id);
 			String valuePath = registeredValuePaths.remove(id);
 			expressionIdsPerValuePath.get(valuePath).remove(id);
-			if (LOG.isDebugEnabled()) {
-				printState();
-			}
-
+			printState();
 			mSensorInterface.unregister(id);
 		}
 
 		@Override
 		public List<TimestampedValue> getValues(final String id,
 				final long now, final long timespan) throws RemoteException {
-			synchronized (AbstractSensorBase.this) {
-				notified.put(getRootIdFor(id), false);
-			}
 			try {
 				return mSensorInterface.getValues(id, now, timespan);
 			} catch (Throwable t) {
@@ -246,28 +149,43 @@ public abstract class AbstractSensorBase extends Service implements
 		}
 
 		@Override
-		public String getScheme() throws RemoteException {
-			return mSensorInterface.getScheme();
+		public long getStartUpTime(String id) throws RemoteException {
+			return mSensorInterface.getStartUpTime(id);
 		}
 
+		@Override
+		public Bundle getInfo() throws RemoteException {
+			Bundle info = new Bundle();
+			info.putString("name", AbstractSensorBase.this.getClass().getSimpleName());
+			int num = 0;
+			for (Map.Entry<String, List<String>> entry : expressionIdsPerValuePath
+					.entrySet()) {
+				num += entry.getValue().size();
+			}
+			info.putInt("registeredids", num);
+			info.putDouble("sensingRate", getAverageSensingRate());
+			info.putLong("starttime", getStartTime());
+			info.putFloat("currentMilliAmpere", getCurrentMilliAmpere());
+			return info;
+		}
 	};
 
 	/**
 	 * Debug helper which prints the state for this sensor.
 	 */
 	private void printState() {
-		for (String key : notified.keySet()) {
-			LOG.debug("not: {} : {}", key, notified.get(key));
-		}
 		for (String key : registeredConfigurations.keySet()) {
-			LOG.debug("conf: {} : {}", key, registeredConfigurations.get(key));
+			Log.d(TAG,
+					"configs: " + key + ": "
+							+ registeredConfigurations.get(key));
 		}
 		for (String key : registeredValuePaths.keySet()) {
-			LOG.debug("vp: {} : {}", key, registeredValuePaths.get(key));
+			Log.d(TAG,
+					"valuepaths: " + key + ": " + registeredValuePaths.get(key));
 		}
 		for (String key : expressionIdsPerValuePath.keySet()) {
-			LOG.debug("expressionIds: {} : {}", key,
-					expressionIdsPerValuePath.get(key));
+			Log.d(TAG, "expressionIds: " + key + ": "
+					+ expressionIdsPerValuePath.get(key));
 		}
 	}
 
@@ -293,11 +211,9 @@ public abstract class AbstractSensorBase extends Service implements
 	@Override
 	public final void onDestroy() {
 		try {
-			LOG.debug("unbind context service from: {}", getClass());
-			contextServiceConnector.stop();
 			mSensorInterface.onDestroySensor();
 		} catch (Exception e) {
-			LOG.error("Got exception destroying sensor service", e);
+			Log.e(TAG, "Got exception destroying sensor service", e);
 		}
 		super.onDestroy();
 	}
@@ -305,37 +221,20 @@ public abstract class AbstractSensorBase extends Service implements
 	// =-=-=-=- Utility Functions -=-=-=-=
 
 	/**
-	 * @param id
-	 *            the id to find the root of
-	 * @return the id of the root expression
-	 */
-	protected final String getRootIdFor(final String id) {
-		String rootId = id;
-		while (rootId.endsWith(".R") || rootId.endsWith(".L")) {
-			rootId = rootId.substring(0, rootId.length() - 2);
-		}
-		return rootId;
-	}
-
-	/**
 	 * Send a notification that data changed for the given id.
 	 * 
 	 * @param id
 	 *            the id of the value to notify for.
 	 */
-	protected final void notifyDataChangedForId(final String id) {
-		String rootId = getRootIdFor(id);
-		synchronized (this) {
-			try {
-				if (!notified.get(rootId)) {
-					notified.put(rootId, true);
-				}
-			} catch (NullPointerException e) {
-				// if it's no longer in the notified map
-				return;
-			}
-		}
-		contextServiceConnector.notifyDataChanged(new String[] { rootId });
+	protected final void notifyDataChangedForId(final String... ids) {
+		Intent notifyIntent = new Intent(ACTION_NOTIFY);
+		notifyIntent.putExtra("expressionIds", ids);
+		sendBroadcast(notifyIntent);
+	}
+
+	@Override
+	public long getStartUpTime(String id) {
+		return 0;
 	}
 
 	/**
@@ -347,19 +246,73 @@ public abstract class AbstractSensorBase extends Service implements
 	protected final void notifyDataChanged(final String valuePath) {
 		List<String> notify = new ArrayList<String>();
 
-		synchronized (this) {
-			for (String id : expressionIdsPerValuePath.get(valuePath)) {
-				id = getRootIdFor(id);
-				if (!notified.get(id)) {
+		synchronized (mSensorInterface) {
+			// can be null if multiple valuepaths are updated together and not
+			// for all of them, there's an id registered.
+			if (expressionIdsPerValuePath.get(valuePath) != null) {
+				for (String id : expressionIdsPerValuePath.get(valuePath)) {
 					notify.add(id);
-					notified.put(id, true);
 				}
 			}
 		}
 
 		if (notify.size() > 0) {
-			contextServiceConnector.notifyDataChanged(notify
-					.toArray(new String[notify.size()]));
+			notifyDataChangedForId(notify.toArray(new String[notify.size()]));
 		}
+	}
+
+	/**
+	 * Gets all readings from timespan seconds ago until now. Readings are in
+	 * reverse order (latest first). This is important for the expression
+	 * engine.
+	 * 
+	 * @param now
+	 *            the start
+	 * @param timespan
+	 *            the end
+	 * @param values
+	 *            the values
+	 * @return All readings in the timespan between timespan seconds ago and now
+	 */
+	protected static final List<TimestampedValue> getValuesForTimeSpan(
+			final List<TimestampedValue> values, final long now,
+			final long timespan) {
+		// make a copy of the list
+		List<TimestampedValue> result = new ArrayList<TimestampedValue>();
+
+		if (timespan == 0) {
+			if (values != null && values.size() > 0) {
+				result.add(values.get(0));
+			}
+		} else {
+			int startPos = 0;
+			if (values != null) {
+				result.addAll(values);
+				for (int i = 0; i < result.size(); i++) {
+					if ((now - timespan) < result.get(i).getTimestamp()) {
+						startPos++;
+					}
+				}
+			}
+
+			result = result.subList(0, startPos);
+		}
+		return result;
+	}
+
+	@Override
+	public double getAverageSensingRate() {
+		return (double) getReadings()
+				/ ((System.currentTimeMillis() - mStartTime) / 1000.0);
+	}
+
+	public long getStartTime() {
+		return mStartTime;
+	}
+
+	public abstract long getReadings();
+
+	public float getCurrentMilliAmpere() {
+		return -1;
 	}
 }

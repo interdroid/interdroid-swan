@@ -39,7 +39,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 
 	public static final String DISTANCE_FIELD = "distance";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 300;
 
 	private Sensor proximitySensor;
 	private SensorManager sensorManager;
@@ -72,17 +72,6 @@ public class ProximitySensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'proximity', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ DISTANCE_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager
@@ -110,9 +99,7 @@ public class ProximitySensor extends AbstractMemorySensor {
 				}
 				if (configuration.containsKey(ACCURACY)) {
 					highestAccuracy = Math
-							.min(highestAccuracy,
-									Integer.parseInt(configuration
-											.getString(ACCURACY)));
+							.min(highestAccuracy,configuration.getInt(ACCURACY));
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,
@@ -132,4 +119,10 @@ public class ProximitySensor extends AbstractMemorySensor {
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
 	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return proximitySensor.getPower();
+	}
+	
 }

@@ -52,6 +52,11 @@ public class BatterySensor extends AbstractVdbSensor {
 	 * The plugged field
 	 */
 	public static final String PLUGGED_FIELD = "plugged";
+	
+	/**
+	 * The pluggedText field
+	 */
+	public static final String STATUS_TEXT_FIELD = "status_text";
 
 	/**
 	 * The schema for this sensor.
@@ -85,6 +90,7 @@ public class BatterySensor extends AbstractVdbSensor {
 				+ LEVEL_FIELD + "', 'type': 'int'}," + "\n{'name': '"
 				+ VOLTAGE_FIELD + "', 'type': 'int'}," + "\n{'name': '"
 				+ PLUGGED_FIELD + "', 'type': 'int'}," + "\n{'name': '"
+				+ STATUS_TEXT_FIELD + "', 'type': 'string'}," + "\n{'name': '"
 				+ TEMPERATURE_FIELD + "', 'type': 'int'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
@@ -108,7 +114,22 @@ public class BatterySensor extends AbstractVdbSensor {
 						intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0));
 				values.put(PLUGGED_FIELD,
 						intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0));
+				values.put(STATUS_TEXT_FIELD,
+						pluggedAsText(intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)));
 				putValues(values, now);
+			}
+		}
+		
+		private String pluggedAsText(int i){
+			switch (i) {
+			case 0:
+				return "Charger not plugged";
+			case 1:
+				return "AC Charger plugged";
+			case 2:
+				return "USB Charger plugged";
+			default:
+				return "Unknown";
 			}
 		}
 
@@ -117,7 +138,7 @@ public class BatterySensor extends AbstractVdbSensor {
 	@Override
 	public final String[] getValuePaths() {
 		return new String[] { TEMPERATURE_FIELD, LEVEL_FIELD, VOLTAGE_FIELD,
-				PLUGGED_FIELD };
+				PLUGGED_FIELD, STATUS_TEXT_FIELD };
 	}
 
 	@Override

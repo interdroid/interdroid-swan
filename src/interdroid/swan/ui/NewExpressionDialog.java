@@ -1,10 +1,12 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Comparator;
-import interdroid.swan.contextexpressions.ComparisonExpression;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
+import interdroid.swan.swansong.Comparator;
+import interdroid.swan.swansong.ComparisonExpression;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionFactory;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.ValueExpression;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -67,10 +69,10 @@ public class NewExpressionDialog extends Activity {
 				// comparator expression out of it, then add
 				// it to the list of expressions.
 				try {
-					Expression left = Expression
+					Expression left = ExpressionFactory
 							.parse(((Button) findViewById(R.id.left)).getText()
 									.toString());
-					Expression right = Expression
+					Expression right = ExpressionFactory
 							.parse(((Button) findViewById(R.id.right))
 									.getText().toString());
 					Comparator comparator = Comparator
@@ -78,8 +80,9 @@ public class NewExpressionDialog extends Activity {
 									.getText().toString());
 					// String name = ((EditText) findViewById(R.id.name))
 					// .getText().toString();
-					Expression newExpression = new ComparisonExpression(left,
-							comparator, right);
+					Expression newExpression = new ComparisonExpression(
+							Expression.LOCATION_INFER, (ValueExpression) left,
+							comparator, (ValueExpression) right);
 					Intent result = new Intent();
 					result.putExtra("Expression", newExpression.toParseString());
 					// if (name != null && !name.equals("")) {

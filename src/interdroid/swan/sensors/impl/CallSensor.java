@@ -4,14 +4,11 @@ import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.ContentValues;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 /**
  * Sensor for phone state.
@@ -20,10 +17,8 @@ import android.telephony.TelephonyManager;
  * 
  */
 public class CallSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(CallSensor.class);
+
+	private static final String TAG = "Call Sensor";
 
 	/**
 	 * The configuration activity for this sensor.
@@ -97,7 +92,7 @@ public class CallSensor extends AbstractVdbSensor {
 		@Override
 		public void onCallStateChanged(final int state,
 				final String incomingNumber) {
-			LOG.debug("Call State: {} {}", state, incomingNumber);
+			Log.d(TAG, "Call State: " + state + " " + incomingNumber);
 
 			long now = System.currentTimeMillis();
 
@@ -128,7 +123,7 @@ public class CallSensor extends AbstractVdbSensor {
 
 	@Override
 	public final void onConnected() {
-		LOG.debug("call sensor connected");
+		Log.d(TAG, "call sensor connected");
 	}
 
 	@Override

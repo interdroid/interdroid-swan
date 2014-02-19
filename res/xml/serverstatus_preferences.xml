@@ -6,13 +6,13 @@
 			android:entries="@array/serverstatus_valuepaths" android:entryValues="@array/serverstatus_valuepaths" />
 	</PreferenceCategory>
 	<PreferenceCategory android:title="Configuration">
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Sample Interval" android:key="sample_interval" />
 		<EditTextPreference android:key="server_url"
 			android:title="Server URL" android:summary="Set Server URL"
 			android:dialogTitle="Enter Server URL" />
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Connection Timeout" android:key="connection_timeout" />
 

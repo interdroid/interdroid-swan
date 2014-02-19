@@ -1,11 +1,12 @@
 package interdroid.swan.sensors;
 
+import interdroid.swan.swansong.TimestampedValue;
+import interdroid.vdb.content.EntityUriBuilder;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-
-import interdroid.swan.contextexpressions.TimestampedValue;
-import interdroid.vdb.content.EntityUriBuilder;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -20,9 +21,9 @@ import android.net.Uri;
 
 /**
  * Base class for sensors which store their data into a VDB database.
- *
+ * 
  * @author nick &lt;palmer@cs.vu.nl&gt;
- *
+ * 
  */
 public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
@@ -31,6 +32,9 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	private static final Logger LOG = LoggerFactory
 			.getLogger(AbstractVdbSensor.class);
+
+	private long mReadings = 0;
+	private long mLastReadingTimestamp = 0;
 
 	/**
 	 * Field which represents the timestamp for the reading.
@@ -76,6 +80,8 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	private Schema schema;
 
+	public abstract String getScheme();
+
 	/**
 	 * Initialize this sensor.
 	 */
@@ -92,7 +98,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param id
 	 *            the id
 	 * @param values
@@ -102,6 +108,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 */
 	public final void putValues(final String id, final ContentValues values,
 			final long now) {
+		updateReadings(now);
 		notifyDataChangedForId(id);
 		values.put(EXPRESSION_ID, id);
 		putValues(getContentResolver(), uri, values, now);
@@ -110,23 +117,31 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	/**
 	 * Stores the values to the content provider using this service as the
 	 * context. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param values
 	 *            the values to store
 	 * @param now
 	 *            the timestamp
 	 */
 	public final void putValues(final ContentValues values, final long now) {
+		updateReadings(now);
+		putValues(getContentResolver(), uri, values, now);
 		for (Entry<String, Object> key : values.valueSet()) {
 			notifyDataChanged(key.getKey());
 		}
-		putValues(getContentResolver(), uri, values, now);
+	}
+
+	private void updateReadings(long now) {
+		if (now != mLastReadingTimestamp) {
+			mReadings++;
+			mLastReadingTimestamp = now;
+		}
 	}
 
 	/**
 	 * Stores the values to the content provider using this given content
 	 * resolver. Fills in the timestamp and expiration before storing.
-	 *
+	 * 
 	 * @param resolver
 	 *            the resolver to store with
 	 * @param values
@@ -152,9 +167,14 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	}
 
 	@Override
-	public final List<TimestampedValue> getValues(final String id,
-			final long now, final long timespan) {
+	public List<TimestampedValue> getValues(final String id, final long now,
+			final long timespan) {
 		String fieldName = registeredValuePaths.get(id);
+		return getValuesForValuePath(fieldName, id, now, timespan);
+	}
+
+	public List<TimestampedValue> getValuesForValuePath(final String fieldName,
+			String id, final long now, final long timespan) {
 		Type fieldType = getType(fieldName);
 		Cursor values;
 		if (schema.getField(EXPRESSION_ID) != null) {
@@ -180,16 +200,16 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 					break;
 				case ENUM:
 				case STRING:
-					ret.add(new TimestampedValue(values.getString(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getString(column),
+							values.getLong(0)));
 					break;
 				case FLOAT:
-					ret.add(new TimestampedValue(values.getFloat(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getFloat(column),
+							values.getLong(0)));
 					break;
 				case DOUBLE:
-					ret.add(new TimestampedValue(values.getDouble(column), values
-							.getLong(0)));
+					ret.add(new TimestampedValue(values.getDouble(column),
+							values.getLong(0)));
 					break;
 				case FIXED:
 				case BYTES:
@@ -231,9 +251,9 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 	 * @param id
 	 * @return a cursor with the value data
 	 */
-	protected static Cursor getValuesCursor(final Context context, final Uri uri,
-			final String[] values, final long now, final long timespan,
-			String id) {
+	protected static Cursor getValuesCursor(final Context context,
+			final Uri uri, final String[] values, final long now,
+			final long timespan, String id) {
 		LOG.debug("timespan: {} end: {}", timespan, now);
 
 		String[] projection = new String[values.length + 1];
@@ -247,7 +267,11 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 
 		// Build where args
 		if (id != null) {
-			where = EXPRESSION_ID + "=?";
+			// we might have a non null id, but values stored without an
+			// expression id (e.g. id independent values), therefore we also
+			// accept expression ids that are null.
+			where = "( " + EXPRESSION_ID + "=? OR " + EXPRESSION_ID
+					+ " is null ) ";
 
 			if (timespan <= 0) {
 				whereArgs = new String[] { id };
@@ -266,7 +290,7 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 			c = context.getContentResolver().query(uri, projection, where,
 					whereArgs,
 					// If timespan is zero we just pull the last one in time
-					TIMESTAMP_FIELD + " DESC");
+					TIMESTAMP_FIELD + " DESC LIMIT 1");
 
 		} else {
 
@@ -274,12 +298,15 @@ public abstract class AbstractVdbSensor extends AbstractSensorBase {
 					uri,
 					projection,
 					(where == null ? "" : where + " AND ") + TIMESTAMP_FIELD
-							+ " >= ? ", whereArgs,
-					// If timespan is zero we just pull the last one in time
-					TIMESTAMP_FIELD + " ASC");
+							+ " >= ? ", whereArgs, TIMESTAMP_FIELD + " ASC");
 
 		}
 
 		return c;
+	}
+
+	@Override
+	public long getReadings() {
+		return mReadings;
 	}
 }

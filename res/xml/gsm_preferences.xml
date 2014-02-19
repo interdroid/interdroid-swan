@@ -5,14 +5,14 @@
 			android:summary="Select a Value Path" android:key="valuepath"
 			android:entries="@array/gsm_valuepaths" android:entryValues="@array/gsm_valuepaths" />
 	</PreferenceCategory>
-	<PreferenceCategory android:title="Configuration">
-		<interdroid.contextdroid.util.SeekBarPreference
+	<!-- <PreferenceCategory android:title="Configuration">
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Sample Interval" android:key="sample_interval" />
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" samples" android:max="3600" android:defaultValue="300"
 			android:title="Sample Length" android:key="sample_length" />
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" Hz" android:max="44000" android:defaultValue="8000"
 			android:title="Sample Rate" android:key="sample_rate" />
 		<ListPreference android:title="Audio Source"
@@ -25,6 +25,6 @@
 			android:summary="Select	audio format" android:key="audio_format"
 			android:entries="@array/sound_audio_format" android:entryValues="@array/sound_audio_format_values" />
 
-	</PreferenceCategory>
+	</PreferenceCategory> -->
 </PreferenceScreen>
 

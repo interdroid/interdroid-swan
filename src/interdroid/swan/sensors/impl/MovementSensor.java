@@ -42,7 +42,7 @@ public class MovementSensor extends AbstractMemorySensor {
 	public static final String Z_FIELD = "z";
 	public static final String TOTAL_FIELD = "total";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 80 * 160; //hz x seconds
 
 	private Sensor accelerometer;
 	private SensorManager sensorManager;
@@ -81,26 +81,6 @@ public class MovementSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'movement', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ X_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Y_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ Z_FIELD
-				+ "', 'type': 'double'},"
-				+ "            {'name': '"
-				+ TOTAL_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		List<Sensor> sensorList = sensorManager
@@ -127,10 +107,15 @@ public class MovementSensor extends AbstractMemorySensor {
 					continue;
 				}
 				if (configuration.containsKey(ACCURACY)) {
-					highestAccuracy = Math
-							.min(highestAccuracy,
-									Integer.parseInt(configuration
-											.getString(ACCURACY)));
+					// accuracy can be string or int
+					if (configuration.getString(ACCURACY, null) == null) {
+						highestAccuracy = Math.min(highestAccuracy,
+								configuration.getInt(ACCURACY));
+					} else {
+						highestAccuracy = Math.min(highestAccuracy, Integer
+								.parseInt(configuration.getString(ACCURACY)));
+					}
+
 				}
 			}
 			highestAccuracy = Math.max(highestAccuracy,
@@ -149,5 +134,10 @@ public class MovementSensor extends AbstractMemorySensor {
 	@Override
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
+	}
+
+	@Override
+	public float getCurrentMilliAmpere() {
+		return accelerometer.getPower();
 	}
 }

@@ -1,10 +1,12 @@
 package interdroid.swan.ui;
 
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.Expression;
-import interdroid.swan.contextexpressions.ExpressionParseException;
-import interdroid.swan.contextexpressions.LogicExpression;
-import interdroid.swan.contextexpressions.LogicOperator;
+import interdroid.swan.swansong.BinaryLogicOperator;
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.ExpressionFactory;
+import interdroid.swan.swansong.ExpressionParseException;
+import interdroid.swan.swansong.LogicExpression;
+import interdroid.swan.swansong.TriStateExpression;
 
 import java.util.ArrayList;
 
@@ -65,17 +67,19 @@ public class MergeExpressionDialog extends Activity {
 			@Override
 			public void onClick(View v) {
 				try {
-					Expression left = Expression
+					Expression left = ExpressionFactory
 							.parse(((Button) findViewById(R.id.left)).getText()
 									.toString());
-					Expression right = Expression
+					Expression right = ExpressionFactory
 							.parse(((Button) findViewById(R.id.right))
 									.getText().toString());
-					LogicOperator logicOperator = ((RadioGroup) findViewById(R.id.operator))
-							.getCheckedRadioButtonId() == R.id.and ? LogicOperator.AND
-							: LogicOperator.OR;
-					Expression newExpression = new LogicExpression(left,
-							logicOperator, right);
+					BinaryLogicOperator logicOperator = ((RadioGroup) findViewById(R.id.operator))
+							.getCheckedRadioButtonId() == R.id.and ? BinaryLogicOperator.AND
+							: BinaryLogicOperator.OR;
+					Expression newExpression = new LogicExpression(
+							Expression.LOCATION_INFER,
+							(TriStateExpression) left, logicOperator,
+							(TriStateExpression) right);
 					expressions.add(newExpression.toParseString());
 					if (!((CheckBox) findViewById(R.id.keep_originals))
 							.isChecked()) {

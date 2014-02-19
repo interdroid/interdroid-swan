@@ -10,17 +10,12 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.os.Bundle;
+import android.util.Log;
 
 public class LogCatSensor extends AbstractMemorySensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LogCatSensor.class);
+
+	private static final String TAG = "LogCat Sensor";
 
 	/**
 	 * The configuration activity for this sensor.
@@ -44,7 +39,7 @@ public class LogCatSensor extends AbstractMemorySensor {
 
 	public static final String DEFAULT_LOGCAT_PARAMETERS = "*:I";
 
-	protected static final int HISTORY_SIZE = 10;
+	protected static final int HISTORY_SIZE = 20;
 
 	private Map<String, LogcatPoller> activeThreads = new HashMap<String, LogcatPoller>();
 
@@ -60,23 +55,13 @@ public class LogCatSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'train', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ LOG_FIELD
-				+ "', 'type': 'string'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 	}
 
 	@Override
 	public final void register(String id, String valuePath, Bundle configuration) {
-		LOG.debug("Logcat got registration for: {}", id);
+		Log.d(TAG, "Logcat got registration for: " + id + ", conf: "
+				+ configuration.getString(LOGCAT_PARAMETERS));
 		LogcatPoller logcatPoller = new LogcatPoller(id, valuePath,
 				configuration);
 		activeThreads.put(id, logcatPoller);
@@ -115,12 +100,15 @@ public class LogCatSensor extends AbstractMemorySensor {
 								.getString(LOGCAT_PARAMETERS);
 					}
 					try {
-						process = Runtime.getRuntime().exec(
-								"logcat " + parameters);
+						process = Runtime
+								.getRuntime()
+								.exec(new String[] { "/system/bin/sh", "-c",
+										"/system/bin/logcat -s " + parameters });
 						BufferedReader reader = new BufferedReader(
 								new InputStreamReader(process.getInputStream()));
 						String line = null;
 						while ((line = reader.readLine()) != null) {
+							System.out.println("line: " + line);
 							long now = System.currentTimeMillis();
 							putValueTrimSize(valuePath, id, now, line,
 									HISTORY_SIZE);

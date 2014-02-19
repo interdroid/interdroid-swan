@@ -6,7 +6,7 @@
 			android:entries="@array/train_valuepaths" android:entryValues="@array/train_valuepaths" />
 	</PreferenceCategory>
 	<PreferenceCategory android:title="Configuration">
-		<interdroid.contextdroid.util.SeekBarPreference
+		<interdroid.swan.util.SeekBarPreference
 			android:text=" seconds" android:max="3600" android:defaultValue="300"
 			android:title="Sample Interval" android:key="sample_interval"
 			android:persistent="false" />
@@ -16,7 +16,7 @@
 		<EditTextPreference android:key="to_station"
 			android:title="Destination Station" android:summary="Select a Railway Station"
 			android:dialogTitle="Enter Destination Railway Station" />
-		<interdroid.contextdroid.util.TimePreference
+		<interdroid.swan.util.TimePreference
 			android:persistent="false" android:key="departure_time"
 			android:title="Departure Time" android:summary="Departure time of the train"
 			android:dialogTitle="Pick Departure Time" />

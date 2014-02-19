@@ -39,7 +39,7 @@ public class LightSensor extends AbstractMemorySensor {
 
 	public static final String LUX_FIELD = "lux";
 
-	protected static final int HISTORY_SIZE = 30;
+	protected static final int HISTORY_SIZE = 300;
 
 	private Sensor lightSensor;
 	private SensorManager sensorManager;
@@ -54,10 +54,8 @@ public class LightSensor extends AbstractMemorySensor {
 		public void onSensorChanged(SensorEvent event) {
 			long now = System.currentTimeMillis();
 			if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-				for (int i = 0; i < 3; i++) {
-					putValueTrimSize(VALUE_PATHS[i], null, now,
-							event.values[i], HISTORY_SIZE);
-				}
+				putValueTrimSize(LUX_FIELD, null, now, event.values[0],
+						HISTORY_SIZE);
 			}
 		}
 	};
@@ -71,17 +69,6 @@ public class LightSensor extends AbstractMemorySensor {
 	public void initDefaultConfiguration(Bundle DEFAULT_CONFIGURATION) {
 		DEFAULT_CONFIGURATION.putInt(ACCURACY,
 				SensorManager.SENSOR_DELAY_NORMAL);
-	}
-
-	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'lightSensor', 'namespace': 'context.sensor',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ LUX_FIELD
-				+ "', 'type': 'double'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
 	}
 
 	@Override
@@ -133,5 +120,10 @@ public class LightSensor extends AbstractMemorySensor {
 	@Override
 	public final void onDestroySensor() {
 		sensorManager.unregisterListener(sensorEventListener);
+	}
+	
+	@Override
+	public float getCurrentMilliAmpere() {
+		return lightSensor.getPower();
 	}
 }

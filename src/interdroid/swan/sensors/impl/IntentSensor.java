@@ -1,13 +1,15 @@
 package interdroid.swan.sensors.impl;
 
-import interdroid.swan.SwanException;
-import interdroid.swan.ContextTypedValueListener;
+import interdroid.swan.ExpressionManager;
 import interdroid.swan.R;
-import interdroid.swan.contextexpressions.ContextTypedValue;
-import interdroid.swan.contextexpressions.TimestampedValue;
+import interdroid.swan.SwanException;
+import interdroid.swan.ValueExpressionListener;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractMemorySensor;
-
+import interdroid.swan.swansong.Expression;
+import interdroid.swan.swansong.HistoryReductionMode;
+import interdroid.swan.swansong.SensorValueExpression;
+import interdroid.swan.swansong.TimestampedValue;
 import android.os.Bundle;
 
 public class IntentSensor extends AbstractMemorySensor {
@@ -42,9 +44,9 @@ public class IntentSensor extends AbstractMemorySensor {
 
 	public static final String STARTED_FIELD = "started";
 
-	protected static final int HISTORY_SIZE = 10;
+	protected static final int HISTORY_SIZE = 300;
 
-	private static final String MAGIC_RELAY = "MAGIC_RELAY";
+	private static final String MAGIC_RELAY = "INTENTS_FROM_LOGCAT";
 
 	@Override
 	public String[] getValuePaths() {
@@ -56,48 +58,35 @@ public class IntentSensor extends AbstractMemorySensor {
 	}
 
 	@Override
-	public String getScheme() {
-		return "{'type': 'record', 'name': 'intent', " +
-				"'namespace': 'context.sensor.intent',"
-				+ " 'fields': ["
-				+ "            {'name': '"
-				+ STARTED_FIELD
-				+ "', 'type': 'string'}"
-				+ "           ]"
-				+ "}".replace('\'', '"');
-	}
-
-	@Override
 	public void onConnected() {
 	}
 
 	@Override
 	public void register(final String id, final String valuePath,
 			final Bundle configuration) {
+		configuration.putString("logcat_parameters", "'ActivityManager:I'");
 		try {
-			contextServiceConnector.registerContextTypedValue(id + "."
-					+ MAGIC_RELAY, new ContextTypedValue(
-					"logcat" + ContextTypedValue.ENTITY_VALUE_PATH_SEPARATOR
-					+ "log?logcat_parameters=ActivityManager:I *:S"),
-					new ContextTypedValueListener() {
+			ExpressionManager.registerValueExpression(this, id + "."
+					+ MAGIC_RELAY, new SensorValueExpression(
+					Expression.LOCATION_SELF, "logcat", "log", configuration,
+					HistoryReductionMode.ANY, 0),
+					new ValueExpressionListener() {
 
 						@Override
-						public void onReading(String relayedId,
+						public void onNewValues(String id,
 								TimestampedValue[] newValues) {
-							// values is always of length 1
-							if (newValues[0].getValue().toString()
-									.contains("Starting: Intent {")) {
-								if (getValues().size() >= HISTORY_SIZE) {
-									getValues().remove(0);
+							for (TimestampedValue value : newValues) {
+								// if (value.getValue().toString()
+								// .contains("Starting: Intent {")) {
+								if (value.getValue().toString()
+										.startsWith("START")) {
+									putValueTrimSize(valuePath, id,
+											value.getTimestamp(),
+											getIntentFrom(value.getValue()),
+											HISTORY_SIZE);
 								}
-								putValueTrimSize(valuePath, id,
-										newValues[0].getTimestamp(),
-										getIntentFrom(newValues[0].getValue()),
-										HISTORY_SIZE);
 							}
-
 						}
-
 					});
 		} catch (SwanException e) {
 			e.printStackTrace();
@@ -108,17 +97,13 @@ public class IntentSensor extends AbstractMemorySensor {
 		String string = value.toString();
 		string = string.substring(string.indexOf("cmp=") + 4);
 		string = string.substring(0, string.indexOf(" "));
+		System.out.println("got intent: " + string);
 		return string;
 	}
 
 	@Override
 	public void unregister(final String id) {
-		try {
-			contextServiceConnector.unregisterContextTypedValue(id + "."
-					+ MAGIC_RELAY);
-		} catch (SwanException e) {
-			e.printStackTrace();
-		}
+		ExpressionManager.unregisterExpression(this, id + "." + MAGIC_RELAY);
 	}
 
 	@Override

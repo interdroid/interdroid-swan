@@ -1,0 +1,65 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:showAsAction="always"
+        android:title="@string/action_refresh"
+        android:visible="true"/>
+    <item
+        android:id="@+id/menu_sort"
+        android:showAsAction="always"
+        android:title="@string/menu_sort"
+        android:visible="true">
+
+        <!-- submenu -->
+        <menu>
+            <item
+                android:id="@+id/sort_name"
+                android:title="@string/sort_name">
+            </item>
+            <item
+                android:id="@+id/sort_eval_per"
+                android:title="@string/sort_eval_per">
+            </item>
+            <item
+                android:id="@+id/sort_eval_rate"
+                android:title="@string/sort_eval_rate">
+            </item>
+            <item
+                android:id="@+id/sort_eval_delay"
+                android:title="@string/sort_eval_delay">
+            </item>
+            <item
+                android:id="@+id/sort_eval_avg_time"
+                android:title="@string/sort_eval_avg_time">
+            </item>
+            <item
+                android:id="@+id/sort_eval_min_time"
+                android:title="@string/sort_eval_min_time">
+            </item>
+            <item
+                android:id="@+id/sort_eval_max_time"
+                android:title="@string/sort_eval_max_time">
+            </item>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/sort_order"
+        android:icon="@drawable/ic_action_ascend"
+        android:showAsAction="always"
+        android:title="@string/sort_order"
+        android:visible="true"/>
+    <item
+        android:id="@+id/expand_all"
+        android:icon="@drawable/expandoff"
+        android:showAsAction="always"
+        android:visible="true"/>
+    
+        <item
+        android:id="@+id/sensor_activity"
+        android:title="Sensors"
+        android:showAsAction="always"
+        android:visible="true"/>
+
+</menu>

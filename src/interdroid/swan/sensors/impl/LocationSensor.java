@@ -1,14 +1,13 @@
 package interdroid.swan.sensors.impl;
 
-import java.lang.reflect.Field;
-
 import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
+import interdroid.swan.swansong.TimestampedValue;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.reflect.Field;
+import java.util.List;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,6 +17,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * A sensor for location.
@@ -26,11 +26,8 @@ import android.os.Looper;
  * 
  */
 public class LocationSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LocationSensor.class);
+
+	private static final String TAG = "Location Sensor";
 
 	/**
 	 * The configuration activity for this sensor.
@@ -47,6 +44,21 @@ public class LocationSensor extends AbstractVdbSensor {
 		}
 
 	}
+
+	/**
+	 * Location field name.
+	 */
+	public static final String LOCATION_FIELD = "location";
+
+	/**
+	 * Accuracy field name.
+	 */
+	public static final String ACCURACY_FIELD = "accuracy";
+
+	/**
+	 * Bearing field name.
+	 */
+	public static final String BEARING_FIELD = "bearing";
 
 	/**
 	 * Latitude field name.
@@ -87,6 +99,7 @@ public class LocationSensor extends AbstractVdbSensor {
 	 * The provider for this sensor.
 	 * 
 	 * @author nick &lt;palmer@cs.vu.nl&gt;
+	 * @author rkemp
 	 * 
 	 */
 	public static class Provider extends AvroContentProviderProxy {
@@ -110,7 +123,9 @@ public class LocationSensor extends AbstractVdbSensor {
 				+ LATITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
 				+ LONGITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
 				+ ALTITUDE_FIELD + "', 'type': 'double'}," + "\n{'name': '"
-				+ SPEED_FIELD + "', 'type': 'float'}" + "\n]" + "}";
+				+ SPEED_FIELD + "', 'type': 'float'}," + "\n{'name': '"
+				+ BEARING_FIELD + "', 'type': 'float'}," + "\n{'name': '"
+				+ ACCURACY_FIELD + "', 'type': 'float'}" + "\n]" + "}";
 		return scheme.replace('\'', '"');
 	}
 
@@ -133,33 +148,37 @@ public class LocationSensor extends AbstractVdbSensor {
 			long now = System.currentTimeMillis();
 
 			ContentValues values = new ContentValues();
-			LOG.debug("Location: {} {}", location.getLatitude(),
-					location.getLongitude());
+			Log.d(TAG,
+					"Location: " + location.getLatitude() + ", "
+							+ location.getLongitude());
 			values.put(LATITUDE_FIELD, location.getLatitude());
 			values.put(LONGITUDE_FIELD, location.getLongitude());
 			values.put(ALTITUDE_FIELD, location.getAltitude());
 			values.put(SPEED_FIELD, location.getSpeed());
+			values.put(BEARING_FIELD, location.getBearing());
+			values.put(ACCURACY_FIELD, location.getAccuracy());
 
 			putValues(values, now);
 		}
 
 		public void onProviderDisabled(final String provider) {
-			LOG.debug("provider disabled: {}. I am using: {}", provider,
-					currentProvider);
+			Log.d(TAG, "provider disabled: " + provider + ". I am using: "
+					+ currentProvider);
 			if (provider.equals(currentProvider)) {
-				LOG.warn("location sensor disabled due to lack of provider");
+				Log.w(TAG, "location sensor disabled due to lack of provider");
 			}
 		}
 
 		public void onProviderEnabled(final String provider) {
-			LOG.debug("provider enabled: {}", provider);
+			Log.d(TAG, "provider enabled: " + provider);
 		}
 
 		public void onStatusChanged(final String provider, final int status,
 				final Bundle extras) {
 			if (provider.equals(currentProvider)
 					&& status != LocationProvider.AVAILABLE) {
-				LOG.warn("location sensor disabled because sensor unavailable");
+				Log.w(TAG,
+						"location sensor disabled because sensor unavailable");
 			}
 
 		}
@@ -167,8 +186,8 @@ public class LocationSensor extends AbstractVdbSensor {
 
 	@Override
 	public final String[] getValuePaths() {
-		return new String[] { LATITUDE_FIELD, LONGITUDE_FIELD, ALTITUDE_FIELD,
-				SPEED_FIELD };
+		return new String[] { LOCATION_FIELD, LATITUDE_FIELD, LONGITUDE_FIELD,
+				ALTITUDE_FIELD, SPEED_FIELD, BEARING_FIELD, ACCURACY_FIELD };
 	}
 
 	@Override
@@ -210,7 +229,7 @@ public class LocationSensor extends AbstractVdbSensor {
 			passiveProvider = (String) passive.get(null);
 			mostAccurateProvider = passiveProvider;
 		} catch (Exception e) {
-			LOG.warn("Caught exception checking for PASSIVE_PROVIDER.");
+			Log.w(TAG, "Caught exception checking for PASSIVE_PROVIDER.", e);
 			mostAccurateProvider = LocationManager.NETWORK_PROVIDER;
 		}
 
@@ -265,4 +284,35 @@ public class LocationSensor extends AbstractVdbSensor {
 
 	}
 
+	@Override
+	public List<TimestampedValue> getValues(String id, long now, long timespan) {
+		if (LOCATION_FIELD.equals(registeredValuePaths.get(id))) {
+			List<TimestampedValue> latitudes = getValuesForValuePath(
+					LATITUDE_FIELD, null, now, timespan);
+			List<TimestampedValue> longitudes = getValuesForValuePath(
+					LONGITUDE_FIELD, null, now, timespan);
+			List<TimestampedValue> altitudes = getValuesForValuePath(
+					ALTITUDE_FIELD, null, now, timespan);
+			List<TimestampedValue> speeds = getValuesForValuePath(SPEED_FIELD,
+					null, now, timespan);
+			List<TimestampedValue> bearings = getValuesForValuePath(
+					BEARING_FIELD, null, now, timespan);
+			List<TimestampedValue> accuracies = getValuesForValuePath(
+					ACCURACY_FIELD, null, now, timespan);
+			for (int i = 0; i < latitudes.size(); i++) {
+				Location location = new Location("SWAN Location Sensor");
+				location.setLatitude((Double) latitudes.get(i).getValue());
+				location.setLongitude((Double) longitudes.get(i).getValue());
+				location.setSpeed((Float) speeds.get(i).getValue());
+				location.setAltitude((Double) altitudes.get(i).getValue());
+				location.setBearing((Float) bearings.get(i).getValue());
+				location.setAccuracy((Float) accuracies.get(i).getValue());
+
+				latitudes.set(i, new TimestampedValue(location, latitudes
+						.get(i).getTimestamp()));
+			}
+			return latitudes;
+		}
+		return super.getValues(id, now, timespan);
+	}
 }

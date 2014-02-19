@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string-array name="time_units">
+        <item>milliseconds</item>
+        <item>seconds</item>
+        <item>minutes</item>
+        <item>hours</item>
+    </string-array>
+    
+    <string-array name="time_units_values">
+        <item>ms</item>
+        <item>s</item>
+        <item>m</item>
+        <item>h</item>
+    </string-array>
+
     <!-- history_reduction_modes -->
     <string-array name="history_reduction_modes">
         <item>ANY</item>
         <item>ALL</item>
         <item>MAX</item>
         <item>MIN</item>
-        <item>AVG</item>
-        <item>MED</item>
+        <item>MEAN</item>
+        <item>MEDIAN</item>
     </string-array>
 
     <!-- battery sensor -->
@@ -17,6 +31,14 @@
         <item>voltage</item>
         <item>temperature</item>
         <item>plugged</item>
+        <item>status_text</item>
+    </string-array>
+
+    <!-- time sensor -->
+    <string-array name="time_valuepaths">
+        <item>hour_of_day</item>
+        <item>day_of_week</item>
+        <item>current</item>
     </string-array>
 
     <!-- train sensor -->
@@ -70,7 +92,8 @@
 
     <!-- sound sensor -->
     <string-array name="sound_valuepaths">
-        <item>dB</item>
+        <item>rms</item>
+        <item>db</item>
     </string-array>
     <string-array name="sound_audio_source">
         <item>Default</item>
@@ -148,11 +171,13 @@
 
     <!-- location sensor -->
     <string-array name="location_valuepaths">
+        <item>location</item>
         <item>latitude</item>
         <item>longitude</item>
         <item>altitude</item>
         <item>speed</item>
-        <item>location</item>
+        <item>bearing</item>
+        <item>accuracy</item>
     </string-array>
     <string-array name="location_provider">
         <item>gps</item>
@@ -212,6 +237,21 @@
         <item>status</item>
         <item>index</item>
         <item>rri</item>
+        <item>status_text</item>
+    </string-array>
+    
+    <string-array name="accuracy">
+        <item>fastest</item>
+        <item>game</item>
+        <item>ui</item>
+        <item>normal</item>
+    </string-array>
+    
+    <string-array name="accuracy_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
 </resources>

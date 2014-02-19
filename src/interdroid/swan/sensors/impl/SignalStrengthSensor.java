@@ -4,22 +4,16 @@ import interdroid.swan.R;
 import interdroid.swan.sensors.AbstractConfigurationActivity;
 import interdroid.swan.sensors.AbstractVdbSensor;
 import interdroid.vdb.content.avro.AvroContentProviderProxy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import android.content.ContentValues;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class SignalStrengthSensor extends AbstractVdbSensor {
-	/**
-	 * Access to logger.
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SignalStrengthSensor.class);
+
+	private static final String TAG = "SignalStrengthSensor";
 
 	/**
 	 * The configuration activity for this sensor.
@@ -29,16 +23,6 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 	 */
 	public static class ConfigurationActivity extends
 			AbstractConfigurationActivity {
-
-		@Override
-		protected void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			setResult(
-					RESULT_OK,
-					getIntent().putExtra("configuration",
-							SignalStrengthSensor.GSM_SIGNAL_STRENGTH_FIELD));
-			finish();
-		}
 
 		@Override
 		public final int getPreferencesXML() {
@@ -161,13 +145,14 @@ public class SignalStrengthSensor extends AbstractVdbSensor {
 			ContentValues values = new ContentValues();
 
 			if (signalStrength.isGsm()) {
-				LOG.debug("GSM Signal Strength: {} {}",
-						signalStrength.getGsmSignalStrength(),
-						signalStrength.getGsmBitErrorRate());
+				Log.d(TAG,
+						"GSM Signal Strength: "
+								+ signalStrength.getGsmSignalStrength() + ", "
+								+ signalStrength.getGsmBitErrorRate());
 			} else {
-				LOG.debug("CDMA Signal Strength: {} {}",
-						signalStrength.getCdmaDbm(),
-						signalStrength.getCdmaEcio());
+				Log.d(TAG,
+						"CDMA Signal Strength: " + signalStrength.getCdmaDbm()
+								+ ", " + signalStrength.getCdmaEcio());
 			}
 
 			values.put(IS_GSM_FIELD, signalStrength.isGsm());
