@@ -13,6 +13,13 @@ of context in powerful and new ways while also minimizing energy
 consumption.  Smartphones have the power to dramatically change our
 lives and context holds the key to unlocking that power.
 
+Dependencies:
+-------------
+Swan depends on another interdroid project: https://github.com/interdroid/interdroid-vdb-avro.
+It also depends on
+    sdk/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar
+from the SDK. This jar must be copied to the Swan "libs" directory.
+
 Contact:
 --------
 
